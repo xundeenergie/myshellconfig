@@ -15,15 +15,15 @@ Damit auf einem neuen Server meine persönlichen Alias und Bash-Promt, wie auch 
 
 Download von github
 ```
-curl -o bashrc\_add "https://raw.githubusercontent.com/xundeenergie/server-config/master/bashrc\_add"
+curl -o bashrc\_add "https://raw.githubusercontent.com/xundeenergie/myshellconfig/master/bashrc\_add"
 ```
 oder Download von git.schuerz.at
 ```
-curl -o bashrc\_add "https://git.schuerz.at/?p=server-config.git;a=blob\_plain;f=bashrc\_add;hb=HEAD"
+curl -o bashrc\_add "https://git.schuerz.at/?p=myshellconfig.git;a=blob\_plain;f=bashrc\_add;hb=HEAD"
 ```
 
 ## Lokale Configuration
-in ~/.bashrc werden vor der Zeile zum Einbinden der Serverconfig die Variablen eingefügt um damit ein hostspezifisches Verhalten zu steuern
+in ~/.bashrc werden vor der Zeile zum Einbinden der myshellconfig die Variablen eingefügt um damit ein hostspezifisches Verhalten zu steuern
 MYSHELLCONFIG\_GIT\_CHECKOUTSCRIPT\_OPTIONS=
 Mögliche Optionen:
     * -h
@@ -35,6 +35,9 @@ Mögliche Optionen:
     * http - wenn git nicht möglich ist, kann das http/https Protokoll verwendet werden. (ist langsamer als git, jedoch ist fast überall Port 80 oder 440 freigeschaltet)
     * ssh - Wenn auch schreibend auf das Repo zugegriffen werden soll, so muss Privatekey, Pubkey (und wenn konfiguriert Certifikate mit den notwendigen Principals) vorhanden sein, dann kann das ssh-Prodokoll verwendet werden.
 
+Vim Plugins werden prinzipiell von github.com bezogen. Für spezielle Anwendungsfälle (github.com ist per firewall gesperrt), kann man diese auch in eigenen Repos hosten. Um diese eigenen Repos zu verwenden, muss in ~/.bashrc die Variable entsprechend gesetzt werden. Es ist ein Verzeichnis anzugeben, unter dem alle Pluginrepos als bare-Repos gecloned werden. Wichtig ist, dass die Usernamenverzeichnisse von github.com hier auch vorhanden sind, damit ohne dieser gesetzten Variable die Plugins direkt von github.com geladen werden können.
+
+MYSHELLCONFIG\_VIM\_PLUGINS=https://my.git.server/public/Vim
 
 ## Einbinden von bashrc\_add in die bash 
 
@@ -51,7 +54,7 @@ Diese Datei clont dieses Repo nach $HOME oder pullt es, wenn das Repo schon vorh
 Damit ist auch schon alles erledigt
 
 # Über ~/.bashrc manuell festlegbare Variablen und ihre Default-Werte, wenn nicht manuell gesetzt:
-MYSHELLCONFIG\_SUBPATH=server-config
+MYSHELLCONFIG\_SUBPATH=.local/myshellconfig
 MYSHELLCONFIG\_BASE="${HOME}/${MYSHELLCONFIG\_SUBPATH}"
 MYSHELLCONFIG\_LOGDIR="${MYSHELLCONFIG\_BASE}/logs"
 MYSHELLCONFIG\_LOGFILE="${MYSHELLCONFIG\_LOGDIR}/git.log"
