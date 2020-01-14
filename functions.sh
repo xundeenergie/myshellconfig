@@ -219,9 +219,13 @@ mkcd () {
 
 sshmyshellconfig() {
 
-    local SSH="/usr/bin/ssh"
-    [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "cat > ~/${MYSHELLCONFIG_SUBPATH}/bashrc_add" < "${MYSHELLCONFIG_BASE}/bashrc_add"
-    local CMD="$SSH -T $@"
+    if [ $1 == "*localhost" ]; then
+        CMD=""
+    else
+        local SSH="/usr/bin/ssh"
+        [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "cat > ~/${MYSHELLCONFIG_SUBPATH}/bashrc_add" < "${MYSHELLCONFIG_BASE}/bashrc_add"
+        local CMD="$SSH -T $@"
+    fi
     $CMD /bin/bash << EOF
     [ -e /etc/bashrc ] && .  /etc/bashrc
     [ -e /etc/bash.bashrc ] && . /etc/bash.bashrc
