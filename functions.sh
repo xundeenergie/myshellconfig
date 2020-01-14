@@ -217,7 +217,7 @@ mkcd () {
     cd "$1"
 }
 
-sshserverconfig() {
+sshmyshellconfig() {
 
     local SSH="/usr/bin/ssh"
     [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "cat > ~/bashrc_add" < "${MYSHELLCONFIG_BASE}/bashrc_add"
@@ -232,7 +232,8 @@ sshserverconfig() {
         sed -i -e '/bashrc_add/d' ~/.bashrc
     fi
     echo
-    printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
+    #printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
+    printf "%s" "if [ -e \${MYSHELLCONFIG_BASE}/bashrc_add ]; then . \${MYSHELLCONFIG_BASE}/bashrc_add; else if [ -f bashrc_add ] ;then . bashrc_add;fi;fi" |tee -a ~/.bashrc
     echo
 
 EOF
