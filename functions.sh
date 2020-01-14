@@ -332,7 +332,7 @@ vim-repair-vundle () {
         cd $MYSHELLCONFIG_BASE
         cd vim/bundle
         rm -rf Vundle.vim
-        git clone  "${MYSHELLCONFIG_GIT_REMOTE_PUBLIC}Vim/Vundle.vim.git"
+        git clone  "${MYSHELLCONFIG_GIT_REMOTE_PUBLIC}Vim/gmarik/Vundle.vim.git"
         cd ~-
     fi
 }
