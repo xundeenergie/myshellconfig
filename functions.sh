@@ -243,7 +243,7 @@ EOF
 }
 
 transit2newconf() {
-    sshmyshellconfig
+    sshmyshellconfig localhost
     echo  rm ~/bashrc_add
     rm ~/bashrc_add
     exit
