@@ -220,9 +220,7 @@ mkcd () {
 sshmyshellconfig() {
 
     local SSH="/usr/bin/ssh"
-    [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "cat > ~/bashrc_add" < "${MYSHELLCONFIG_BASE}/bashrc_add"
-    #[ -e ${HOME}/.gitconfig ] && $SSH -T -o VisualHostKey=no $@ "cat > ~/.gitconfig" < "${HOME}/.gitconfig"
-    #[ -e ${HOME}/.gitconfig_local ] && $SSH -T -o VisualHostKey=no $@ "cat > ~/.gitconfig_local" < "${HOME}/.gitconfig_local"
+    [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "cat > ~/${MYSHELLCONFIG_SUBPATH}/bashrc_add" < "${MYSHELLCONFIG_BASE}/bashrc_add"
     local CMD="$SSH -T $@"
     $CMD /bin/bash << EOF
     [ -e /etc/bashrc ] && .  /etc/bashrc
