@@ -233,7 +233,7 @@ sshmyshellconfig() {
     fi
     echo
     #printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
-    printf "%s" "if [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ]; then . ${MYSHELLCONFIG_BASE}/bashrc_add; else if [ -f bashrc_add ] ;then . bashrc_add;fi;fi" |tee -a ~/.bashrc
+    printf "%s" "if [ -e \\${MYSHELLCONFIG_BASE}/bashrc_add ]; then \n  . \\${MYSHELLCONFIG_BASE}/bashrc_add;\nelse\n  if [ -f bashrc_add ] ;then \n    . bashrc_add;\n  fi;\nfi" |tee -a ~/.bashrc
     echo
 
 EOF
