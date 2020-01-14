@@ -11,6 +11,14 @@ filetype off                  " required
 
 let g:NERDTreeDirArrows = 1
 
+if !empty($MYSHELLCONFIG_VIM_PLUGINS)
+  let pluginrepopath=$MYSHELLCONFIG_VIM_PLUGINS . '/'
+  let pluginextension='.git'
+else
+  let pluginrepopath=''
+  let pluginextension=''
+endif
+
 if !empty(glob("~/.vim/bundle/Vundle.vim"))
   " set the runtime path to include Vundle and initialize
   set rtp+=~/.vim/bundle/Vundle.vim
@@ -21,23 +29,23 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
 
   " let Vundle manage Vundle, required
   
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'/gmarik/Vundle.vim'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'Zenburn'
-"  Plugin $MYSHELLCONFIG_VIM_PLUGINS'Solarized'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'altercation/vim-colors-solarized.git'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'vim-scripts/indentpython.vim'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'tmhedberg/SimpylFold'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'vim-syntastic/syntastic'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'ctrlpvim/ctrlp.vim'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'scrooloose/nerdtree'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'Xuyuanp/nerdtree-git-plugin'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'jistr/vim-nerdtree-tabs'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'tpope/vim-fugitive'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'rakr/vim-togglebg'
-  Plugin $MYSHELLCONFIG_VIM_PLUGINS'ConradIrwin/vim-bracketed-paste'
-"  Plugin $MYSHELLCONFIG_VIM_PLUGINS'ryanpcmcquen/fix-vim-pasting'
-"  Plugin $MYSHELLCONFIG_VIM_PLUGINS'Valloric/YouCompleteMe'
+  Plugin pluginrepopath . 'gmarik/Vundle.vim' . pluginextension
+  Plugin pluginrepopath . 'vim-scripts/Zenburn' . pluginextension
+"  Plugin pluginrepopath . 'Solarized' . pluginextension
+  Plugin pluginrepopath . 'altercation/vim-colors-solarized' . pluginextension
+  Plugin pluginrepopath . 'vim-scripts/indentpython.vim' . pluginextension
+  Plugin pluginrepopath . 'tmhedberg/SimpylFold' . pluginextension
+  Plugin pluginrepopath . 'vim-syntastic/syntastic' . pluginextension
+  Plugin pluginrepopath . 'ctrlpvim/ctrlp.vim' . pluginextension
+  Plugin pluginrepopath . 'preservim/nerdtree' . pluginextension
+  Plugin pluginrepopath . 'Xuyuanp/nerdtree-git-plugin' . pluginextension
+  Plugin pluginrepopath . 'jistr/vim-nerdtree-tabs' . pluginextension
+  Plugin pluginrepopath . 'tpope/vim-fugitive' . pluginextension
+  Plugin pluginrepopath . 'Lokaltog/powerline' . pluginextension, {'rtp': 'powerline/bindings/vim/'}
+  Plugin pluginrepopath . 'rakr/vim-togglebg' . pluginextension
+  Plugin pluginrepopath . 'ConradIrwin/vim-bracketed-paste' . pluginextension
+"  Plugin pluginrepopath . 'ryanpcmcquen/fix-vim-pasting' . pluginextension
+"  Plugin pluginrepopath . 'Valloric/YouCompleteMe' . pluginextension
   
   
    
