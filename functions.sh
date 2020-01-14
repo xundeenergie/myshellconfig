@@ -228,8 +228,8 @@ sshmyshellconfig() {
     [ -e /etc/bashrc ] && .  /etc/bashrc
     [ -e /etc/bash.bashrc ] && . /etc/bash.bashrc
     echo "modify ~/.bashrc"
-    if grep -q bashrc_add ~/.bashrc ;then
-        sed -i -e '/bashrc_add/d' ~/.bashrc
+    if grep -q "[ -f ~/bashrc_add ] &&" ~/.bashrc ;then
+        sed -i -e '/\\[ -f ~/bashrc_add \\] &&/d' ~/.bashrc
     fi
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
