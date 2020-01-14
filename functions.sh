@@ -241,6 +241,7 @@ sshmyshellconfig() {
 EOF
 
 }
+
 sshs() {
 
 #    MKTMPCMD='mktemp $(echo ${XDG_RUNTIME_DIR}/bashrc.XXXXXXXX.conf)'
