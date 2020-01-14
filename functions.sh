@@ -242,6 +242,7 @@ EOF
 }
 
 transit2newconf() {
+    [ -z "${MYSHELLCONFIG_BASE+x} ] && MYSHELLCONFIG_BASE=~/.local/myshellconfig
     sshmyshellconfig localhost
     echo  rm ~/bashrc_add
     rm ~/bashrc_add
