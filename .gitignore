@@ -1,0 +1,11 @@
+vim/.netrwhist
+vim/.VimballRecord
+vim/bundle/*
+!vim/bundle/Vundle.vim
+*.log
+*.swp
+*.orig
+serverconfig.local.conf
+bashrc_local
+.local_scripts
+.git-token

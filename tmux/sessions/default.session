@@ -1,0 +1,4 @@
+new -s User -n Default 
+neww -n Root sudo -i 
+selectw -t 1
+selectp -t 1

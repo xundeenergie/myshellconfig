@@ -1,0 +1,11 @@
+#!/bin/bash
+
+function _uencfsfiles() {
+    COMPREPLY=()
+    local CUR KEYS
+    CUR="${COMP_WORDS[COMP_CWORD]}"
+    KEYS=$(mount|grep encfs|sed -e 's/^encfs on \(.*\)\ type.*$/\1/')
+    COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
+    return 0
+}
+complete -F _uencfsfiles uencfs

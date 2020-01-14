@@ -1,0 +1,33 @@
+[credential]
+        helper = cache --timeout=1200
+[user]
+	name = Jakobus Schürz
+	email = jakobus.schuerz@schuerz.at
+[push]
+	default = simple
+[core]
+	editor = vim
+[diff]
+	submodule = log
+[alias]
+	last = log -1 HEAD
+	unstage = reset HEAD --
+	visual = !gitk
+        tree = log --oneline --decorate --graph --all
+	treefull = log --graph --all
+	hist = log --pretty=format:'%h %ad | %s%d [%an : %cn]' --graph --date=short
+	fixcached = rm -r --cached .
+        delete-last-commit = reset --soft HEAD~1
+        purge-last-commit = reset --hard HEAD~1
+        pushdetachedhead = push origin HEAD:master
+[merge]
+	conflictstyle = diff3
+	tool = vimdiff
+[mergetool]
+	prompt = false
+
+[alias]
+  pushup = "!gitbranchname() { git symbolic-ref --short HEAD; }; gitpushupstream() { git push --set-upstream origin `gitbranchname`; }; gitpushupstream"
+
+[include]
+    path = ~/.gitconfig_local

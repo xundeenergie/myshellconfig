@@ -1,0 +1,15 @@
+[submodule "vim/bundle/Vundle.vim"]
+	path = vim/bundle/Vundle.vim
+	url = http://git.schuerz.at/public/Vim/Vundle.vim.git
+[submodule "tmux/plugins/tpm"]
+	path = tmux/plugins/tpm
+	url = http://git.schuerz.at/public/tmux-plugins/tpm.git
+[submodule "tmux/plugins/tmux-themepack"]
+	path = tmux/plugins/tmux-themepack
+	url = http://git.schuerz.at/public/tmux-plugins/tmux-themepack.git
+[submodule "tmux/plugins/tmux-sensible"]
+	path = tmux/plugins/tmux-sensible
+	url = http://git.schuerz.at/public/tmux-plugins/tmux-sensible.git
+[submodule "git-credential-pass"]
+        path = git-credential-pass
+        url = http://git.schuerz.at/public/git-credential-pass.git

@@ -1,0 +1,148 @@
+#Persönliche Aliases
+
+# usefull commands
+alias fuck='sudo $(history -p \!\!)'
+alias wosis='which $(history -p \!\!)' 
+alias fix='reset; stty sane; tput rs1; clear; echo -e "\033c"' # Fix terminal aber binary output
+
+
+
+# paketmanagement
+# -- apt
+alias aptupgrade='sudo /usr/bin/apt update && sudo /usr/bin/apt dist-upgrade'
+alias apt-get-key='sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys'
+# -- dnf
+alias dnfupgrade='sudo dnf upgrade'
+
+# docker and docker-compose
+alias dcdown='docker-compose down'
+alias dclogs='docker-compose logs -f'
+alias dcup='docker-compose up --build -d'
+alias dcpull='docker-compose pull'
+alias dcbuild='docker-compose build --pull'
+alias dcrestartcollabora='docker-compose restart collabora-code'
+alias dcrestart='docker-compose down && docker-compose pull && docker-compose up --build -d'
+alias diclean='docker images | grep '\''<none>'\'' | grep -P '\''[1234567890abcdef]{12}'\'' -o | xargs -L1 docker rmi'
+alias dclean='docker ps -a | grep -v '\''CONTAINER\|_config\|_data\|_run'\'' | cut -c-12 | xargs docker rm'
+# Kill all running containers.
+alias dockerkillall='docker kill $(docker ps -q)'
+# Delete all stopped containers.
+alias dockercleanc='printf "\n>>> Deleting stopped containers\n\n" && docker rm $(docker ps -a -q)'
+# Delete all untagged images.
+alias dockercleani='printf "\n>>> Deleting untagged images\n\n" && docker rmi $(docker images -q -f dangling=true)'
+# Delete all stopped containers and untagged images.
+alias dockerclean='dockercleanc || true && dockercleani'
+
+# git
+alias git-getbranchauthors="git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' | sort -k5n -k2M -k3n -k4n"
+alias gcm='git checkout master'
+
+# xdg-user-dirs
+alias godesktop='[ -e $(xdg-user-dir DESKTOP) ] && cd $(xdg-user-dir DESKTOP)'
+alias godoc='[ -e $(xdg-user-dir DOCUMENTS) ] && cd $(xdg-user-dir DOCUMENTS)'
+alias godownload='[ -e $(xdg-user-dir DOWNLOAD) ] && cd $(xdg-user-dir DOWNLOAD'
+alias gomusic='[ -e $(xdg-user-dir MUSIC) ] && cd $(xdg-user-dir MUSIC)'
+alias gopublic='[ -e $(xdg-user-dir PUBLICSHARE) ] && cd $(xdg-user-dir PUBLICSHARE)'
+alias gotempl='[ -e $(xdg-user-dir TEMPLATES) ] && cd $(xdg-user-dir TEMPLATES)'
+alias govideo='[ -e $(xdg-user-dir VIDEOS) ] && cd $(xdg-user-dir VIDEOS)'
+
+# some special locations
+alias godebian='cd ~/debian'
+alias gofvwm='cd /home/jakob/src/fvwmverve/'
+alias gofvwmsys='cd /usr/share/fvwm-verve/'
+alias goserverconfig='cd $MYSHELLCONFIG_BASE'
+alias goxund='cd /home/jakob/xundeenergie.at/'
+
+# system-dirs
+alias gosystemd='cd /etc/systemd/system/'
+alias goudevrules='cd /etc/udev/rules.d/'
+alias gousrlocal='cd /usr/local/bin/'
+
+# btrfs-backup
+alias golocbak='cd /var/cache/btrfs_pool_SYSTEM/'
+alias gorembak='cd /var/cache/backup/$HOSTNAME/'
+alias lslocbak='ls -alF /var/cache/btrfs_pool_SYSTEM/'
+alias lsrembak='ls -alF /var/cache/backup/$HOSTNAME/'
+
+# common commands
+alias ....='cd ../../..'
+alias ...='cd ../..'
+alias ..='cd ..'
+alias cd..='cd ..'
+alias cp='cp -i --reflink=auto'
+alias dir='ls -l $LS_OPTIONS'
+alias grep='grep --color'
+alias la='ls -la $LS_OPTIONS'
+alias ll='ls -l $LS_OPTIONS'
+alias l='ls -alF $LS_OPTIONS'
+alias ls-l='ls -l $LS_OPTIONS'
+alias md='mkdir -p'
+alias rd=rmdir
+alias rmbrokenlinks='for f in $(find -L . -maxdepth 1 -type l); do unlink "$f";done'
+
+# tests
+alias testmail='echo testemail von ${USER}@${HOSTNAME} am $(date)|mail -s "TESTEMAIL ${USER}@${HOSTNAME} $(date)"'
+
+# logging
+alias tailmail='sudo tail -f /var/log/mail.log /var/log/exim4/mainlog /var/log/exim4/rejectlog /var/log/exim4/paniclog'
+alias taildemsg='sudo watch -n1 "dmesg|tail -n20"'
+alias tailsys='sudo tail -f /var/log/syslog /var/log/dmesg'
+
+# infos, stati
+alias getrelease='cat /etc/*release'
+alias mkbackupinfo='mkbackup -Vi list SNP BKP SRC'
+alias myip='curl "http://icanhazip.com/"'
+alias netzwerk='watch "route; echo iwconfig; iwconfig 2> /dev/null ;echo; echo ifconfig; ifconfig 2> /dev/null; echo; echo arp -a; arp -a; echo EOF"'
+
+# Applications
+alias jq='jq -C'
+alias ncmpcpp='ncmpcpp -h "${MPD_HOST}" -p "${MPD_PORT}"'
+alias nedit='LC_ALL=ISO-8850-15;export LC_ALL;nedit -fn win8x15 -xrm "*fontList:win8x15"'
+alias o='less -r'
+alias totem='VDPAU_DRIVER=va_gl totem'
+alias unetbootin='export QT_X11_NO_MITSHM=1 unetbootin'
+alias vi='/usr/bin/vim'
+alias vlc='VDPAU_DRIVER=va_gl vlc'
+alias tmux='tmux -f ~/.tmux.conf'
+
+# mount/unmount
+alias me='owndisk mount'
+alias m=mount
+#alias mxxx='encfs ~/.x ~/X && xdg-open ~/X'
+alias ue='owndisk umount'
+#alias umxx='fusermount -u ~/X'
+alias u=umount
+
+# rock64
+alias rock64='sudo  minicom -D /dev/ttyUSB0 --color=on'
+alias rock64='sudo  minicom -D /dev/ttyUSB0 -b 1500000--color=on'
+
+# openvpn
+alias ovpnrestart='sudo systemctl restart openvpn-client@${HOSTNAME}.service'
+alias ovpnstart='sudo systemctl start openvpn-client@${HOSTNAME}.service'
+alias ovpnstatus='sudo systemctl status openvpn-client@${HOSTNAME}.service'
+alias ovpnstop='sudo systemctl stop openvpn-client@${HOSTNAME}.service'
+
+# systemd
+alias scdr='systemctl --system daemon-reload'
+alias scpo='systemctl poweroff'
+alias scrb='systemctl reboot'
+alias scrl='systemctl reload'
+alias scrs='systemctl restart'
+alias scs='systemctl start'
+alias scstp='systemctl stop'
+alias scst='systemctl status'
+alias sc='systemctl'
+alias sda='systemd-analyze plot > /tmp/bootchart.svg &&  eog /tmp/bootchart.svg&'
+
+# remote control
+alias virgooff='ssh virgo sudo systemctl poweroff'
+alias virgoreboot='ssh virgo sudo systemctl reboot'
+alias aldebaranoff='ssh aldebaran sudo systemctl poweroff'
+alias aldebaransuspend='ssh aldebaran sudo systemctl suspend'
+alias aldebaranreboot='ssh aldebaran sudo systemctl reboot'
+
+
+#  nextcloud
+alias nextcloud-add-missing-indices='docker exec -ti nc_app_1 php occ db:add-missing-indices'
+alias nextcloud-upgrade='docker-compose down && docker image rm nc_app:latest nc_web:latest && docker-compose pull && docker-compose up --build -d'

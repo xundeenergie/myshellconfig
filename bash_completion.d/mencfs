@@ -1,0 +1,21 @@
+#!/bin/bash
+
+
+function _encfsconfig() {
+    KEYS=""
+    for KEY_DIR in ${ENCFS_CONFIG_DIRS[*]};do
+        KEYS="${KEYS} $(find ${ENCFS_CONFIG_DIRS[*]} -type f -name "*.conf" -exec basename {} \; 2>/dev/null |sed 's/\.conf$//' )"
+    done
+    echo $KEYS
+    
+}
+
+function _encfsfiles() {
+    COMPREPLY=()
+    local CUR KEYS
+    CUR="${COMP_WORDS[COMP_CWORD]}"
+    KEYS=$(_encfsconfig)
+    COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
+    return 0
+}
+complete -F _encfsfiles mencfs

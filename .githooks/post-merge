@@ -1,0 +1,24 @@
+#!/bin/bash                                                                      
+
+set -e                                                                           
+
+printf '\npost-checkout hook\n\n'                                                
+
+prevHEAD=$1                                                                      
+newHEAD=$2                                                                       
+checkoutType=$3                                                                  
+
+[[ $checkoutType == 1 ]] && checkoutType='branch' ||                             
+                            checkoutType='file' ;                                
+
+echo 'Checkout type: '$checkoutType                                              
+echo '    prev HEAD: '`git name-rev --name-only $prevHEAD`                       
+echo '     new HEAD: '`git name-rev --name-only $newHEAD`
+
+pwd
+REPODIR=$(git rev-parse --show-toplevel)
+. ./functions.sh
+create_symlinks ${REPODIR}
+
+# Check if local scripts exists and source it
+[ -e .local_scripts/post-merge ] && . .local_scripts/post-merge
