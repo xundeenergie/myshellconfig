@@ -231,9 +231,10 @@ sshmyshellconfig() {
     if grep -q bashrc_add ~/.bashrc ;then
         sed -i -e '/bashrc_add/d' ~/.bashrc
     fi
+    sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
     #printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
-    printf "%s" "if [ -e \\${MYSHELLCONFIG_BASE}/bashrc_add ]; then \n  . \\${MYSHELLCONFIG_BASE}/bashrc_add;\nelse\n  if [ -f bashrc_add ] ;then \n    . bashrc_add;\n  fi;\nfi" |tee -a ~/.bashrc
+    printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \\\${MYSHELLCONFIG_BASE}/bashrc_add ]; then" "  . \\\${MYSHELLCONFIG_BASE}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
 
 EOF
