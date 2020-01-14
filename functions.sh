@@ -231,7 +231,7 @@ sshmyshellconfig() {
     [ -e /etc/bash.bashrc ] && . /etc/bash.bashrc
     echo "modify ~/.bashrc"
     sed -e '/^\[ -f bashrc_add \] /d' ~/.bashrc
-    sed -i -e '/\[ -f /bashrc_add \] /d' ~/.bashrc
+    sed -i -e '/^\[ -f bashrc_add \] /d' ~/.bashrc
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
     #printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
@@ -240,6 +240,13 @@ sshmyshellconfig() {
 
 EOF
 
+}
+
+transit2newconf() {
+    sshmyshellconfig
+    echo  rm ~/bashrc_add
+    rm ~/bashrc_add
+    exit
 }
 
 sshs() {
