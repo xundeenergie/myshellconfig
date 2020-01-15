@@ -10,8 +10,13 @@ Am Einfachsten ist es, das github-Repo zu forken und in .gitconfig den Namen und
 Wenn in einem Setup ein Proxy verwendet werden muss, so ist dieser VORHER zu konfigurieren. Da Proxyeinstellungen Hostabhängig sind und nicht generell in die allgemeine Konfiguration aufgenommen werden können, sind die Proxy-Einstellungen für git im File
 
 ~/.gitconfig_local
+```
+[http]
+        proxy = http://username:password@proxy.domain.tld:1233/
+```
 
 abzulegen. Die verteilte .gitconfig enthält bereits eine Zeile, welche dieses lokale File für git sourced.
+
 
 ## Installation
 Damit auf einem neuen Server meine persönlichen Alias und Bash-Promt, wie auch verschiedene andere Befehle (vim in sudo mit der vimrc des Benutzers) zur Verfügung stehen, muss als erstes nach dem ersten Login folgendes ausgeführt werden:
@@ -93,3 +98,18 @@ ssh USER@HOST
 es können die üblichen ssh-Optionen und Parameter verwendet werden.
 
 
+
+## Signieren der Commits mit gpg
+Wenn man seine Commits signieren möchte, kann dazu in der Datei
+~/.gitconfig_local
+folgendes eingetragen werden:
+
+```
+[user]
+	signingKey = 0xABC123DEF456GHI7
+[gpg]
+	program = gpg2
+
+```
+
+signingKey muss natürlich dem eigenen gpg-Key entsprechen, der lokal vorhanden ist und verwendet werden soll.
