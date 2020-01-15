@@ -1,14 +1,17 @@
-# server-config
+# myshellconfig
 
 Am Einfachsten ist es, das github-Repo zu forken und in .gitconfig den Namen und die Emailadresse an die eigenen Werte anzupassen. Das Repo ist öffentlich, also keine Passwörter speicher!!!
 
-.gitconfig wird von diesem Repo beim Einrichten nach ~/.gitconfig gelinkt. Bitte beachten, dass damit eine schon vorhandene eigene Datei überschrieben wird!
+.gitconfig wird von diesem Repo beim Einrichten nach ~/.gitconfig gelinkt. 
 
-Soll ein Proxy zum Einsatz kommen, so ist dieser mittels
-```
-git config http.proxy "http://proxy.to.use:prot/"
-```
-local für jedes Repo zu konfigurieren. Die globale gitconfig für den User wird auf allen eingesetzten Instanzen verteilt und versioniert!
+**Bitte beachten, dass damit eine schon vorhandene eigene Datei überschrieben wird!**
+
+## Proxy
+Wenn in einem Setup ein Proxy verwendet werden muss, so ist dieser VORHER zu konfigurieren. Da Proxyeinstellungen Hostabhängig sind und nicht generell in die allgemeine Konfiguration aufgenommen werden können, sind die Proxy-Einstellungen für git im File
+
+~/.gitconfig_local
+
+abzulegen. Die verteilte .gitconfig enthält bereits eine Zeile, welche dieses lokale File für git sourced.
 
 ## Installation
 Damit auf einem neuen Server meine persönlichen Alias und Bash-Promt, wie auch verschiedene andere Befehle (vim in sudo mit der vimrc des Benutzers) zur Verfügung stehen, muss als erstes nach dem ersten Login folgendes ausgeführt werden:
