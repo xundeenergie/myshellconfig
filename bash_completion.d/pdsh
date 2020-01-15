@@ -1,0 +1,11 @@
+#!/bin/bash
+
+function _pdshgroups() {
+    COMPREPLY=()
+    local CUR KEYS
+    CUR="${COMP_WORDS[COMP_CWORD]}"
+    KEYS="$(find ~/.dsh/group/* -type f -exec basename {} \;)"
+    COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
+    return 0
+}
+complete -F _pdshgroups pdsh
