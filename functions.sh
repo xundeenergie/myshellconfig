@@ -26,7 +26,7 @@ create_symlinks() {
     ln -sf "${MYSHELLCONFIG_BASE}/vimrc" ~/.vimrc
     ln -sf "${MYSHELLCONFIG_BASE}/vim" ~/.vim
     ln -sf "${MYSHELLCONFIG_BASE}/.gitconfig" ~/.gitconfig
-    ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
+    #ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
     ln -sf "${MYSHELLCONFIG_BASE}/tmux" ~/.tmux
     ln -sf "${MYSHELLCONFIG_BASE}/tmux/tmux.conf" ~/.tmux.conf
 
@@ -234,19 +234,11 @@ sshmyshellconfig() {
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
     #printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
-    printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ]; then" "  . ${MYSHELLCONFIG_BASE}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
+    printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
 
 EOF
 
-}
-
-transit2newconf() {
-    [ -z "${MYSHELLCONFIG_BASE+x}" ] && MYSHELLCONFIG_BASE=~/.local/myshellconfig
-    sshmyshellconfig localhost
-    echo  rm ~/bashrc_add
-    rm ~/bashrc_add
-    exit
 }
 
 sshs() {
