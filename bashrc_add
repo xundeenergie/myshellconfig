@@ -5,7 +5,10 @@
 if [ -z ${SSHS+x} ]; then SSHS=false;fi
 
 # check if we are a interactive shell
-if [ -n "$PS1" ] ;then
+# https://guide.bash.academy/expansions/
+# https://www.tldp.org/LDP/abs/html/refcards.html#AEN22473
+if [[ $- = *i* ]] ; then
+#if [ -n "$PS1" ] ;then
     #echo "interactive shell" >&2
    
 
