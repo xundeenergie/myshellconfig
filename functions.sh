@@ -236,6 +236,9 @@ sshmyshellconfig() {
     #printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
     printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
+    echo cleanup from old config
+    rm ~/bashrc_add && echo  rm ~/bashrc_add
+    rm -rf  ~/server-config && echo rm -rf  ~/server-config
 
 EOF
 
