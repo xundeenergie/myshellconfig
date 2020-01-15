@@ -83,8 +83,8 @@ if [ -n "$PS1" ] ;then
         # export SYSTEMD_PAGER=
 
         ### set userspecific variables #######
-        [ -z "$PDSH_RCMD_TYPE" ] && PDSH_RCMD_TYPE=ssh
-        [ -z "$XDG_RUNTIME_DIR" ] && export XDG_RUNTIME_DIR=/run/user/$(id -u $USER)
+        [ -z "$PDSH_RCMD_TYPE" ] && export PDSH_RCMD_TYPE=ssh
+        [ -z "$XDG_RUNTIME_DIR" ] && export export XDG_RUNTIME_DIR=/run/user/$(id -u $USER)
 
         ######################################
 
