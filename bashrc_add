@@ -296,6 +296,7 @@ EOF
         unset -f pathmunge
 
     else
+        # run with temporary config
 
         case $TERM in
             *screen*)
