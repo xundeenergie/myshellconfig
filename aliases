@@ -85,7 +85,7 @@ alias testmail='echo testemail von ${USER}@${HOSTNAME} am $(date)|mail -s "TESTE
 
 # logging
 alias tailmail='sudo tail -f /var/log/mail.log /var/log/exim4/mainlog /var/log/exim4/rejectlog /var/log/exim4/paniclog'
-alias tailmail='sudo journalctl -f -u exim4.service -u dovecot.service -u rspamd.service _UID=$(id -u vmail) _UID=$(id -u fetchmail)'
+alias tailmail='sudo journalctl -f -u exim4.service -u dovecot.service -u rspamd.service -u getmail*'
 alias taildemsg='sudo watch -n1 "dmesg|tail -n20"'
 alias tailsys='sudo tail -f /var/log/syslog /var/log/dmesg'
 
