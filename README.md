@@ -7,11 +7,11 @@ Diese automatische Konfiguration überschreibt bei jedem Login in ${HOME} einige
 Folgende Dateien werden durch Symlinks ersetzt. Diese bitte VOR dem ersten Aufruf sichern.
 
 ```
-~/.gitconfig -> /home/jakobus.schuerz/.local/myshellconfig/.gitconfig
-~/.tmux -> /home/jakobus.schuerz/.local/myshellconfig/tmux
-~/.tmux.conf -> /home/jakobus.schuerz/.local/myshellconfig/tmux/tmux.conf
-~/.vim -> /home/jakobus.schuerz/.local/myshellconfig/vim
-~/.vimrc -> /home/jakobus.schuerz/.local/myshellconfig/vimrc
+~/.gitconfig -> ${HOME}/.local/myshellconfig/.gitconfig
+~/.tmux -> ${HOME}/.local/myshellconfig/tmux
+~/.tmux.conf -> ${HOME}/.local/myshellconfig/tmux/tmux.conf
+~/.vim -> ${HOME}/.local/myshellconfig/vim
+~/.vimrc -> ${HOME}/.local/myshellconfig/vimrc
 ```
 
 **Bitte beachten, dass damit eine schon vorhandene eigene Datei überschrieben wird!**
@@ -33,7 +33,7 @@ Damit auf einem neuen Server meine persönlichen Alias und Bash-Promt, wie auch 
 
 Clone von github
 ```
-git clone https://github.com/xundeenergie/myshellconfig.git ~/.local/myshellconfig
+git clone https://github.com/xundeenergie/myshellconfig.git ${HOME}/.local/myshellconfig
 ```
 
 ~/.bashrc ist am Ende um folgende Zeilen zu ergänzen
