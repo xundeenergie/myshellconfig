@@ -150,7 +150,7 @@ if [[ $- = *i* ]] ; then
         [ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME+x}" ] && export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
         [ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
         # If TAG is set, checkout is always headless. 
-        [ -z "${MYSHELLCONFIG_GIT_TAG:+x}" ] && { export MYSHELLCONFIG_GIT_BRANCH=${MYSHELLCONFIG_GIT_TAG}; export MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=""; }
+        [ -z "${MYSHELLCONFIG_GIT_TAG:+x}" ] || { export MYSHELLCONFIG_GIT_BRANCH=${MYSHELLCONFIG_GIT_TAG}; export MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=""; }
 
         #GIT_SSH_PATH="/srv/repos"
 
