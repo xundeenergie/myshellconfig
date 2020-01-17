@@ -169,7 +169,7 @@ if [[ $- = *i* ]] ; then
                     $SGIT config user.name "${FULLNAME}"
 
                     # set upstream only if not detached
-                    [ $($SGIT rev-parse --abbrev-ref HEAD) != "HEAD" ] && $SGIT branch --set-upstream-to=origin/$($SGIT rev-parse --abbrev-ref HEAD)
+                    [ $($SGIT rev-parse --abbrev-ref HEAD) != "HEAD" ] && $SGIT branch --set-upstream-to=${MYSHELLCONFIG_GIT_REMOTE_NAME}/$($SGIT rev-parse --abbrev-ref HEAD)
 
                     # sync repo with origin if git is reachable 
                     if ckrepo ; then
@@ -213,7 +213,7 @@ if [[ $- = *i* ]] ; then
                     #echo "Run Vim, and in Vim run :PluginInstall to install all Plugins"
                     vim -c "PluginInstall" -c ":qa!"
                 fi
-                [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ] || $SGIT remote set-url --push origin "${MYSHELLCONFIG_GIT_REMOTE_PUSH}" 
+                [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ] || $SGIT remote set-url --push ${MYSHELLCONFIG_GIT_REMOTE_NAME} "${MYSHELLCONFIG_GIT_REMOTE_PUSH}" 
     #            cd ${HOME}
                 ;;
             *screen*)
