@@ -39,13 +39,7 @@ git clone https://github.com/xundeenergie/myshellconfig.git ${HOME}/.local/myshe
 ~/.bashrc ist am Ende um folgende Zeilen zu ergänzen
 ```
 #MYSHELLCONFIG-start
-if [ -e ~/.local/myshellconfig/bashrc_add ]; then
-  . ~/.local/myshellconfig/bashrc_add;
-else
-  if [ -f ~/bashrc_add ] ;then
-    . ~/bashrc_add;
-  fi;
-fi
+if [ -e ~/.local/myshellconfig/bashrc_add ]; then . ~/.local/myshellconfig/bashrc_add; fi
 #MYSHELLCONFIG-end
 ```
 Ausloggen und neu Einloggen.
