@@ -108,7 +108,7 @@ case "$TERM" in
         esac
 
         # Labels: remote, tmpconfig, screen...
-        if [ ! -z ${SSH_TTY+x} ]; then 
+        if [ ! -z ${SSH_TTY:+x} ]; then 
             LABEL="${LABEL} \[$On_IRed\]\[$BBlack\]remote\[$Color_Off\]"
         fi
         if $SSHS ; then 
@@ -126,7 +126,7 @@ case "$TERM" in
         ;;
     *)
         # Labels: remote, tmpconfig, screen...
-        if [ ! -z ${SSH_TTY+x} ]; then 
+        if [ ! -z ${SSH_TTY:+x} ]; then 
             LABEL="${LABEL} \[$On_Red\]\[$BWhite\]remote\[$Color_Off\]"
         fi
         if $SSHS ; then 
