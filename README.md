@@ -1,8 +1,18 @@
 # myshellconfig
 
-Am Einfachsten ist es, das github-Repo zu forken und in .gitconfig den Namen und die Emailadresse an die eigenen Werte anzupassen. Das Repo ist öffentlich, also keine Passwörter speicher!!!
+Am Einfachsten ist es, das github-Repo zu forken und in .gitconfig den Namen und die Emailadresse an die eigenen Werte anzupassen. Das Repo ist öffentlich, also keine Passwörter speichern!!!
 
-.gitconfig wird von diesem Repo beim Einrichten nach ~/.gitconfig gelinkt. 
+## ACHTUNG
+Diese automatische Konfiguration überschreibt bei jedem Login in ${HOME} einige Dateien mit Symlinks in das lokale Repo. Die zuvor vorhandenen Dateien werden nicht gesichert und gehen daher verloren.
+Folgende Dateien werden durch Symlinks ersetzt. Diese bitte VOR dem ersten Aufruf sichern.
+
+```
+~/.gitconfig -> /home/jakobus.schuerz/.local/myshellconfig/.gitconfig
+~/.tmux -> /home/jakobus.schuerz/.local/myshellconfig/tmux
+~/.tmux.conf -> /home/jakobus.schuerz/.local/myshellconfig/tmux/tmux.conf
+~/.vim -> /home/jakobus.schuerz/.local/myshellconfig/vim
+~/.vimrc -> /home/jakobus.schuerz/.local/myshellconfig/vimrc
+```
 
 **Bitte beachten, dass damit eine schon vorhandene eigene Datei überschrieben wird!**
 
@@ -70,6 +80,15 @@ Mögliche Optionen:
 Vim Plugins werden prinzipiell von github.com bezogen. Für spezielle Anwendungsfälle (github.com ist per firewall gesperrt), kann man diese auch in eigenen Repos hosten. Um diese eigenen Repos zu verwenden, muss in ~/.bashrc die Variable entsprechend gesetzt werden. Es ist ein Verzeichnis anzugeben, unter dem alle Pluginrepos als bare-Repos gecloned werden. Wichtig ist, dass die Usernamenverzeichnisse von github.com hier auch vorhanden sind, damit ohne dieser gesetzten Variable die Plugins direkt von github.com geladen werden können.
 
 MYSHELLCONFIG\_VIM\_PLUGINS=https://my.git.server/public/Vim
+
+Z.B. das Plugin Vundle.vim hat ist auf github unter dieser URL zu finden
+```
+//github.com/gmarik/Vundle.vim.git
+```
+Damit ist das eigene Repo am eigenen git-server unter dieser Adresse erreichbar zu machen wenn die Variable MYSHELLCONFIG\_VIM\_PLUGINS wie oben Angegeben gesetzt wird.:
+```
+https://my.git.server/public/Vim/gmarik/Vundle
+```
 
 ### Über ~/.bashrc manuell festlegbare Variablen und ihre Default-Werte, wenn nicht manuell gesetzt:
 MYSHELLCONFIG\_SUBPATH=.local/myshellconfig
