@@ -233,8 +233,8 @@ sshmyshellconfig() {
     sed -i -e '/^\[ -f bashrc_add \] /d' ~/.bashrc
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
-    #printf "%s" "[ -f bashrc_add ] && . bashrc_add" | tee -a ~/.bashrc
-    printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
+    printf "%s\n" "#MYSHELLCONFIG-start" "[ -f \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ] && . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add"  "#MYSHELLCONFIG-end"| tee -a ~/.bashrc
+    #printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
     echo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
