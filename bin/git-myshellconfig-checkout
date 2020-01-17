@@ -15,6 +15,8 @@
 MYSHELLCONFIG_LOGDIR="./logs"
 MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/git.log"
 [ -d "${MYSHELLCONFIG_LOGDIR}" ] || mkdir -p "${MYSHELLCONFIG_LOGDIR}"
+[ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME:+x}" ] || export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
+[ -z "${MYSHELLCONFIG_GIT_BRANCH:+x}" ] || export MYSHELLCONFIG_GIT_BRANCH=master
 
 cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 +-----BEGINN $(date) -------------------------------+
@@ -23,22 +25,26 @@ EOF
 case $1 in
     -h)
         # Headless repo local
-        PRE="origin/"
+        PRE="${MYSHELLCONFIG_GIT_REMOTE_NAME}"
         ;;
     *)
         PRE=""
         ;;
 esac
-$SGIT fetch origin -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { echo fetch failed; exit 1; }
+# If TAG is set, checkout is always headless. 
+[ -z "${MYSHELLCONFIG_GIT_TAG:+x}" ] || { export MYSHELLCONFIG_GIT_BRANCH=${MYSHELLCONFIG_GIT_TAG}; export PRE=""; }
+
+
+$SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { echo fetch failed; exit 1; }
 
 if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MYSHELLCONFIG_LOGFILE}" ; then
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 Check for local changes:
     no changes in local repo
-    $SGIT checkout repo ${PRE}master
+    $SGIT checkout repo ${PRE}${PRE:+/}${MYSHELLCONFIG_GIT_BRANCH}
 EOF
     #echo "checkout origin/master as detached HEAD"
-    $SGIT checkout ${PRE}master 1>>"${MYSHELLCONFIG_LOGFILE}" 2>>"${MYSHELLCONFIG_LOGFILE}"|| exit 2
+    $SGIT checkout ${PRE}${PRE:+/}${MYSHELLCONFIG_GIT_BRANCH} 1>>"${MYSHELLCONFIG_LOGFILE}" 2>>"${MYSHELLCONFIG_LOGFILE}"|| exit 2
     $SGIT merge FETCH_HEAD 1>>"${MYSHELLCONFIG_LOGFILE}" 2>>"${MYSHELLCONFIG_LOGFILE}"|| exit 3
 else
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
@@ -83,6 +89,7 @@ rc=0
 #$SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo update submodules failed; exit 1; }
 
 #echo "update submodules" >&2
+# Submodules always have origin and master as repo and branch to track
 $SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo update submodules failed on ini; rc=5; }
 $SGIT submodule sync 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo sync submodules failed on sync; rc=6;  }
 $SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo checkout master submodules failed on set upstream; rc=7;  }
