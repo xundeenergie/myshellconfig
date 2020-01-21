@@ -80,6 +80,10 @@ alias md='mkdir -p'
 alias rd=rmdir
 alias rmbrokenlinks='for f in $(find -L . -maxdepth 1 -type l); do unlink "$f";done'
 
+# mount/unmount
+alias m=mount
+alias u=umount
+
 # tests
 alias testmail='echo testemail von ${USER}@${HOSTNAME} am $(date)|mail -s "TESTEMAIL ${USER}@${HOSTNAME} $(date)"'
 
@@ -105,14 +109,6 @@ alias unetbootin='export QT_X11_NO_MITSHM=1 unetbootin'
 alias vi='/usr/bin/vim'
 alias vlc='VDPAU_DRIVER=va_gl vlc'
 alias tmux='tmux -f ~/.tmux.conf'
-
-# mount/unmount
-alias me='owndisk mount'
-alias m=mount
-#alias mxxx='encfs ~/.x ~/X && xdg-open ~/X'
-alias ue='owndisk umount'
-#alias umxx='fusermount -u ~/X'
-alias u=umount
 
 # rock64
 alias rock64='sudo  minicom -D /dev/ttyUSB0 --color=on'
@@ -146,12 +142,20 @@ alias ssc='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl'
 alias sda='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemd-analyze plot > /tmp/bootchart.svg &&  eog /tmp/bootchart.svg&'
 
 # remote control
-alias virgooff='ssh virgo sudo systemctl poweroff'
-alias virgoreboot='ssh virgo sudo systemctl reboot'
+# tinakisti
+alias tinakistioff='ssh tinakisti sudo systemctl poweroff'
+alias tinakistisuspend='ssh tinakisti sudo systemctl suspend'
+alias tinakistireboot='ssh tinakisti sudo systemctl reboot'
+
+# aldebaran
 alias aldebaranoff='ssh aldebaran sudo systemctl poweroff'
 alias aldebaransuspend='ssh aldebaran sudo systemctl suspend'
 alias aldebaranreboot='ssh aldebaran sudo systemctl reboot'
 
+## hostname
+#alias hostnameoff='ssh hostname sudo systemctl poweroff'
+#alias hostnamesuspend='ssh hostname sudo systemctl suspend'
+#alias hostnamereboot='ssh hostname sudo systemctl reboot'
 
 #  nextcloud
 alias nextcloud-add-missing-indices='docker exec -ti nc_app_1 php occ db:add-missing-indices'

@@ -14,12 +14,14 @@
 	unstage = reset HEAD --
 	visual = !gitk
         tree = log --oneline --decorate --graph --all
+        treedate = log --oneline --decorate --graph --all --date-order --date=format:'%Y-%m-%d %H:%M:%S' --pretty=format:'%C(cyan)%h%Creset %C(black bold)%ad%Creset%C(auto)%d %s'
 	treefull = log --graph --all
 	hist = log --pretty=format:'%h %ad | %s%d [%an : %cn]' --graph --date=short
 	fixcached = rm -r --cached .
         delete-last-commit = reset --soft HEAD~1
         purge-last-commit = reset --hard HEAD~1
         pushdetachedhead = push origin HEAD:master
+        getbranchauthor = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' | sort -k5n -k2M -k3n -k4n; }; f"
 [merge]
 	conflictstyle = diff3
 	tool = vimdiff
