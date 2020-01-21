@@ -283,7 +283,7 @@ if [[ $- = *i* ]] ; then
 
         # Create and link Work-Dir of the Day
 
-        WDOTD=$(date "+${HOME}/archive/work_%Y%m%d")
+        WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
         [ -e $WDOTD ] || mkdir -p "${WDOTD}"
         [ -h "${HOME}/WORK" ] && ln -sf "${WDOTD}" "${HOME}/WORK"
 
