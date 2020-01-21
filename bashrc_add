@@ -284,8 +284,12 @@ if [[ $- = *i* ]] ; then
         # Create and link Work-Dir of the Day
 
         WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
-        [ -e $WDOTD ] || mkdir -p "${WDOTD}"
-        [ -f "${HOME}/WORK" ] || ln -sf "${WDOTD}" "${HOME}/WORK"
+        [ -e $WDOTD ] || mkdir -pv "${WDOTD}"
+        if [ ( -e "${HOME}/WORK" -a -h "${HOME}/WORK" ) -o ! -e "${HOME}/WORK" ] ; then
+            ln -sf "${WDOTD}" "${HOME}/WORK" 
+        else
+            echo "${HOME}/WORK exists and is real directory" 
+        fi
 
 
 
