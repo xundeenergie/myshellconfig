@@ -281,6 +281,13 @@ if [[ $- = *i* ]] ; then
         # Go HOME
         #cd ${HOME}
 
+        # Create and link Work-Dir of the Day
+
+        WDOTD=$(date "+${HOME}/archive/work_%Y%m%d")
+        [ -e $WDOTD ] || mkdir -p "${WDOTD}"
+        [ -h "${HOME}/WORK" ] && ln -sf "${WDOTD}" "${HOME}/WORK"
+
+
 
         echo "bashrc_add sourced" 1>&2
 
