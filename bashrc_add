@@ -66,12 +66,15 @@ EOF
 
 
 
+echo TEST1 >&2
         # source git-sync part of myshellconfig
         . "${MYSHELLCONFIG_BASE}/myshell_git_sync"
 
+echo TEST2 >&2
         # source loading defaults part of myshellconfig
         . "${MYSHELLCONFIG_BASE}/myshell_load_defaults"
 
+echo TEST3 >&2
 
 fi
 
