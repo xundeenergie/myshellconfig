@@ -286,7 +286,7 @@ if [[ $- = *i* ]] ; then
         WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
         [ -e $WDOTD ] || mkdir -pv "${WDOTD}"
         if [[ ( -e "${HOME}/WORK" && -h "${HOME}/WORK" ) ||  ! -e "${HOME}/WORK" ]] ; then
-            ln -sf "${WDOTD}" "${HOME}/WORK" 
+            ln -svnf "${WDOTD}" "${HOME}/WORK"
         else
             echo "${HOME}/WORK exists and is real directory" 
         fi
