@@ -98,10 +98,12 @@ fi
 if [ $(id -u) -ne 0 ]; then
     WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
     [ -e $WDOTD ] || mkdir -pv "${WDOTD}" >>${MYSHELLCONFIG_LOGFILE} 
-    if [[ ( -e "${HOME}/WORK" && -h "${HOME}/WORK" ) ||  ! -e "${HOME}/WORK" ]] ; then
-        ln -svnf "${WDOTD}" "${HOME}/WORK" >>${MYSHELLCONFIG_LOGFILE}
+    if [[ ( -e "${HOME}/Work" && -h "${HOME}/Work" ) ||  ! -e "${HOME}/Work" ]] ; then
+        ln -svnf "${WDOTD}" "${HOME}/Work" >>${MYSHELLCONFIG_LOGFILE}
+        alias gowork='cd "${HOME}/Work"'
     else
-        echo "${HOME}/WORK exists and is real directory" |tee -a ${MYSHELLCONFIG_LOGFILE} 2>&1
+        echo "${HOME}/Work exists and is real directory" |tee -a ${MYSHELLCONFIG_LOGFILE} 2>&1
+        alias gowork='echo "~/Work is not confiugurable, see ${MYSHELLCONFIG_LOGFILE}'
     fi
 fi
 

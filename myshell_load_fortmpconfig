@@ -10,3 +10,4 @@ if [ -f ~/.aliases ]; then
     . ~/.aliases
 fi
 
+WORK=~/Work
