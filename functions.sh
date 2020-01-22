@@ -255,9 +255,12 @@ sshs() {
     cat << EOF >> "${TMPBASHCONFIG}"
 [ -e /etc/bashrc ] && BASHRC=/etc/bashrc
 [ -e /etc/bash.bashrc ] && BASHRC=/etc/bash.bashrc
+echo TEST1 >&2
 . \$BASHRC
+echo TEST2 >&2
 
 for i in /etc/profile.d/*.sh; do
+echo TEST3 >&2
     if [ -r "$i" ];then
         if [ "$PS1" ]; then
             . "$i"
@@ -265,6 +268,7 @@ for i in /etc/profile.d/*.sh; do
             . "$i" >/dev/null
         fi
     fi
+echo TEST3 >&2
 done
 EOF
 
