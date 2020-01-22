@@ -104,7 +104,7 @@ if [ $(id -u) -ne 0 ]; then
     for i in $(find ${ARCHIVPATH} -type d); do
         if [ ! "$(ls -A $i)" ]; then
             echo "DIR $i is empty -> remove it"
-            echo rm -rf "$i"
+            rm -vr "$i"
         fi
     done
     
