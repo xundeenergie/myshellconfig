@@ -59,20 +59,6 @@ if ! $SSHS; then
     # Go HOME
     #cd ${HOME}
 
-    # Create and link Work-Dir of the Day
-
-    WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
-    [ -e $WDOTD ] || mkdir -pv "${WDOTD}"
-    if [[ ( -e "${HOME}/WORK" && -h "${HOME}/WORK" ) ||  ! -e "${HOME}/WORK" ]] ; then
-        ln -svnf "${WDOTD}" "${HOME}/WORK"
-    else
-        echo "${HOME}/WORK exists and is real directory" 
-    fi
-
-
-
-    echo "bashrc_add sourced" 1>&2
-
     if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
         cat << EOF
 
@@ -110,3 +96,20 @@ else
     esac
 
 fi
+
+# Create and link Work-Dir of the Day
+
+if [ $(id -u) -ne 0 ]; then
+    WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
+    [ -e $WDOTD ] || mkdir -pv "${WDOTD}"
+    if [[ ( -e "${HOME}/WORK" && -h "${HOME}/WORK" ) ||  ! -e "${HOME}/WORK" ]] ; then
+        ln -svnf "${WDOTD}" "${HOME}/WORK"   >${MYSHELLCONFIG_LOGFILE} 2>&1
+    else
+        echo "${HOME}/WORK exists and is real directory"  >${MYSHELLCONFIG_LOGFILE} 2>&1
+    fi
+fi
+
+
+
+echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
+
