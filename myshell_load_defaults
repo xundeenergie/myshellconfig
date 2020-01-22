@@ -19,11 +19,6 @@ if ! $SSHS; then
     # User specific aliases and function
 
 
-    if [ -d "${HOME}/bin" ] ; then
-        pathmunge "${HOME}/bin"
-        export PATH
-    fi
-
     if [ -d "${MYSHELLCONFIG_BASE}/bin" ] ; then
         pathmunge "${MYSHELLCONFIG_BASE}/bin"
         export PATH
@@ -38,10 +33,6 @@ if ! $SSHS; then
         . "${MYSHELLCONFIG_BASE}/aliases"
     fi
 
-    if [ -f ~/.aliases ]; then
-        . ~/.aliases
-    fi
-
     if [ -f "${MYSHELLCONFIG_BASE}/PS1" ]; then
         . "${MYSHELLCONFIG_BASE}/PS1"
     fi
@@ -50,6 +41,11 @@ if ! $SSHS; then
         for i in $( ls "${MYSHELLCONFIG_BASH_COMPLETION}" ); do
             . "${MYSHELLCONFIG_BASH_COMPLETION}/${i}"
         done
+    fi
+
+    . 
+    if [ -f "${MYSHELLCONFIG_BASE}/PS1" ]; then
+        . "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig"
     fi
 
 

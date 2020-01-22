@@ -249,7 +249,7 @@ sshs() {
 #    VIMMKTMPCMD="mktemp ${XDG_RUNTIME_DIR}/vimrc.XXXXXXXX.conf"
 
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${HOME}/.aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
+    local FILELIST=( "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
 
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"

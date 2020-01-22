@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# load this in temporary config and also in myshellconfig permanent
+if [ -d "${HOME}/bin" ] ; then
+    pathmunge "${HOME}/bin"
+    export PATH
+fi
+
+if [ -f ~/.aliases ]; then
+    . ~/.aliases
+fi
+
