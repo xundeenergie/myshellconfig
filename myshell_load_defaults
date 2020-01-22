@@ -111,5 +111,6 @@ fi
 
 
 
-echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
+#echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
+echo "bashrc_add sourced" >&2
 
