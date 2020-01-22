@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# Load default values, functions, aliases for myshellconfig
+if ! $SSHS; then
+    if [ -e ${MYSHELLCONFIG_BASE}/functions.sh ]; then
+        . ${MYSHELLCONFIG_BASE}/functions.sh
+    else
+        return
+    fi
+
+
+
+    ######################################################################################
+    # ls is not in color on all systems
+    export LS_OPTIONS='--color=auto'
+    eval "`dircolors`"
+
+    #######################################################################################
+    # User specific aliases and function
+
+
+    if [ -d "${HOME}/bin" ] ; then
+        pathmunge "${HOME}/bin"
+        export PATH
+    fi
+
+    if [ -d "${MYSHELLCONFIG_BASE}/bin" ] ; then
+        pathmunge "${MYSHELLCONFIG_BASE}/bin"
+        export PATH
+    fi
+
+    if [ -d "${MYSHELLCONFIG_BASE}/git-credential-pass" ] ; then
+        pathmunge "${MYSHELLCONFIG_BASE}/git-credential-pass"
+        export PATH
+    fi
+
+    if [ -f "${MYSHELLCONFIG_BASE}/aliases" ]; then
+        . "${MYSHELLCONFIG_BASE}/aliases"
+    fi
+
+    if [ -f ~/.aliases ]; then
+        . ~/.aliases
+    fi
+
+    if [ -f "${MYSHELLCONFIG_BASE}/PS1" ]; then
+        . "${MYSHELLCONFIG_BASE}/PS1"
+    fi
+
+    if [ -e "${MYSHELLCONFIG_BASH_COMPLETION}" ]; then
+        for i in $( ls "${MYSHELLCONFIG_BASH_COMPLETION}" ); do
+            . "${MYSHELLCONFIG_BASH_COMPLETION}/${i}"
+        done
+    fi
+
+
+    #########################################################################################
+
+
+    # Go HOME
+    #cd ${HOME}
+
+    # Create and link Work-Dir of the Day
+
+    WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
+    [ -e $WDOTD ] || mkdir -pv "${WDOTD}"
+    if [[ ( -e "${HOME}/WORK" && -h "${HOME}/WORK" ) ||  ! -e "${HOME}/WORK" ]] ; then
+        ln -svnf "${WDOTD}" "${HOME}/WORK"
+    else
+        echo "${HOME}/WORK exists and is real directory" 
+    fi
+
+
+
+    echo "bashrc_add sourced" 1>&2
+
+    if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
+        cat << EOF
+
+"User: $USER - $UID"
+
+Starting or resuming screen session
+Press CTRL+C to cancel screen startup
+
+EOF
+            sleep 1
+            #screen -UxR
+            tmux attach-session
+    fi
+
+    unset -f pathmunge
+
+else
+    # run with temporary config
+
+    case $TERM in
+        *screen*)
+            echo BASHRC: $BASHRC -> source it
+            #[ -e $BASHRC ] && . "$BASHRC"
+            if [ ! -z ${BASHRC+x} ]; then
+                if [ -e $BASHRC ] ; then
+                    exec bash --rcfile "$BASHRC" -i /dev/null
+                else
+                    exec bash -i
+                fi
+            else
+                exec bash -i
+            fi
+
+            ;;
+    esac
+
+fi

@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# Sync myshellconfig with configured git repo
+if ! $SSHS; then
+    ### set userspecific variables #######
+    [ -z "$PDSH_RCMD_TYPE" ] && export PDSH_RCMD_TYPE=ssh
+    [ -z "$XDG_RUNTIME_DIR" ] && export export XDG_RUNTIME_DIR=/run/user/$(id -u $USER)
+
+    ######################################
+
+    MYSHELLCONFIG_GIT_PROTOCOL_GIT="git://"
+    MYSHELLCONFIG_GIT_PROTOCOL_HTTP="http://"
+    MYSHELLCONFIG_GIT_PROTOCOL_SSH="git@"
+    [ -z "${MYSHELLCONFIG_GIT_SERVER+x}" ] && MYSHELLCONFIG_GIT_SERVER="git.schuerz.at"
+    [ -z "${MYSHELLCONFIG_GIT_REPO_NAME+x}" ] && MYSHELLCONFIG_GIT_REPO_NAME="$(basename $MYSHELLCONFIG_BASE).git"
+    [ -z "${MYSHELLCONFIG_GIT_REPO_PATH_HTTP+x}" ] && MYSHELLCONFIG_GIT_REPO_PATH_HTTP="/public/"
+    [ -z "${MYSHELLCONFIG_GIT_REPO_PATH_SSH+x}" ] && MYSHELLCONFIG_GIT_REPO_PATH_SSH=":public/"
+    [ -z "${MYSHELLCONFIG_GIT_REPO_PATH_GIT+x}" ] && MYSHELLCONFIG_GIT_REPO_PATH_GIT="/public/"
+
+    MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT="${MYSHELLCONFIG_GIT_PROTOCOL_GIT}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_GIT}"
+    MYSHELLCONFIG_GIT_REMOTE_PUBLIC_SSH="${MYSHELLCONFIG_GIT_PROTOCOL_SSH}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_SSH}"
+    MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP="${MYSHELLCONFIG_GIT_PROTOCOL_HTTP}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_HTTP}"
+    MYSHELLCONFIG_GIT_REMOTE_PUBLIC_DEFAULT="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT}"
+
+    MYSHELLCONFIG_GIT_REMOTE_DEFAULT="${MYSHELLCONFIG_GIT_PROTOCOL_GIT}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_GIT}"
+
+    # If MYSHELLCONFIG_GIT_REMOTE is set in ~/.bashrc before sourcing this file, take value from ~/.bashrc
+    # If set MYSHELLCONFIG_GIT_REMOTE_PROTOCOL in ~/.bashrc before sourcing this file, you cange choose one of the above 
+    # defined values for a specific host
+
+    if [ -z ${MYSHELLCONFIG_GIT_REMOTE+x} ]; then
+        case $MYSHELLCONFIG_GIT_REMOTE_PROTOCOL in
+            git)
+                MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT}"
+                ;;
+            ssh)
+                MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_SSH}"
+                ;;
+            http)
+                MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}"
+                ;;
+            *)
+                MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_DEFAULT}"
+                ;;
+            esac
+            MYSHELLCONFIG_GIT_REMOTE="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC}${MYSHELLCONFIG_GIT_REPO_NAME}"
+    fi
+
+    if [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ]; then
+        case $MYSHELLCONFIG_GIT_REMOTE_PUSH_PROTOCOL in
+            git)
+                MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT}"
+                ;;
+            ssh)
+                MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_SSH}"
+                ;;
+            http)
+                MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}"
+                ;;
+            *)
+                MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_DEFAULT}"
+                ;;
+            esac
+            MYSHELLCONFIG_GIT_REMOTE_PUSH=${MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC}${MYSHELLCONFIG_GIT_REPO_NAME}
+    fi
+
+    [ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME+x}" ] && export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
+    [ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
+    # If TAG is set, checkout is always headless. 
+    [ -z "${MYSHELLCONFIG_GIT_TAG:+x}" ] || { export MYSHELLCONFIG_GIT_BRANCH=${MYSHELLCONFIG_GIT_TAG}; export MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=""; }
+
+    #GIT_SSH_PATH="/srv/repos"
+
+    case $TERM in
+        *term*)
+
+            if [ -d "${MYSHELLCONFIG_BASE}" -a $($SGIT status 1>/dev/null 2>&1; echo $?) -eq 0 ]; then
+                [ -d "${MYSHELLCONFIG_LOGDIR}" ] || mkdir -p "${MYSHELLCONFIG_LOGDIR}"
+                if ! $SGIT rev-parse --git-dir > /dev/null 2>&1 ; then
+                    echo "Init ${MYSHELLCONFIG_BASE} as git-repo" >&2
+                    $SGIT init
+                fi
+                
+                # Update Userinformations for git
+                $SGIT config user.email "${USERNAME}"
+                $SGIT config user.name "${FULLNAME}"
+
+                # set upstream only if not detached
+                [ $($SGIT rev-parse --abbrev-ref HEAD) != "HEAD" ] && $SGIT branch --set-upstream-to=${MYSHELLCONFIG_GIT_REMOTE_NAME}/$($SGIT rev-parse --abbrev-ref HEAD)
+
+                # sync repo with origin if git is reachable 
+                if ckrepo ; then
+                    sync_config
+                    . ${MYSHELLCONFIG_BASE}/functions.sh
+                    create_symlinks "$MYSHELLCONFIG_BASE"
+                else 
+                    echo "${MYSHELLCONFIG_GIT_SERVER}" not reachable >&2;
+                    echo profile not syncing >&2;
+                fi
+
+            else
+                echo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
+
+                if $( timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" ); then
+                    :
+                else
+                    MYSHELLCONFIG_GIT_REMOTE="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}${MYSHELLCONFIG_GIT_REPO_NAME}"
+                    echo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
+                    timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" || return 1 2>/dev/null || exit 1
+                fi
+
+
+
+                [ -d "${MYSHELLCONFIG_BASE}" ] && { echo create ${MYSHELLCONFIG_LOGDIR} >&2; mkdir -p "${MYSHELLCONFIG_LOGDIR}"; }
+
+                $SGIT config user.email "${USERNAME}"
+                $SGIT config user.name "${FULLNAME}"
+
+                # Initialize Vundle as preconfigured Submodule
+                #$SGIT submodule update --init --recursive
+                #$SGIT submodule foreach 'git checkout master'
+
+                echo "sync config" >&2
+                sync_config
+                . ${MYSHELLCONFIG_BASE}/functions.sh
+                echo "config synced, functions.sh sourced" >&2
+                create_symlinks "$MYSHELLCONFIG_BASE"
+
+                # Install vim Plugins
+                #echo "Run Vim, and in Vim run :PluginInstall to install all Plugins"
+                vim -c "PluginInstall" -c ":qa!"
+            fi
+            [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ] || $SGIT remote set-url --push ${MYSHELLCONFIG_GIT_REMOTE_NAME} "${MYSHELLCONFIG_GIT_REMOTE_PUSH}" 
+    #            cd ${HOME}
+            ;;
+        *screen*)
+            echo "I'm in sceen/tmux now" >&2
+            ;;
+        *dumb*)
+            echo "Run with dumb terminal" 1>&2
+            ;;
+    esac
+fi

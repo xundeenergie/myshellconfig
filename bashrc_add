@@ -8,12 +8,9 @@ if [ -z ${SSHS+x} ]; then SSHS=false;fi
 # https://guide.bash.academy/expansions/
 # https://www.tldp.org/LDP/abs/html/refcards.html#AEN22473
 if [[ $- = *i* ]] ; then
-#if [ -n "$PS1" ] ;then
     #echo "interactive shell" >&2
-   
 
     # define variables
-
     [ -z "${USERNAME+x}" ]                  && USERNAME="$USER"
     [ -z "${USEREMAIL+x}" ]                 && USEREMAIL="$USER@$(domainname -f)"
     [ -z "${FULLNAME+x}" ]                  && FULLNAME="$(getent passwd $USER | cut -d ":" -f 5 | cut -d ',' -f 1)"
@@ -35,7 +32,6 @@ if [[ $- = *i* ]] ; then
     export MYSHELLCONFIG_BASE MYSHELLCONFIG_LOGDIR MYSHELLCONFIG_LOGFILE SGIT MYSHELLCONFIG_VIM_PLUGINS
 
     # define functions
-
     ckrepo () {
         # check if remote repo is reachable
         if $( timeout --foreground "${MYSHELLCONFIG_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
@@ -52,286 +48,26 @@ if [[ $- = *i* ]] ; then
         if which git >/dev/null; then
             echo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 1>&2
             # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
-            # this are now:
-            #   -h for headless repo
             if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
                 gco="-h"
             else
                 gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
             fi
-            ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 #|tee -a ./logs/git.log 1>&2   
+            ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
             printf '%s\n' "${nok}synced" 1>&2
-
-            # If you want, put a greeting message after sync here
-#                    cat << EOF >&2
-#
-#---------------------------------------------------
-#if you want to update submodules, change dir an run
-#cd $MYSHELLCONFIG_BASE
-#git submodule update --remote --merge
-#cd ~
-#---------------------------------------------------
-#EOF
-
         else
             echo "git not installed, no configuration possible, please install git" >&2
         fi
     }
 
-    if ! $SSHS; then
-#        echo "do not source bashrc_add" >&2
-#    else
-#        echo "source bashrc_add" >&2
-        # Uncomment the following line if you don't like systemctl's auto-paging feature:
-        # export SYSTEMD_PAGER=
-
-        ### set userspecific variables #######
-        [ -z "$PDSH_RCMD_TYPE" ] && export PDSH_RCMD_TYPE=ssh
-        [ -z "$XDG_RUNTIME_DIR" ] && export export XDG_RUNTIME_DIR=/run/user/$(id -u $USER)
-
-        ######################################
-
-        MYSHELLCONFIG_GIT_PROTOCOL_GIT="git://"
-        MYSHELLCONFIG_GIT_PROTOCOL_HTTP="http://"
-        MYSHELLCONFIG_GIT_PROTOCOL_SSH="git@"
-        [ -z "${MYSHELLCONFIG_GIT_SERVER+x}" ] && MYSHELLCONFIG_GIT_SERVER="git.schuerz.at"
-        [ -z "${MYSHELLCONFIG_GIT_REPO_NAME+x}" ] && MYSHELLCONFIG_GIT_REPO_NAME="$(basename $MYSHELLCONFIG_BASE).git"
-        [ -z "${MYSHELLCONFIG_GIT_REPO_PATH_HTTP+x}" ] && MYSHELLCONFIG_GIT_REPO_PATH_HTTP="/public/"
-        [ -z "${MYSHELLCONFIG_GIT_REPO_PATH_SSH+x}" ] && MYSHELLCONFIG_GIT_REPO_PATH_SSH=":public/"
-        [ -z "${MYSHELLCONFIG_GIT_REPO_PATH_GIT+x}" ] && MYSHELLCONFIG_GIT_REPO_PATH_GIT="/public/"
-
-        MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT="${MYSHELLCONFIG_GIT_PROTOCOL_GIT}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_GIT}"
-        MYSHELLCONFIG_GIT_REMOTE_PUBLIC_SSH="${MYSHELLCONFIG_GIT_PROTOCOL_SSH}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_SSH}"
-        MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP="${MYSHELLCONFIG_GIT_PROTOCOL_HTTP}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_HTTP}"
-        MYSHELLCONFIG_GIT_REMOTE_PUBLIC_DEFAULT="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT}"
-
-        MYSHELLCONFIG_GIT_REMOTE_DEFAULT="${MYSHELLCONFIG_GIT_PROTOCOL_GIT}${MYSHELLCONFIG_GIT_SERVER}${MYSHELLCONFIG_GIT_REPO_PATH_GIT}"
-
-        # If MYSHELLCONFIG_GIT_REMOTE is set in ~/.bashrc before sourcing this file, take value from ~/.bashrc
-        # If set MYSHELLCONFIG_GIT_REMOTE_PROTOCOL in ~/.bashrc before sourcing this file, you cange choose one of the above 
-        # defined values for a specific host
-
-        if [ -z ${MYSHELLCONFIG_GIT_REMOTE+x} ]; then
-            case $MYSHELLCONFIG_GIT_REMOTE_PROTOCOL in
-                git)
-                    MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT}"
-                    ;;
-                ssh)
-                    MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_SSH}"
-                    ;;
-                http)
-                    MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}"
-                    ;;
-                *)
-                    MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_DEFAULT}"
-                    ;;
-                esac
-                MYSHELLCONFIG_GIT_REMOTE="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC}${MYSHELLCONFIG_GIT_REPO_NAME}"
-        fi
-
-        if [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ]; then
-            case $MYSHELLCONFIG_GIT_REMOTE_PUSH_PROTOCOL in
-                git)
-                    MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_GIT}"
-                    ;;
-                ssh)
-                    MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_SSH}"
-                    ;;
-                http)
-                    MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}"
-                    ;;
-                *)
-                    MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_DEFAULT}"
-                    ;;
-                esac
-                MYSHELLCONFIG_GIT_REMOTE_PUSH=${MYSHELLCONFIG_GIT_REMOTE_PUSH_PUBLIC}${MYSHELLCONFIG_GIT_REPO_NAME}
-        fi
-
-        [ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME+x}" ] && export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
-        [ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
-        # If TAG is set, checkout is always headless. 
-        [ -z "${MYSHELLCONFIG_GIT_TAG:+x}" ] || { export MYSHELLCONFIG_GIT_BRANCH=${MYSHELLCONFIG_GIT_TAG}; export MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=""; }
-
-        #GIT_SSH_PATH="/srv/repos"
-
-        case $TERM in
-            *term*)
-
-                if [ -d "${MYSHELLCONFIG_BASE}" -a $($SGIT status 1>/dev/null 2>&1; echo $?) -eq 0 ]; then
-                    [ -d "${MYSHELLCONFIG_LOGDIR}" ] || mkdir -p "${MYSHELLCONFIG_LOGDIR}"
-                    if ! $SGIT rev-parse --git-dir > /dev/null 2>&1 ; then
-                        echo "Init ${MYSHELLCONFIG_BASE} as git-repo" >&2
-                        $SGIT init
-                    fi
-                    
-                    # Update Userinformations for git
-                    $SGIT config user.email "${USERNAME}"
-                    $SGIT config user.name "${FULLNAME}"
-
-                    # set upstream only if not detached
-                    [ $($SGIT rev-parse --abbrev-ref HEAD) != "HEAD" ] && $SGIT branch --set-upstream-to=${MYSHELLCONFIG_GIT_REMOTE_NAME}/$($SGIT rev-parse --abbrev-ref HEAD)
-
-                    # sync repo with origin if git is reachable 
-                    if ckrepo ; then
-                        sync_config
-                        . ${MYSHELLCONFIG_BASE}/functions.sh
-                        create_symlinks "$MYSHELLCONFIG_BASE"
-                    else 
-                        echo "${MYSHELLCONFIG_GIT_SERVER}" not reachable >&2;
-                        echo profile not syncing >&2;
-                    fi
-
-                else
-                    echo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
-
-                    if $( timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" ); then
-                        :
-                    else
-                        MYSHELLCONFIG_GIT_REMOTE="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}${MYSHELLCONFIG_GIT_REPO_NAME}"
-                        echo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
-                        timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" || return 1 2>/dev/null || exit 1
-                    fi
 
 
+        # source git-sync part of myshellconfig
+        . "${MYSHELLCONFIG_BASE}/myshell_git_sync"
 
-                    [ -d "${MYSHELLCONFIG_BASE}" ] && { echo create ${MYSHELLCONFIG_LOGDIR} >&2; mkdir -p "${MYSHELLCONFIG_LOGDIR}"; }
+        # source loading defaults part of myshellconfig
+        . "${MYSHELLCONFIG_BASE}/myshell_load_defaults"
 
-                    $SGIT config user.email "${USERNAME}"
-                    $SGIT config user.name "${FULLNAME}"
-
-                    # Initialize Vundle as preconfigured Submodule
-                    #$SGIT submodule update --init --recursive
-                    #$SGIT submodule foreach 'git checkout master'
-
-                    echo "sync config" >&2
-                    sync_config
-                    . ${MYSHELLCONFIG_BASE}/functions.sh
-                    echo "config synced, functions.sh sourced" >&2
-                    create_symlinks "$MYSHELLCONFIG_BASE"
-
-                    # Install vim Plugins
-                    #echo "Run Vim, and in Vim run :PluginInstall to install all Plugins"
-                    vim -c "PluginInstall" -c ":qa!"
-                fi
-                [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ] || $SGIT remote set-url --push ${MYSHELLCONFIG_GIT_REMOTE_NAME} "${MYSHELLCONFIG_GIT_REMOTE_PUSH}" 
-    #            cd ${HOME}
-                ;;
-            *screen*)
-                echo "I'm in sceen/tmux now" >&2
-                ;;
-            *dumb*)
-                echo "Run with dumb terminal" 1>&2
-                ;;
-        esac
-
-        if [ -e ${MYSHELLCONFIG_BASE}/functions.sh ]; then
-            . ${MYSHELLCONFIG_BASE}/functions.sh
-        else
-            return
-        fi
-
-
-
-        ######################################################################################
-        # ls is not in color on all systems
-        export LS_OPTIONS='--color=auto'
-        eval "`dircolors`"
-
-        #######################################################################################
-        # User specific aliases and function
-
-
-        if [ -d "${HOME}/bin" ] ; then
-            pathmunge "${HOME}/bin"
-            export PATH
-        fi
-
-        if [ -d "${MYSHELLCONFIG_BASE}/bin" ] ; then
-            pathmunge "${MYSHELLCONFIG_BASE}/bin"
-            export PATH
-        fi
-
-        if [ -d "${MYSHELLCONFIG_BASE}/git-credential-pass" ] ; then
-            pathmunge "${MYSHELLCONFIG_BASE}/git-credential-pass"
-            export PATH
-        fi
-
-        if [ -f "${MYSHELLCONFIG_BASE}/aliases" ]; then
-            . "${MYSHELLCONFIG_BASE}/aliases"
-        fi
-
-        if [ -f ~/.aliases ]; then
-            . ~/.aliases
-        fi
-
-        if [ -f "${MYSHELLCONFIG_BASE}/PS1" ]; then
-            . "${MYSHELLCONFIG_BASE}/PS1"
-        fi
-
-        if [ -e "${MYSHELLCONFIG_BASH_COMPLETION}" ]; then
-            for i in $( ls "${MYSHELLCONFIG_BASH_COMPLETION}" ); do
-                . "${MYSHELLCONFIG_BASH_COMPLETION}/${i}"
-            done
-        fi
-
-
-        #########################################################################################
-
-
-        # Go HOME
-        #cd ${HOME}
-
-        # Create and link Work-Dir of the Day
-
-        WDOTD=$(date "+${HOME}/archive/work/%Y/%m/work_%Y%m%d")
-        [ -e $WDOTD ] || mkdir -pv "${WDOTD}"
-        if [[ ( -e "${HOME}/WORK" && -h "${HOME}/WORK" ) ||  ! -e "${HOME}/WORK" ]] ; then
-            ln -svnf "${WDOTD}" "${HOME}/WORK"
-        else
-            echo "${HOME}/WORK exists and is real directory" 
-        fi
-
-
-
-        echo "bashrc_add sourced" 1>&2
-
-        if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
-            cat << EOF
-
-    "User: $USER - $UID"
-
-    Starting or resuming screen session
-    Press CTRL+C to cancel screen startup
-
-EOF
-                sleep 1
-                #screen -UxR
-                tmux attach-session
-        fi
-
-        unset -f pathmunge
-
-    else
-        # run with temporary config
-
-        case $TERM in
-            *screen*)
-                echo BASHRC: $BASHRC -> source it
-                #[ -e $BASHRC ] && . "$BASHRC"
-                if [ ! -z ${BASHRC+x} ]; then
-                    if [ -e $BASHRC ] ; then
-                        exec bash --rcfile "$BASHRC" -i /dev/null
-                    else
-                        exec bash -i
-                    fi
-                else
-                    exec bash -i
-                fi
-
-                ;;
-        esac
-
-    fi
 
 fi
 
