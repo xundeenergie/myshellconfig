@@ -43,8 +43,7 @@ if ! $SSHS; then
         done
     fi
 
-    . 
-    if [ -f "${MYSHELLCONFIG_BASE}/PS1" ]; then
+    if [ -f "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" ]; then
         . "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig"
     fi
 
