@@ -1,6 +1,7 @@
 #Persönliche Aliases
 
 # usefull commands
+#alias fuck='f() { cmd=$1; shift; cmd=$(alias $cmd); echo sudo $cmd $@; }; f $(history -p \!\!)'
 alias fuck='sudo $(history -p \!\!)'
 alias wosis='which $(history -p \!\!)' 
 alias fix='reset; stty sane; tput rs1; clear; echo -e "\033c"' # Fix terminal aber binary output
