@@ -10,4 +10,4 @@ if [ -f ~/.aliases ]; then
     . ~/.aliases
 fi
 
-WORK=~/Work
+export WORK=~/Work
