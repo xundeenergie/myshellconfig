@@ -59,6 +59,8 @@ EOF
             fi
             ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
             printf '%s\n' "${nok}synced" 1>&2
+            [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGFILE}"
+
         else
             echo "git not installed, no configuration possible, please install git" >&2
         fi
