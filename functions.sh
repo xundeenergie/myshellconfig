@@ -447,7 +447,20 @@ gnome-shell-extensions-enable-defaults () {
 }
 
 checkbkp () {
-    if ping -c 1 backup.vpn >/dev/null 2>&1 ; then
+    if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
+        local SSH="/usr/bin/ssh"
+        local CMD="$SSH -T backup.vpn"
+        $CMD /bin/bash << EOF
+        sudo find /srv/nfs/backup -mindepth 1 -maxdepth 1|grep -v -e "git$\|git-backup-repos"|while read i;do printf "%-30s%s\\n" "\$i" \$(ls \$i|tail -n1);done|sort -k 2.1 -r
+EOF
+    else
+        echo "backup.vpn is not reachable -> exit"
+        return 1
+        
+    fi
+}
+checkbkp-full () {
+    if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
         local SSH="/usr/bin/ssh"
         local CMD="$SSH -T backup.vpn"
         $CMD /bin/bash << EOF
