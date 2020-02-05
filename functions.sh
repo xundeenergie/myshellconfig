@@ -437,7 +437,7 @@ function tmuxx() {
 }
 
 
-gnome-shell-extensions-enable-defaults() { 
+function gnome-shell-extensions-enable-defaults() { 
     if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
         for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
             #gnome-shell-extension-tool -e $i;
@@ -446,7 +446,7 @@ gnome-shell-extensions-enable-defaults() {
     fi
 }
 
-checkbkp() {
+function checkbkp() {
     if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
         local SSH="/usr/bin/ssh"
         local CMD="$SSH -T backup.vpn"
@@ -459,7 +459,7 @@ EOF
         
     fi
 }
-checkbkp-full() {
+function checkbkp-full() {
     if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
         local SSH="/usr/bin/ssh"
         local CMD="$SSH -T backup.vpn"
