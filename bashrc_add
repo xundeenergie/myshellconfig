@@ -59,7 +59,7 @@ EOF
             fi
             ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
             printf '%s\n' "${nok}synced" 1>&2
-            [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGFILE}"
+            [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
 
         else
             echo "git not installed, no configuration possible, please install git" >&2
@@ -68,11 +68,11 @@ EOF
 
 
 
-        # source git-sync part of myshellconfig
-        . "${MYSHELLCONFIG_BASE}/myshell_git_sync"
+    # source git-sync part of myshellconfig
+    . "${MYSHELLCONFIG_BASE}/myshell_git_sync"
 
-        # source loading defaults part of myshellconfig
-        . "${MYSHELLCONFIG_BASE}/myshell_load_defaults"
+    # source loading defaults part of myshellconfig
+    . "${MYSHELLCONFIG_BASE}/myshell_load_defaults"
 
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     --8<--- end ---------------- $(date) ---------------8<--
