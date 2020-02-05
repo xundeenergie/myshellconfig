@@ -72,9 +72,9 @@ EOF
         # source loading defaults part of myshellconfig
         . "${MYSHELLCONFIG_BASE}/myshell_load_defaults"
 
-fi
-
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     --8<--- end ---------------- $(date) ---------------8<--
 
 EOF
+fi
+
