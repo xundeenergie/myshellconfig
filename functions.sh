@@ -29,6 +29,7 @@ create_symlinks() {
     #ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
     ln -sf "${MYSHELLCONFIG_BASE}/tmux" ~/.tmux
     ln -sf "${MYSHELLCONFIG_BASE}/tmux/tmux.conf" ~/.tmux.conf
+    mkdir -pv ~/.config/systemd/user/default.target.wants
     ln -sf "${MYSHELLCONFIG_BASE}/systemd/workdir.service" ~/.config/systemd/user/default.target.wants/workdir.service
 
     # Configure to use githooks in .githooks, not in standardlocation .git/hooks
