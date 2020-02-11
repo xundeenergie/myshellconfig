@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 -u
+#!/usr/bin/env -S  python3 -u
 
 from __future__ import with_statement
 
@@ -9,7 +9,14 @@ import errno
 from datetime import datetime, timedelta
 import time
 
-from fuse import FUSE, FuseOSError, Operations
+try:
+    from fuse import FUSE, FuseOSError, Operations
+except:
+    try:
+        from fusepy import FUSE, FuseOSError, Operations
+    except:
+        print("please install fusepy")
+        raise errno.ENOENT
 
 
 class Passthrough(Operations):
