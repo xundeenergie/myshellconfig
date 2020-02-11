@@ -22,7 +22,7 @@ except:
 class Passthrough(Operations):
     def __init__(self, root):
         self.root = root
-        self.timeoffset = 2
+        self.timeoffset = 2 #hours
 
     # Helpers
     # =======
@@ -35,8 +35,6 @@ class Passthrough(Operations):
                                                    "workdir",
                                                    today.strftime("%Y-%m-%d"))),
                             partial)
- #       path = os.path.join(check_dir(os.path.join(self.root, "workdir",
- #                                                  str(time.strftime("%Y-%m-%d-%M", time.gmtime())))), partial)
 
         return path
 
