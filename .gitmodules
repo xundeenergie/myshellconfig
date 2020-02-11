@@ -15,4 +15,5 @@
         url = http://git.schuerz.at/public/git-credential-pass.git
 [submodule "workdirfs"]
 	path = workdirfs
-	url = git://git.schuerz.at/public/workdirfs.git
+        url = https://github.com/xundeenergie/workdirfs.git
+        #url = git://git.schuerz.at/public/workdirfs.git
