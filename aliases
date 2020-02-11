@@ -46,6 +46,8 @@ alias gomusic='[ -e $(xdg-user-dir MUSIC) ] && cd $(xdg-user-dir MUSIC)'
 alias gopublic='[ -e $(xdg-user-dir PUBLICSHARE) ] && cd $(xdg-user-dir PUBLICSHARE)'
 alias gotempl='[ -e $(xdg-user-dir TEMPLATES) ] && cd $(xdg-user-dir TEMPLATES)'
 alias govideo='[ -e $(xdg-user-dir VIDEOS) ] && cd $(xdg-user-dir VIDEOS)'
+alias gowork='[ -e $(xdg-user-dir WORK) ] && cd $(xdg-user-dir WORK)'
+alias goarchive='[ -e $(xdg-user-dir ARCHIVE) ] && cd $(xdg-user-dir ARCHIVE)'
 
 # some special locations
 alias godebian='cd ~/debian'

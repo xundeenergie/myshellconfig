@@ -29,7 +29,7 @@ create_symlinks() {
     #ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
     ln -sf "${MYSHELLCONFIG_BASE}/tmux" ~/.tmux
     ln -sf "${MYSHELLCONFIG_BASE}/tmux/tmux.conf" ~/.tmux.conf
-    mkdir -pv ~/.config/systemd/user/default.target.wants
+    #mkdir -pv ~/.config/systemd/user/default.target.wants
     #ln -sf "${MYSHELLCONFIG_BASE}/systemd/workdir.service" ~/.config/systemd/user/default.target.wants/workdir.service
     #ln -sf "${MYSHELLCONFIG_BASE}/systemd/workdir.service" ~/.config/systemd/user/workdir.service
 
