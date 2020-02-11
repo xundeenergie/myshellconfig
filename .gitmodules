@@ -13,3 +13,6 @@
 [submodule "git-credential-pass"]
         path = git-credential-pass
         url = http://git.schuerz.at/public/git-credential-pass.git
+[submodule "workdir-fuse"]
+	path = workdir-fuse
+	url = git@git.schuerz.at:public/workdir-fuse.git
