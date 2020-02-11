@@ -94,34 +94,34 @@ fi
 
 # Create and link Work-Dir of the Day
 
-if [ $(id -u) -ne 0 ]; then
-    ARCHIVSUBPATH="archive/work"
-    ARCHIVPATH="${HOME}/${ARCHIVSUBPATH}"
-    WDOTD=$(date "+${ARCHIVPATH}/%Y/%m/work_%Y%m%d")
-    WORKDIR="${HOME}/Work"
-
-    # First cleanup all empty Archivdirectories for workdir
-    for i in $(find ${ARCHIVPATH} -maxdepth 3 -type d |grep -v "$WDOTD" ); do
-        if [ ! "$(ls -A $i)" ]; then
-            echo "DIR $i is empty -> remove it" >&2
-            rm -vr "$i" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
-        fi
-    done
-    
-    # Create workdir of the day, if not existing
-    [ -e $WDOTD ] || mkdir -pv "${WDOTD}" >>${MYSHELLCONFIG_LOGFILE} 
-
-    # Link $WORKDIR to $WDOTD and set alias
-    if [[ ( -e "${WORKDIR}" && -h "${WORKDIR}" ) ||  ! -e "${WORKDIR}" ]] ; then
-        ln -svnf "${WDOTD}" "${WORKDIR}" >>${MYSHELLCONFIG_LOGFILE}
-        alias gowork='cd "${WORKDIR}"'
-    else
-        echo "${WORKDIR} exists and is real directory" |tee -a ${MYSHELLCONFIG_LOGFILE} 2>&1
-        alias gowork='echo "${WORKDIR} is not configurable, see ${MYSHELLCONFIG_LOGFILE}'
-    fi
-
-    unset ARCHIVPATH ARCHIVSUBPATH 
-fi
+#if [ $(id -u) -ne 0 ]; then
+#    ARCHIVSUBPATH="archive/work"
+#    ARCHIVPATH="${HOME}/${ARCHIVSUBPATH}"
+#    WDOTD=$(date "+${ARCHIVPATH}/%Y/%m/work_%Y%m%d")
+#    WORKDIR="${HOME}/Work"
+#
+#    # First cleanup all empty Archivdirectories for workdir
+#    for i in $(find ${ARCHIVPATH} -maxdepth 3 -type d |grep -v "$WDOTD" ); do
+#        if [ ! "$(ls -A $i)" ]; then
+#            echo "DIR $i is empty -> remove it" >&2
+#            rm -vr "$i" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
+#        fi
+#    done
+#    
+#    # Create workdir of the day, if not existing
+#    [ -e $WDOTD ] || mkdir -pv "${WDOTD}" >>${MYSHELLCONFIG_LOGFILE} 
+#
+#    # Link $WORKDIR to $WDOTD and set alias
+#    if [[ ( -e "${WORKDIR}" && -h "${WORKDIR}" ) ||  ! -e "${WORKDIR}" ]] ; then
+#        ln -svnf "${WDOTD}" "${WORKDIR}" >>${MYSHELLCONFIG_LOGFILE}
+#        alias gowork='cd "${WORKDIR}"'
+#    else
+#        echo "${WORKDIR} exists and is real directory" |tee -a ${MYSHELLCONFIG_LOGFILE} 2>&1
+#        alias gowork='echo "${WORKDIR} is not configurable, see ${MYSHELLCONFIG_LOGFILE}'
+#    fi
+#
+#    unset ARCHIVPATH ARCHIVSUBPATH 
+#fi
 
 
 
