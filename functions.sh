@@ -29,6 +29,7 @@ create_symlinks() {
     #ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
     ln -sf "${MYSHELLCONFIG_BASE}/tmux" ~/.tmux
     ln -sf "${MYSHELLCONFIG_BASE}/tmux/tmux.conf" ~/.tmux.conf
+    ln -sf "${MYSHELLCONFIG_BASE}/systemd/workdir.service" ~/.config/systemd/user/default.target.wants/workdir.service
 
     # Configure to use githooks in .githooks, not in standardlocation .git/hooks
     $SGIT config core.hooksPath .githooks
@@ -36,6 +37,8 @@ create_symlinks() {
     # don't know, why i do it here. TODO: Check it
     find .git/hooks -type l -exec rm {} \; && find .githooks -type f -exec ln -sf ../../{} .git/hooks/ \;
 
+    systemctl --user daemon-reload
+    systemctl --user restart workdir.service
     cd ~-
 
 }
