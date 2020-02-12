@@ -123,7 +123,9 @@ fi
 #    unset ARCHIVPATH ARCHIVSUBPATH 
 #fi
 
-
+# Disable Ctrl+s to freeze terminal
+# Source https://www.digitalocean.com/community/tutorials/how-to-use-bash-history-commands-and-expansions-on-a-linux-vps
+stty -ixon
 
 echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
 #echo "bashrc_add sourced" >&2
