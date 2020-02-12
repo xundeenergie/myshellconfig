@@ -6,6 +6,10 @@
 
 export TMUX_SESSION_DIRS SETPROXY_CREDS_DIRS KERBEROS_CONFIG_DIRS
 
+cpb() {
+    scp "$1" ${SSH_CLIENT%% *}:~/Work
+}
+
 sudo() {
     local SUDO
     SUDO=$( if [ -e /bin/sudo ]; then echo /bin/sudo; else echo /usr/bin/sudo; fi )
