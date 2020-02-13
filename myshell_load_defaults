@@ -129,7 +129,7 @@ stty -ixon
 export HISTCONTROL=erasedups,ignorespace,ignoredups
 export HISTIGNORE="ls:l:cd:exit:pwd:date:"
 export HISTTIMEFORMAT='%F %T  '
-export HIStSIZE=999999
+export HISTSIZE=999999
 
 echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
 #echo "bashrc_add sourced" >&2
