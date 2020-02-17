@@ -318,6 +318,7 @@ EOF
     fi
 }
 
+
 VIMRC="${MYSHELLCONFIG_BASE}/vimrc"
 
 svi () { 
