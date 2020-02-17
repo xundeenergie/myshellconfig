@@ -10,6 +10,7 @@ alias vilastcatfile='vim $(history -p \!cat:$:t)'
 alias vio='vim $(history -p \!less:$:t)'
 alias viless='vim $(history -p \!less:$:t)'
 alias cdlastfiledir='cd $(history -p \!\!:$:h)'
+alias ssh='function f() { trap "reset; stty sane; tput rs1; clear; echo -e \"\033c\"" EXIT ; ssh $@; }; f $@'
 
 
 
