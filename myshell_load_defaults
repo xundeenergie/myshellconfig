@@ -127,7 +127,7 @@ fi
 # Source https://www.digitalocean.com/community/tutorials/how-to-use-bash-history-commands-and-expansions-on-a-linux-vps
 stty -ixon
 export HISTCONTROL=erasedups:ignorespace:ignoredups
-export HISTIGNORE="ls:l:cd:exit:pwd:date:"
+export HISTIGNORE="ls:l:cd:exit:pwd:date:mencfs:"
 export HISTTIMEFORMAT='%F %T  '
 export HISTSIZE=999999
 
