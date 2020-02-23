@@ -100,7 +100,7 @@ alias u=umount
 alias testmail='echo testemail von ${USER}@${HOSTNAME} am $(date)|mail -s "TESTEMAIL ${USER}@${HOSTNAME} $(date)"'
 
 # logging
-alias tailmail='sudo tail -f /var/log/mail.log /var/log/exim4/mainlog /var/log/exim4/rejectlog /var/log/exim4/paniclog'
+alias tailexim='sudo tail -f /var/log/mail.log /var/log/exim4/mainlog /var/log/exim4/rejectlog /var/log/exim4/paniclog'
 alias tailmail='sudo journalctl -f -u exim4.service -u dovecot.service -u rspamd.service -u getmail*'
 alias taildemsg='sudo watch -n1 "dmesg|tail -n20"'
 alias tailsys='sudo tail -f /var/log/syslog /var/log/dmesg'
@@ -121,6 +121,8 @@ alias unetbootin='export QT_X11_NO_MITSHM=1 unetbootin'
 alias vi='/usr/bin/vim'
 alias vlc='VDPAU_DRIVER=va_gl vlc'
 alias tmux='tmux -f ~/.tmux.conf'
+alias youtube-dl-whole-user="youtube-dl --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
+alias youtube-dl-whole-playlist="youtube-dl --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
 
 # rock64
 alias rock64='sudo  minicom -D /dev/ttyUSB0 --color=on'
