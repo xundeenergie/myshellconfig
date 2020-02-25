@@ -38,10 +38,15 @@ EOF
     # define functions
     ckrepo () {
         # check if remote repo is reachable
-        if $( timeout --foreground "${MYSHELLCONFIG_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
+        if $MYSHELLCONFIG_NOSYNC; then
+            echo "no sync allowed from config" >&2
             return 0
-        else 
-            return 1
+        else
+            if $( timeout --foreground "${MYSHELLCONFIG_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
+                return 0
+            else 
+                return 1
+            fi
         fi
 
     }
