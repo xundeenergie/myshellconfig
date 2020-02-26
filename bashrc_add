@@ -27,6 +27,7 @@ if [[ $- = *i* ]] ; then
     [ -z "${MYSHELLCONFIG_GIT_TIMEOUT+x}" ] && MYSHELLCONFIG_GIT_TIMEOUT=5s
     [ -z "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT+x}" ] && MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT=20s
     MYSHELLCONFIG_BASH_COMPLETION="${HOME}/${MYSHELLCONFIG_SUBPATH}/bash_completion.d"
+    [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ] && MYSHELLCONFIG_GIT_SYNC=true
 
     SGIT="git -C ${MYSHELLCONFIG_BASE}" 
     export MYSHELLCONFIG_BASE MYSHELLCONFIG_LOGDIR MYSHELLCONFIG_LOGFILE SGIT MYSHELLCONFIG_VIM_PLUGINS
@@ -52,22 +53,26 @@ EOF
     }
 
     sync_config () {
-        local nok=""
-        local gco=""
-        if which git >/dev/null; then
-            echo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 1>&2
-            # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
-            if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
-                gco="-h"
-            else
-                gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
-            fi
-            ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
-            printf '%s\n' "${nok}synced" 1>&2
-            [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
+        if $MYSHELLCONFIG_GIT_SYNC; then
+            local nok=""
+            local gco=""
+            if which git >/dev/null; then
+                echo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 1>&2
+                # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
+                if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
+                    gco="-h"
+                else
+                    gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
+                fi
+                ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
+                printf '%s\n' "${nok}synced" 1>&2
+                [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
 
+            else
+                echo "git not installed, no configuration possible, please install git" >&2
+            fi
         else
-            echo "git not installed, no configuration possible, please install git" >&2
+            echo "Not syncing profile in case of configuration"
         fi
     }
 

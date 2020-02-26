@@ -131,7 +131,6 @@ if ! $SSHS; then
                 vim -c "PluginInstall" -c ":qa!"
             fi
             [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ] || $SGIT remote set-url --push ${MYSHELLCONFIG_GIT_REMOTE_NAME} "${MYSHELLCONFIG_GIT_REMOTE_PUSH}" 
-    #            cd ${HOME}
             ;;
         *screen*)
             echo "I'm in sceen/tmux now" >&2
