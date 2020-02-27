@@ -1,2 +1,2 @@
-. /usr/share/bash-completion/completions/ssh
+#. /usr/share/bash-completion/completions/ssh
 shopt -u hostcomplete && complete -F _ssh sshserverconfig
