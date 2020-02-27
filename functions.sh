@@ -72,6 +72,8 @@ setproxy () {
         source "${CONFIG}"
         echo "sourced"
         export PROXY_CREDS="${PROXY_USER}:${PROXY_PASS}@"
+        export proxy_user=$PROXY_USER
+        export proxy_pass=$PROXY_PASS
     else
         echo "${CONFIG} not existing"
         export PROXY_CREDS=""
@@ -195,8 +197,10 @@ ${KERBEROS_PASSWORD}
 }
 
 unsetproxy () {
-    unset {http,https,fpt}_proxy
+    unset {HTTP,HTTPS,FPT}_PROXY
     unset PROXY_{CREDS,USER,PASS,SERVER,PORT}
+    unset {http,https,fpt}_proxy
+    unset proxy_{creds,user,pass,server,port}
 }
 
 git-mergedetachedheadtomaster () {
