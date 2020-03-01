@@ -121,6 +121,7 @@ alias unetbootin='export QT_X11_NO_MITSHM=1 unetbootin'
 alias vi='/usr/bin/vim'
 alias vlc='VDPAU_DRIVER=va_gl vlc'
 alias tmux='tmux -f ~/.tmux.conf'
+alias youtube-dl-whole-video="youtube-dl --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
 alias youtube-dl-whole-user="youtube-dl --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
 alias youtube-dl-whole-playlist="youtube-dl --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
 
