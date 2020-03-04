@@ -496,7 +496,7 @@ turnoffbeep() {
 changebeep() {
     case $1 in
         none)
-            style=visible
+            style=none
             ;;
         visible)
             style=visible
