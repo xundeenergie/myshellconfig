@@ -11,3 +11,5 @@ if [ -f ~/.aliases ]; then
 fi
 
 export WORK=~/Work
+
+turnoffbeep
