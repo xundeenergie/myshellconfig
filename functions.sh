@@ -488,3 +488,10 @@ EOF
         
     fi
 }
+
+turnoffbeep() {
+    line='set bell-style none'
+    file=~/.inputrc
+    grep -qxF "$line" "$file" || echo "$line" >> "$file"
+}
+#EOF
