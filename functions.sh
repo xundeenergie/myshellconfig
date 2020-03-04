@@ -490,27 +490,50 @@ EOF
 }
 
 turnoffbeep() {
-    line='set bell-style none'
+    changebeep none
+}
+
+changebeep() {
+    case $1 in
+        none)
+            style=visible
+            ;;
+        visible)
+            style=visible
+            ;;
+        audible)
+            style=audible
+            ;;
+        *)
+            echo "usage: changebeep [none|visible|audible]"
+            return 1
+            ;;
+    esac
+    line='set bell-style'
     file=~/.inputrc
-    [ -e "$file" ] && grep -qxF "$line" "$file" || echo "$line" >> "$file"
+    if [ -e "${file}" ] ; then
+        sed -i -e "/$line/d" "${file}"
+    fi
+    echo "${line} ${style}" >> "${file}"
+    return 0
 }
 
 turnoffconfigsync() {
     line='MYSHELLCONFIG_GIT_SYNC='
     file=~/.bashrc
-    if [ -e "$file" ] ; then
-        sed -i -e "/$line/d" "${file}"
+    if [ -e "${file}" ] ; then
+        sed -i -e "/${line}/d" "${file}"
     fi
-    sed -i -e "/#MYSHELLCONFIG-start/i${line}false" "$file"
+    sed -i -e "/#MYSHELLCONFIG-start/i${line}false" "${file}"
 }
 
 turnonconfigsync() {
     line='MYSHELLCONFIG_GIT_SYNC='
     file=~/.bashrc
-    if [ -e "$file" ] ; then
-        sed -i -e "/$line/d" "${file}"
+    if [ -e "${file}" ] ; then
+        sed -i -e "/${line}/d" "${file}"
     fi
-    sed -i "/#MYSHELLCONFIG-start/i${line}true" "$file"
+    sed -i "/#MYSHELLCONFIG-start/i${line}true" "${file}"
 }
 
 #EOF
