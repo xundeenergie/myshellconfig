@@ -44,6 +44,7 @@ if ! $SSHS; then
                 ;;
             file)
                 MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_FILE}"
+                MYSHELLCONFIG_GIT_SERVER="${MYSHELLCONFIG_GIT_REPO_PATH_FILE}"
                 ;;
             *)
                 MYSHELLCONFIG_GIT_REMOTE_PUBLIC="${MYSHELLCONFIG_GIT_REMOTE_DEFAULT}"
