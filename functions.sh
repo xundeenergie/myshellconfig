@@ -494,4 +494,23 @@ turnoffbeep() {
     file=~/.inputrc
     [ -e "$file" ] && grep -qxF "$line" "$file" || echo "$line" >> "$file"
 }
+
+turnoffconfigsync() {
+    line='MYSHELLCONFIG_GIT_SYNC='
+    file=~/.bashrc
+    if [ -e "$file" ] ; then
+        sed -i -e "/$line/d" "${file}"
+    fi
+    sed -i -e "/#MYSHELLCONFIG-start/i${line}false" "$file"
+}
+
+turnonconfigsync() {
+    line='MYSHELLCONFIG_GIT_SYNC='
+    file=~/.bashrc
+    if [ -e "$file" ] ; then
+        sed -i -e "/$line/d" "${file}"
+    fi
+    sed -i "/#MYSHELLCONFIG-start/i${line}true" "$file"
+}
+
 #EOF
