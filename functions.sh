@@ -492,6 +492,6 @@ EOF
 turnoffbeep() {
     line='set bell-style none'
     file=~/.inputrc
-    grep -qxF "$line" "$file" || echo "$line" >> "$file"
+    [ -e "$file" ] && grep -qxF "$line" "$file" || echo "$line" >> "$file"
 }
 #EOF
