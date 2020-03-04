@@ -1,2 +1,2 @@
-. /usr/share/bash-completion/completions/ssh
+[ -e . /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 shopt -u hostcomplete && complete -F _ssh sshmyshellconfig
