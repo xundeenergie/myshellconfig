@@ -557,10 +557,17 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
     sudo mkdir -p '/etc/dconf/db/local.d'
     if [ -e "${file}" ] ; then
         sudo sed -i -e "/${line}/d" "${file}"
-        sudo sed -i -e "/\[org\/gnome\/shell\]/d" "${file}"
+        #sudo sed -i -e "/\[org\/gnome\/shell\]/d" "${file}"
     fi
     local EXTENSIONS=$(gsettings get org.gnome.shell enabled-extensions)
-    echo "[org/gnome/shell]" | sudo tee -a "${file}"
-    echo "${EXTENSIONS}" | sudo tee -a "${file}"
+    line="[org/gnome/shell]"
+    command="grep -xqF -- ${line} ${file} || echo $line >> $file"
+    sudo sh -c "$command"
+
+    local line='enabled-extensions='
+    echo "Update or add extensions"
+    #echo "${line}${EXTENSIONS}" | sudo tee -a "${file}"
+    sudo sed -i "/\[org\/gnome\/shell\]/a${line}${EXTENSIONS}" "${file}"
+    sudo dconf update
 }
 #EOF
