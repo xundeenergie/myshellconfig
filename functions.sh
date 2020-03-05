@@ -450,15 +450,6 @@ function tmuxx() {
 }
 
 
-function gnome-shell-extensions-enable-defaults() { 
-    if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
-        for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
-            #gnome-shell-extension-tool -e $i;
-            gnome-extensions enable $i;
-        done; 
-    fi
-}
-
 function checkbkp() {
     if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
         local SSH="/usr/bin/ssh"
@@ -537,10 +528,20 @@ turnonconfigsync() {
     sed -i "/#MYSHELLCONFIG-start/i${line}true" "${file}"
 }
 
+function gnome-shell-extensions-enable-defaults() { 
+    if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
+        for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
+            #gnome-shell-extension-tool -e $i;
+            gnome-extensions enable $i;
+        done; 
+    fi
+}
+
 gnome-shell-extensions-make-actual-permanent-systemwide() {
     # https://people.gnome.org/~pmkovar/system-admin-guide/extensions-enable.html
     # https://askubuntu.com/questions/359958/extensions-are-turned-off-after-reboot
     local file="/etc/dconf/profile/user"
+    sudo mkdir -p "/etc/dconf/profile/"
     local line='user-db:user'
     if [ -e "${file}" ] ; then
         echo "$command"
@@ -553,6 +554,7 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
     fi
     local line='enabled-extensions='
     local file='/etc/dconf/db/local.d/00-extensions'
+    sudo mkdir -p '/etc/dconf/db/local.d'
     if [ -e "${file}" ] ; then
         sudo sed -i -e "/${line}/d" "${file}"
         sudo sed -i -e "/\[org\/gnome\/shell\]/d" "${file}"
