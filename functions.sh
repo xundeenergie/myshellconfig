@@ -494,6 +494,7 @@ turnoffbeep() {
 }
 
 changebeep() {
+    local style
     case $1 in
         none)
             style=none
@@ -509,8 +510,8 @@ changebeep() {
             return 1
             ;;
     esac
-    line='set bell-style'
-    file=~/.inputrc
+    local line='set bell-style'
+    local file=~/.inputrc
     if [ -e "${file}" ] ; then
         sed -i -e "/$line/d" "${file}"
     fi
@@ -519,8 +520,8 @@ changebeep() {
 }
 
 turnoffconfigsync() {
-    line='MYSHELLCONFIG_GIT_SYNC='
-    file=~/.bashrc
+    local line='MYSHELLCONFIG_GIT_SYNC='
+    local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
     fi
@@ -528,12 +529,36 @@ turnoffconfigsync() {
 }
 
 turnonconfigsync() {
-    line='MYSHELLCONFIG_GIT_SYNC='
-    file=~/.bashrc
+    local line='MYSHELLCONFIG_GIT_SYNC='
+    local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
     fi
     sed -i "/#MYSHELLCONFIG-start/i${line}true" "${file}"
 }
 
+gnome-shell-extensions-make-actual-permanent-systemwide() {
+    # https://people.gnome.org/~pmkovar/system-admin-guide/extensions-enable.html
+    # https://askubuntu.com/questions/359958/extensions-are-turned-off-after-reboot
+    local file="/etc/dconf/profile/user"
+    local line='user-db:user'
+    if [ -e "${file}" ] ; then
+        echo "$command"
+        sudo sh -c "$command"
+    fi
+    local line='system-db:local'
+    if [ -e "${file}" ] ; then
+        command="grep -xqF -- ${line} ${file} || echo $line >> $file"
+        sudo sh -c "$command"
+    fi
+    local line='enabled-extensions='
+    local file='/etc/dconf/db/local.d/00-extensions'
+    if [ -e "${file}" ] ; then
+        sudo sed -i -e "/${line}/d" "${file}"
+        sudo sed -i -e "/\[org\/gnome\/shell\]/d" "${file}"
+    fi
+    local EXTENSIONS=$(gsettings get org.gnome.shell enabled-extensions)
+    echo "[org/gnome/shell]" | sudo tee -a "${file}"
+    echo "${EXTENSIONS}" | sudo tee -a "${file}"
+}
 #EOF
