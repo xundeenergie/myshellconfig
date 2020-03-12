@@ -72,6 +72,7 @@ Mögliche Optionen:
     * git - (default) Gitprotokoll ist git (Auf manchen Umgebungen kann der dazu notwenidge Port gesperrt sein)
     * http - wenn git nicht möglich ist, kann das http/https Protokoll verwendet werden. (ist langsamer als git, jedoch ist fast überall Port 80 oder 440 freigeschaltet)
     * ssh - Wenn auch schreibend auf das Repo zugegriffen werden soll, so muss Privatekey, Pubkey (und wenn konfiguriert Certifikate mit den notwendigen Principals) vorhanden sein, dann kann das ssh-Prodokoll verwendet werden.
+    * file - Das entfernte Repository ist auf einem USB-Stick, welcher unter /media/$USER/gitstick beim Einstecken gemountet wird. Der Pfad ist anpassbar (siehe MYSHELLCONFIG_GIT_REPO_PATH)
 
 Vim Plugins werden prinzipiell von github.com bezogen. Für spezielle Anwendungsfälle (github.com ist per firewall gesperrt), kann man diese auch in eigenen Repos hosten. Um diese eigenen Repos zu verwenden, muss in ~/.bashrc die Variable entsprechend gesetzt werden. Es ist ein Verzeichnis anzugeben, unter dem alle Pluginrepos als bare-Repos gecloned werden. Wichtig ist, dass die Usernamenverzeichnisse von github.com hier auch vorhanden sind, damit ohne dieser gesetzten Variable die Plugins direkt von github.com geladen werden können.
 

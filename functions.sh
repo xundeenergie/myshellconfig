@@ -77,6 +77,7 @@ setproxy () {
         export PROXY_CREDS=""
     fi
     export {http,https,ftp}_proxy="http://${PROXY_CREDS}${PROXY_SERVER}:${PROXY_PORT}"
+    export {HTTP,HTTPS,FTP}_PROXY="http://${PROXY_CREDS}${PROXY_SERVER}:${PROXY_PORT}"
 }
 
 mencfs () {
@@ -195,8 +196,10 @@ ${KERBEROS_PASSWORD}
 }
 
 unsetproxy () {
-    unset {http,https,fpt}_proxy
+    unset {HTTP,HTTPS,FTP}_PROXY
     unset PROXY_{CREDS,USER,PASS,SERVER,PORT}
+    unset {http,https,ftp}_proxy
+    unset proxy_{creds,user,pass,server,port}
 }
 
 git-mergedetachedheadtomaster () {
@@ -317,6 +320,7 @@ EOF
         ssh
     fi
 }
+
 
 VIMRC="${MYSHELLCONFIG_BASE}/vimrc"
 
@@ -446,15 +450,6 @@ function tmuxx() {
 }
 
 
-function gnome-shell-extensions-enable-defaults() { 
-    if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
-        for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
-            #gnome-shell-extension-tool -e $i;
-            gnome-extensions enable $i;
-        done; 
-    fi
-}
-
 function checkbkp() {
     if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
         local SSH="/usr/bin/ssh"
@@ -484,3 +479,95 @@ EOF
         
     fi
 }
+
+turnoffbeep() {
+    changebeep none
+}
+
+changebeep() {
+    local style
+    case $1 in
+        none)
+            style=none
+            ;;
+        visible)
+            style=visible
+            ;;
+        audible)
+            style=audible
+            ;;
+        *)
+            echo "usage: changebeep [none|visible|audible]"
+            return 1
+            ;;
+    esac
+    local line='set bell-style'
+    local file=~/.inputrc
+    if [ -e "${file}" ] ; then
+        sed -i -e "/$line/d" "${file}"
+    fi
+    echo "${line} ${style}" >> "${file}"
+    return 0
+}
+
+turnoffconfigsync() {
+    local line='MYSHELLCONFIG_GIT_SYNC='
+    local file=~/.bashrc
+    if [ -e "${file}" ] ; then
+        sed -i -e "/${line}/d" "${file}"
+    fi
+    sed -i -e "/#MYSHELLCONFIG-start/i${line}false" "${file}"
+}
+
+turnonconfigsync() {
+    local line='MYSHELLCONFIG_GIT_SYNC='
+    local file=~/.bashrc
+    if [ -e "${file}" ] ; then
+        sed -i -e "/${line}/d" "${file}"
+    fi
+    sed -i "/#MYSHELLCONFIG-start/i${line}true" "${file}"
+}
+
+function gnome-shell-extensions-enable-defaults() { 
+    if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
+        for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
+            #gnome-shell-extension-tool -e $i;
+            gnome-extensions enable $i;
+        done; 
+    fi
+}
+
+gnome-shell-extensions-make-actual-permanent-systemwide() {
+    # https://people.gnome.org/~pmkovar/system-admin-guide/extensions-enable.html
+    # https://askubuntu.com/questions/359958/extensions-are-turned-off-after-reboot
+    local file="/etc/dconf/profile/user"
+    sudo mkdir -p "/etc/dconf/profile/"
+    local line='user-db:user'
+    if [ -e "${file}" ] ; then
+        echo "$command"
+        sudo sh -c "$command"
+    fi
+    local line='system-db:local'
+    if [ -e "${file}" ] ; then
+        command="grep -xqF -- ${line} ${file} || echo $line >> $file"
+        sudo sh -c "$command"
+    fi
+    local line='enabled-extensions='
+    local file='/etc/dconf/db/local.d/00-extensions'
+    sudo mkdir -p '/etc/dconf/db/local.d'
+    if [ -e "${file}" ] ; then
+        sudo sed -i -e "/${line}/d" "${file}"
+        #sudo sed -i -e "/\[org\/gnome\/shell\]/d" "${file}"
+    fi
+    local EXTENSIONS=$(gsettings get org.gnome.shell enabled-extensions)
+    line="[org/gnome/shell]"
+    command="grep -xqF -- ${line} ${file} || echo $line >> $file"
+    sudo sh -c "$command"
+
+    local line='enabled-extensions='
+    echo "Update or add extensions"
+    #echo "${line}${EXTENSIONS}" | sudo tee -a "${file}"
+    sudo sed -i "/\[org\/gnome\/shell\]/a${line}${EXTENSIONS}" "${file}"
+    sudo dconf update
+}
+#EOF

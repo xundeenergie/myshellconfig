@@ -11,6 +11,9 @@ if [[ $- = *i* ]] ; then
     #echo "interactive shell" >&2
 
     # define variables
+    # default timeouts definted in myshellconfig_load_default
+    #[ -z "${MYSHELLCONFIG_ROOT_TMOUT+x}" ]  && MYSHELLCONFIG_ROOT_TMOUT=500
+    #[ -z "${MYSHELLCONFIG_USER_TMOUT+x}" ]  && MYSHELLCONFIG_USER_TMOUT=0
     [ -z "${USERNAME+x}" ]                  && USERNAME="$USER"
     [ -z "${USEREMAIL+x}" ]                 && USEREMAIL="$USER@$(domainname -f)"
     [ -z "${FULLNAME+x}" ]                  && FULLNAME="$(getent passwd $USER | cut -d ":" -f 5 | cut -d ',' -f 1)"
@@ -27,6 +30,7 @@ if [[ $- = *i* ]] ; then
     [ -z "${MYSHELLCONFIG_GIT_TIMEOUT+x}" ] && MYSHELLCONFIG_GIT_TIMEOUT=5s
     [ -z "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT+x}" ] && MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT=20s
     MYSHELLCONFIG_BASH_COMPLETION="${HOME}/${MYSHELLCONFIG_SUBPATH}/bash_completion.d"
+    [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ] && MYSHELLCONFIG_GIT_SYNC=true
 
     SGIT="git -C ${MYSHELLCONFIG_BASE}" 
     export MYSHELLCONFIG_BASE MYSHELLCONFIG_LOGDIR MYSHELLCONFIG_LOGFILE SGIT MYSHELLCONFIG_VIM_PLUGINS
@@ -38,34 +42,59 @@ EOF
     # define functions
     ckrepo () {
         # check if remote repo is reachable
-        if $( timeout --foreground "${MYSHELLCONFIG_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
+        if $MYSHELLCONFIG_GIT_SYNC; then
+            if $( timeout --foreground "${MYSHELLCONFIG_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
+                return 0
+            else 
+                return 1
+            fi
+        else
+            echo "no sync allowed from config" >&2
             return 0
-        else 
-            return 1
         fi
 
     }
 
     sync_config () {
-        local nok=""
-        local gco=""
-        if which git >/dev/null; then
-            echo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 1>&2
-            # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
-            if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
-                gco="-h"
-            else
-                gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
-            fi
-            ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
-            printf '%s\n' "${nok}synced" 1>&2
-            [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
+        if $MYSHELLCONFIG_GIT_SYNC; then
+            local nok=""
+            local gco=""
+            if which git >/dev/null; then
+                echo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 1>&2
+                # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
+                if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
+                    gco="-h"
+                else
+                    gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
+                fi
+                ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
+                printf '%s\n' "${nok}synced" 1>&2
+                [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
 
+            else
+                echo "git not installed, no configuration possible, please install git" >&2
+            fi
         else
-            echo "git not installed, no configuration possible, please install git" >&2
+            echo "Not syncing profile in case of configuration"
         fi
     }
 
+    # Check for interactive bash and that we haven't already been sourced.
+    if [ -n "${BASH_VERSION-}" -a -n "${PS1-}" -a -z "${BASH_COMPLETION_VERSINFO-}" ]; then
+
+        # Check for recent enough version of bash.
+        if [ ${BASH_VERSINFO[0]} -gt 4 ] || \
+           [ ${BASH_VERSINFO[0]} -eq 4 -a ${BASH_VERSINFO[1]} -ge 1 ]; then
+            [ -r "${XDG_CONFIG_HOME:-$HOME/.config}/bash_completion" ] && \
+                . "${XDG_CONFIG_HOME:-$HOME/.config}/bash_completion"
+            if shopt -q progcomp && [ -r /usr/share/bash-completion/bash_completion ]; then
+                # Source completion code.
+                echo "Source bash-completion"
+                . /usr/share/bash-completion/bash_completion
+            fi
+        fi
+
+    fi
 
 
     # source git-sync part of myshellconfig

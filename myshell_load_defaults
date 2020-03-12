@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# if we are root, exit after 5 Minutes
+case $(tty) in 
+    /dev/tty[0-9]*)
+        #[ $( id -u ) -eq 0 ] && TMOUT=${MYSHELLCONFIG_ROOT_TMOUT}
+        #[ $( id -u ) -gt 0 ] && TMOUT=${MYSHELLCONFIG_USER_TMOUT}
+        case $(id u) in
+            0)
+                TMOUT=${MYSHELLCONFIG_ROOT_TMOUT:-500}
+                ;;
+            *)
+                TMOUT=${MYSHELLCONFIG_USER_TMOUT:-0}
+                ;;
+        esac
+        echo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
+        ;;
+    *)
+        echo "Run in other terminal" >&2
+        ;;
+esac
+
 # Load default values, functions, aliases for myshellconfig
 if ! $SSHS; then
     if [ -e ${MYSHELLCONFIG_BASE}/functions.sh ]; then
@@ -126,6 +146,10 @@ fi
 # Disable Ctrl+s to freeze terminal
 # Source https://www.digitalocean.com/community/tutorials/how-to-use-bash-history-commands-and-expansions-on-a-linux-vps
 stty -ixon
+export HISTCONTROL=erasedups:ignorespace:ignoredups
+export HISTIGNORE="ls:l:cd:exit:pwd:date:mencfs:"
+export HISTTIMEFORMAT='%F %T  '
+export HISTSIZE=999999
 
 echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
 #echo "bashrc_add sourced" >&2
