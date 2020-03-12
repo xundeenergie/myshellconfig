@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# if we are root, exit after 5 Minutes
+[ $( id -u ) -eq 0 ] && TMOUT=${MYSHELLCONFIIG_ROOT_TMOUT}
+[ $( id -u ) -gt 0 ] && TMOUT=${MYSHELLCONFIIG_USER_TMOUT}
+
 # Load default values, functions, aliases for myshellconfig
 if ! $SSHS; then
     if [ -e ${MYSHELLCONFIG_BASE}/functions.sh ]; then
