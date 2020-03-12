@@ -10,12 +10,6 @@ if [ -z ${SSHS+x} ]; then SSHS=false;fi
 if [[ $- = *i* ]] ; then
     #echo "interactive shell" >&2
 
-    case $(tty) in 
-        /dev/tty[0-9]*)
-            echo "Run in TTY" ;;
-        *)
-            echo "Run in other terminal";;
-    esac
     # define variables
     [ -z "${MYSHELLCONFIIG_ROOT_TMOUT+x}" ] && MYSHELLCONFIIG_ROOT_TMOUT=500
     [ -z "${MYSHELLCONFIIG_USER_TMOUT+x}" ] && MYSHELLCONFIIG_USER_TMOUT=0
