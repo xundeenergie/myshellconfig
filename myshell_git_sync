@@ -82,7 +82,7 @@ if ! $SSHS; then
     #GIT_SSH_PATH="/srv/repos"
 
     case $TERM in
-        *term*)
+        *term*|*linux*)
 
             if [ -d "${MYSHELLCONFIG_BASE}" -a $($SGIT status 1>/dev/null 2>&1; echo $?) -eq 0 ]; then
                 [ -d "${MYSHELLCONFIG_LOGDIR}" ] || mkdir -p "${MYSHELLCONFIG_LOGDIR}"
