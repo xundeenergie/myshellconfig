@@ -8,7 +8,7 @@ if [ -z ${SSHS+x} ]; then SSHS=false;fi
 # https://guide.bash.academy/expansions/
 # https://www.tldp.org/LDP/abs/html/refcards.html#AEN22473
 if [[ $- = *i* ]] ; then
-    #echo "interactive shell" >&2
+    echo "interactive shell" >&2
 
     # define variables
     # default timeouts definted in myshellconfig_load_default
@@ -107,5 +107,7 @@ EOF
     --8<--- end ---------------- $(date) ---------------8<--
 
 EOF
+else
+    echo "non-interactive shell" >&2
 fi
 
