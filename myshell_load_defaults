@@ -5,12 +5,12 @@ case $(tty) in
     /dev/tty[0-9]*)
         #[ $( id -u ) -eq 0 ] && TMOUT=${MYSHELLCONFIG_ROOT_TMOUT}
         #[ $( id -u ) -gt 0 ] && TMOUT=${MYSHELLCONFIG_USER_TMOUT}
-        case $(id u) in
+        case $(id -u) in
             0)
                 TMOUT=${MYSHELLCONFIG_ROOT_TMOUT:-500}
                 ;;
             *)
-                TMOUT=${MYSHELLCONFIG_USER_TMOUT:-0}
+                TMOUT=${MYSHELLCONFIG_USER_TMOUT:-1000}
                 ;;
         esac
         echo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
