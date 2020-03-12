@@ -11,8 +11,8 @@ if [[ $- = *i* ]] ; then
     #echo "interactive shell" >&2
 
     # define variables
-    [ -z "${MYSHELLCONFIIG_ROOT_TMOUT+x}" ] && MYSHELLCONFIIG_ROOT_TMOUT=500
-    [ -z "${MYSHELLCONFIIG_USER_TMOUT+x}" ] && MYSHELLCONFIIG_USER_TMOUT=0
+    [ -z "${MYSHELLCONFIG_ROOT_TMOUT+x}" ]  && MYSHELLCONFIG_ROOT_TMOUT=500
+    [ -z "${MYSHELLCONFIG_USER_TMOUT+x}" ]  && MYSHELLCONFIG_USER_TMOUT=0
     [ -z "${USERNAME+x}" ]                  && USERNAME="$USER"
     [ -z "${USEREMAIL+x}" ]                 && USEREMAIL="$USER@$(domainname -f)"
     [ -z "${FULLNAME+x}" ]                  && FULLNAME="$(getent passwd $USER | cut -d ":" -f 5 | cut -d ',' -f 1)"
