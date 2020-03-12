@@ -10,7 +10,7 @@ case $(tty) in
                 TMOUT=${MYSHELLCONFIG_ROOT_TMOUT:-500}
                 ;;
             *)
-                TMOUT=${MYSHELLCONFIG_USER_TMOUT:-100}
+                TMOUT=${MYSHELLCONFIG_USER_TMOUT:-1000}
                 ;;
         esac
         echo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
