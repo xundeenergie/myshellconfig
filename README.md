@@ -19,7 +19,9 @@ Folgende Dateien werden durch Symlinks ersetzt. Diese bitte VOR dem ersten Aufru
 ## Proxy
 Wenn in einem Setup ein Proxy verwendet werden muss, so ist dieser VORHER zu konfigurieren. Da Proxyeinstellungen Hostabhängig sind und nicht generell in die allgemeine Konfiguration aufgenommen werden können, sind die Proxy-Einstellungen für git im File
 
+```
 ~/.gitconfig_local
+```
 ```
 [http]
         proxy = http://username:password@proxy.domain.tld:1233/
