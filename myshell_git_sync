@@ -149,5 +149,8 @@ if ! $SSHS; then
         *dumb*)
             echo "Run with dumb terminal" 1>&2
             ;;
+        *)
+            echo "Rund with $TERM"
+            ;;
     esac
 fi
