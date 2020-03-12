@@ -46,7 +46,9 @@ Ausloggen und neu Einloggen.
 
 ## Lokale Configuration
 in ~/.bashrc werden vor der Zeile zum Einbinden der myshellconfig die Variablen eingefügt um damit ein hostspezifisches Verhalten zu steuern
-MYSHELLCONFIG\_GIT\_CHECKOUTSCRIPT\_OPTIONS=
+```
+MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=
+```
 Mögliche Optionen:
 
     * -h
@@ -61,8 +63,8 @@ MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=""
 
 ### Git Protokolle für push und pull
 ```
-MYSHELLCONFIG\_GIT\_REMOTE\_PROTOCOL=git # git ist default
-MYSHELLCONFIG\_GIT\_REMOTE\_PUSH\_PROTOCOL=$MYSHELLCONFIG\_GIT\_REMOTE\_PROTOCOL # MYSHELLCONFIG\_GIT\_REMOTE\_PROTOCOL ist default
+MYSHELLCONFIG_GIT_REMOTE_PROTOCOL=git # git ist default
+MYSHELLCONFIG_GIT_REMOTE_PUSH_PROTOCOL=$MYSHELLCONFIG_GIT_REMOTE_PROTOCOL # MYSHELLCONFIG_GIT_REMOTE_PROTOCOL ist default
 ```
 
 Mögliche Optionen:
@@ -73,7 +75,9 @@ Mögliche Optionen:
 
 Vim Plugins werden prinzipiell von github.com bezogen. Für spezielle Anwendungsfälle (github.com ist per firewall gesperrt), kann man diese auch in eigenen Repos hosten. Um diese eigenen Repos zu verwenden, muss in ~/.bashrc die Variable entsprechend gesetzt werden. Es ist ein Verzeichnis anzugeben, unter dem alle Pluginrepos als bare-Repos gecloned werden. Wichtig ist, dass die Usernamenverzeichnisse von github.com hier auch vorhanden sind, damit ohne dieser gesetzten Variable die Plugins direkt von github.com geladen werden können.
 
-MYSHELLCONFIG\_VIM\_PLUGINS=https://my.git.server/public/Vim
+```
+MYSHELLCONFIG_VIM_PLUGINS=https://my.git.server/public/Vim
+```
 
 Z.B. das Plugin Vundle.vim hat ist auf github unter dieser URL zu finden
 ```
@@ -85,17 +89,19 @@ https://my.git.server/public/Vim/gmarik/Vundle
 ```
 
 ### Über ~/.bashrc manuell festlegbare Variablen und ihre Default-Werte, wenn nicht manuell gesetzt:
-MYSHELLCONFIG\_SUBPATH=.local/myshellconfig
-MYSHELLCONFIG\_BASE="${HOME}/${MYSHELLCONFIG\_SUBPATH}"
-MYSHELLCONFIG\_LOGDIR="${MYSHELLCONFIG\_BASE}/logs"
-MYSHELLCONFIG\_LOGFILE="${MYSHELLCONFIG\_LOGDIR}/git.log"
-MYSHELLCONFIG\_GIT\_TIMEOUT=5s
+```
+MYSHELLCONFIG_SUBPATH=.local/myshellconfig
+MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"
+MYSHELLCONFIG_LOGDIR="${MYSHELLCONFIG_BASE}/logs"
+MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/git.log"
+MYSHELLCONFIG_GIT_TIMEOUT=5s
 
-MYSHELLCONFIG\_GIT\_SERVER="git.schuerz.at"
-MYSHELLCONFIG\_GIT\_REPO\_NAME="server-config.git"
-MYSHELLCONFIG\_GIT\_REPO\_PATH\_HTTP="/public/"
-MYSHELLCONFIG\_GIT\_REPO\_PATH\_SSH=":public/"
-MYSHELLCONFIG\_GIT\_REPO\_PATH\_GIT="/public/"
+MYSHELLCONFIG_GIT_SERVER="git.schuerz.at"
+MYSHELLCONFIG_GIT_REPO_NAME="server-config.git"
+MYSHELLCONFIG_GIT_REPO_PATH_HTTP="/public/"
+MYSHELLCONFIG_GIT_REPO_PATH_SSH=":public/"
+MYSHELLCONFIG_GIT_REPO_PATH_GIT="/public/"
+```
 
 
 # Verteilen auf neuen Host/User
@@ -114,7 +120,9 @@ es können die üblichen ssh-Optionen und Parameter verwendet werden.
 
 ## Signieren der Commits mit gpg
 Wenn man seine Commits signieren möchte, kann dazu in der Datei
+```
 ~/.gitconfig_local
+```
 folgendes eingetragen werden:
 
 ```
