@@ -3,9 +3,9 @@
 # if we are root, exit after 5 Minutes
 case $(tty) in 
     /dev/tty[0-9]*)
-        echo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
         [ $( id -u ) -eq 0 ] && TMOUT=${MYSHELLCONFIIG_ROOT_TMOUT}
         [ $( id -u ) -gt 0 ] && TMOUT=${MYSHELLCONFIIG_USER_TMOUT}
+        echo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
         ;;
     *)
         echo "Run in other terminal" >&2
