@@ -100,6 +100,7 @@ if ! $SSHS; then
 
                 # sync repo with origin if git is reachable 
                 if ckrepo ; then
+                    echo "git checokut"
                     sync_config
                     . ${MYSHELLCONFIG_BASE}/functions.sh
                     create_symlinks "$MYSHELLCONFIG_BASE"
