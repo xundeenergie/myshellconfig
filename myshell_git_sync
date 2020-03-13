@@ -81,7 +81,7 @@ if ! $SSHS; then
 
     #GIT_SSH_PATH="/srv/repos"
 
-    echo "Run with $TERM"
+    echo "Run with $TERM" >&2
     case $TERM in
         *term*|*linux*)
 
@@ -151,7 +151,7 @@ if ! $SSHS; then
             echo "Run with dumb terminal" 1>&2
             ;;
         *)
-            echo "Run with $TERM"
+            echo "Run with $TERM" >&2
             ;;
     esac
 fi
