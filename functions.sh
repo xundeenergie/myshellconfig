@@ -225,6 +225,9 @@ mkcd () {
 
 sshmyshellconfig() {
 
+    [ -z "${MYSHELLCONFIG_BASE+x} ] && MYSHELLCONFIG_BASE=".local/myshellconfig"
+    [ -z "${MYSHELLCONFIG_BASE_PARENT+x} ] && MYSHELLCONFIG_BASE_PARENT="$(dirname $MYSHELLCONFIG_BASE)"
+
     if [ $1 == "localhost" ]; then
         CMD=""
     else
