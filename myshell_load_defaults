@@ -61,6 +61,7 @@ if ! $SSHS; then
         for i in $( ls "${MYSHELLCONFIG_BASH_COMPLETION}" ); do
             . "${MYSHELLCONFIG_BASH_COMPLETION}/${i}"
         done
+        unset i
     fi
 
     if [ -f "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" ]; then
