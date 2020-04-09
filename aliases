@@ -48,7 +48,7 @@ alias gcm='git checkout master'
 # xdg-user-dirs
 alias godesktop='[ -e $(xdg-user-dir DESKTOP) ] && cd $(xdg-user-dir DESKTOP)'
 alias godoc='[ -e $(xdg-user-dir DOCUMENTS) ] && cd $(xdg-user-dir DOCUMENTS)'
-alias godownload='[ -e $(xdg-user-dir DOWNLOAD) ] && cd $(xdg-user-dir DOWNLOAD'
+alias godownload='[ -e $(xdg-user-dir DOWNLOAD) ] && cd $(xdg-user-dir DOWNLOAD)'
 alias gomusic='[ -e $(xdg-user-dir MUSIC) ] && cd $(xdg-user-dir MUSIC)'
 alias gopublic='[ -e $(xdg-user-dir PUBLICSHARE) ] && cd $(xdg-user-dir PUBLICSHARE)'
 alias gotempl='[ -e $(xdg-user-dir TEMPLATES) ] && cd $(xdg-user-dir TEMPLATES)'
