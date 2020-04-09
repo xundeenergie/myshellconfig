@@ -123,6 +123,7 @@ $ENCFS_PASSWORD
 uencfs () {
 
     local FUSERMOUNT=$(which fusermount 2>/dev/null || exit 127 )
+    local i
     [ -z ${FUSERMOUNT+x} ] && return 127
     if [ $# -eq 1 ]; then
         if [ ! -d ${1} ];then
@@ -130,12 +131,14 @@ uencfs () {
             return 128
         else
             echo umount encrypted directory $1 >&2
+            sync
             $FUSERMOUNT -u "$1"
         fi
     else
         echo "no arguments given. Umount all mounted encfs-dirs" >&2
         for i in $(mount|grep encfs|sed -e 's/^encfs on \(.*\)\ type.*$/\1/');do
             echo $FUSERMOUNT -u "$i"
+            sync
             $FUSERMOUNT -u "$i"
         done
         return 1
@@ -258,6 +261,7 @@ sshs() {
 #    MKTMPCMD='mktemp $(echo ${XDG_RUNTIME_DIR}/bashrc.XXXXXXXX.conf)'
 #    VIMMKTMPCMD="mktemp ${XDG_RUNTIME_DIR}/vimrc.XXXXXXXX.conf"
 
+    local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
     local FILELIST=( ~/.aliases "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" )
 
@@ -276,6 +280,7 @@ for i in /etc/profile.d/*.sh; do
         fi
     fi
 done
+unset i
 EOF
 
     for f in ${FILELIST[*]}; do
@@ -527,6 +532,7 @@ turnonconfigsync() {
 }
 
 function gnome-shell-extensions-enable-defaults() { 
+    local i
     if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
         for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
             #gnome-shell-extension-tool -e $i;
