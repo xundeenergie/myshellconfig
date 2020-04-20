@@ -177,3 +177,18 @@ alias aldebaranreboot='ssh aldebaran sudo systemctl reboot'
 #  nextcloud
 alias nextcloud-add-missing-indices='docker exec -ti nc_app_1 php occ db:add-missing-indices'
 alias nextcloud-upgrade='docker-compose down && docker image rm nc_app:latest nc_web:latest && docker-compose pull && docker-compose up --build -d'
+
+#--- JIRA ---
+alias gojiralib='cd /opt/atlassian/jira/atlassian-jira/WEB-INF/lib/'
+alias gojirainstall='cd /opt/atlassian/jira/'
+alias gojirahome='cd /var/atlassian/application-data/jira/'
+alias gojiralog='cd /var/atlassian/application-data/jira/log'
+alias tailjra='cd /var/atlassian/application-data/jira/log; tail -F atlassian-jira.log'
+
+#--- CONFLUENCE ---
+alias gocnflib='cd /opt/atlassian/confluence/confluence/WEB-INF/lib/'
+alias gocnfinstall='cd /opt/atlassian/confluence/'
+alias gocnfhome='cd /var/atlassian/application-data/confluence/'
+alias gocnflog='cd /var/atlassian/application-data/confluence/logs'
+alias tailcnf='cd /var/atlassian/application-data/confluence/logs; tail -F atlassian-confluence.log'
+
