@@ -263,7 +263,7 @@ sshs() {
 
     local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( ~/.aliases "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" )
+    local FILELIST=( $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" )
 
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
@@ -360,7 +360,7 @@ vim-repair-vundle () {
 
 getbashrcfile () {
     if [ -z ${BASHRC+x} ] ; then
-        echo "bash uses default"
+        echo "bash uses default" >&2
     else
         cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}'
     fi
@@ -368,7 +368,7 @@ getbashrcfile () {
 
 catbashrcfile () {
     if [ -z ${BASHRC+x} ] ; then
-        echo "bash uses default"
+        echo "bash uses default" >&2
     else
         #cat $(cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}')
         cat $(getbashrcfile)
@@ -377,7 +377,7 @@ catbashrcfile () {
 
 getvimrcfile () {
     if [ -z ${VIMRC+x} ] ; then
-        echo "vim uses default"
+        echo "vim uses default" >&2
     else
         echo $VIMRC
     fi
@@ -385,7 +385,7 @@ getvimrcfile () {
 
 catvimrcfile () {
     if [ -z ${VIMRC+x} ] ; then
-        echo "vim uses default"
+        echo "vim uses default" >&2
     else
         #cat $VIMRC
         cat $(getvimrcfile)
