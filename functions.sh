@@ -579,10 +579,36 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
 reachable () {
     local SERVER=$1
     local PORT=${2:-22}
+    local res=1
     if nc -z $SERVER $PORT 2>/dev/null; then
-        echo "${SERVER}:${PORT} is reachable"
+        echo "${SERVER}:${PORT} is reachable" >&2
+        res=0
     else
-        echo "${SERVER}:${PORT} is not reachable"
+        echo "${SERVER}:${PORT} is not reachable" >&2
+        res=1
     fi
+    return $res
+}
+
+reachable-timed () {
+    local SERVER=$1
+    local PORT=${2:-22}
+    local SEC=${3:-0}
+    local res=1
+    local i
+    echo -n "Try to connect to ${SERVER}:${PORT} (${SEC}s) "
+    for i in $(seq 0 $SEC); do
+        echo -n "."
+        if reachable ${SERVER} ${PORT} 2>/dev/null; then
+            res=0
+            break
+        fi
+        sleep 1
+    done
+
+    [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2
+
+    return $res
+
 }
 #EOF
