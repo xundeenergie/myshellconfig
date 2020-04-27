@@ -576,7 +576,7 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
     sudo dconf update
 }
 
-reachable () {
+reachable-default () {
     local SERVER=$1
     local PORT=${2:-22}
     local res=1
@@ -590,20 +590,20 @@ reachable () {
     return $res
 }
 
-reachable-timed () {
+reachable () {
     local SERVER=$1
     local PORT=${2:-22}
-    local SEC=${3:-0}
+    local SEC=${3:-1}
     local res=1
     local i
-    echo -n "Try to connect to ${SERVER}:${PORT} (${SEC}s) "
-    for i in $(seq 0 $SEC); do
-        echo -n "."
-        if reachable ${SERVER} ${PORT} 2>/dev/null; then
+    echo -n "Try to connect to ${SERVER}:${PORT} " >&2
+    for i in $(seq 1 $SEC); do
+        echo -n "." >&2
+        if reachable-default ${SERVER} ${PORT} 2>/dev/null; then
             res=0
             break
         fi
-        sleep 1
+        [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
     done
 
     [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2
