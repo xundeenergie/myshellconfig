@@ -31,7 +31,7 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
   
   Plugin pluginrepopath . 'gmarik/Vundle.vim' . pluginextension
   Plugin pluginrepopath . 'vim-scripts/Zenburn' . pluginextension
-"  Plugin pluginrepopath . 'Solarized' . pluginextension
+  Plugin pluginrepopath . 'Solarized' . pluginextension
   Plugin pluginrepopath . 'altercation/vim-colors-solarized' . pluginextension
   Plugin pluginrepopath . 'vim-scripts/indentpython.vim' . pluginextension
   Plugin pluginrepopath . 'tmhedberg/SimpylFold' . pluginextension
