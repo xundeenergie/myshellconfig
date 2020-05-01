@@ -592,6 +592,7 @@ reachable-default () {
 
 reachable () {
     local SERVER=$1
+    local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
     local PORT=${2:-22}
     local SEC=${3:-1}
     local res=1
@@ -599,7 +600,7 @@ reachable () {
     echo -n "Try to connect to ${SERVER}:${PORT} " >&2
     for i in $(seq 1 $SEC); do
         echo -n "." >&2
-        if reachable-default ${SERVER} ${PORT} 2>/dev/null; then
+        if reachable-default ${IP} ${PORT} 2>/dev/null; then
             res=0
             break
         fi
