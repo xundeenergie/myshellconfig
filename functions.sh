@@ -437,10 +437,10 @@ function tmuxx() {
             echo no session specified return
             ;;
     esac
-    TMUX='/usr/bin/tmux'
-    $TMUX -f ~/.tmux.conf new-session -d
-    [ -e ${SESS[0]} ] && $TMUX source-file ${SESS[0]}
-    $TMUX attach-session -d
+    TMUX_BIN='/usr/bin/tmux'
+    $TMUX_BIN -f ~/.tmux.conf new-session -d
+    [ -e ${SESS[0]} ] && $TMUX_BIN source-file ${SESS[0]}
+    $TMUX_BIN attach-session -d
 }
 
 
