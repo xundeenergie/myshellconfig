@@ -123,6 +123,7 @@ $ENCFS_PASSWORD
 uencfs () {
 
     local FUSERMOUNT=$(which fusermount 2>/dev/null || exit 127 )
+    local i
     [ -z ${FUSERMOUNT+x} ] && return 127
     if [ $# -eq 1 ]; then
         if [ ! -d ${1} ];then
@@ -130,12 +131,14 @@ uencfs () {
             return 128
         else
             echo umount encrypted directory $1 >&2
+            sync
             $FUSERMOUNT -u "$1"
         fi
     else
         echo "no arguments given. Umount all mounted encfs-dirs" >&2
         for i in $(mount|grep encfs|sed -e 's/^encfs on \(.*\)\ type.*$/\1/');do
             echo $FUSERMOUNT -u "$i"
+            sync
             $FUSERMOUNT -u "$i"
         done
         return 1
@@ -225,6 +228,10 @@ mkcd () {
 
 sshmyshellconfig() {
 
+    [ -z "${MYSHELLCONFIG_SUBPATH+x}" ]     && MYSHELLCONFIG_SUBPATH=".local/myshellconfig"
+    [ -z "${MYSHELLCONFIG_BASE+x}" ]        && MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"
+    MYSHELLCONFIG_BASE_PARENT="$(dirname $MYSHELLCONFIG_BASE)"
+
     if [ $1 == "localhost" ]; then
         CMD=""
     else
@@ -254,9 +261,11 @@ sshs() {
 #    MKTMPCMD='mktemp $(echo ${XDG_RUNTIME_DIR}/bashrc.XXXXXXXX.conf)'
 #    VIMMKTMPCMD="mktemp ${XDG_RUNTIME_DIR}/vimrc.XXXXXXXX.conf"
 
+    local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( ~/.aliases "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" )
+    local FILELIST=( $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" )
 
+    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
 [ -e /etc/bashrc ] && BASHRC=/etc/bashrc
@@ -272,6 +281,7 @@ for i in /etc/profile.d/*.sh; do
         fi
     fi
 done
+unset i
 EOF
 
     for f in ${FILELIST[*]}; do
@@ -284,8 +294,8 @@ EOF
     if [ $# -ge 1 ]; then
         if [ -e "${TMPBASHCONFIG}" ] ; then
            local RCMD="/bin/bash --noprofile --norc -c "
-           local REMOTETMPBASHCONFIG=$(ssh -T -o VisualHostKey=no $@ "mktemp -p \${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
-           local REMOTETMPVIMCONFIG=$(ssh -T -o VisualHostKey=no $@ "mktemp -p \${XDG_RUNTIME_DIR} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
+           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
+           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
@@ -299,11 +309,11 @@ title "\$USER@\$HOSTNAME: \$PWD"
 echo "This bash runs with temporary config from \$BASHRC"
 EOF
 
-           ssh -T -o VisualHostKey=no $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
-           ssh -T -o VisualHostKey=no $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MYSHELLCONFIG_BASE}/vimrc"
+           ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
+           ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MYSHELLCONFIG_BASE}/vimrc"
            RCMD="
            trap \"rm -f ${REMOTETMPBASHCONFIG} ${REMOTETMPVIMCONFIG}\" EXIT " ;
-           ssh -t $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
+           ssh -t ${SSH_OPTS} $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
            rm "${TMPBASHCONFIG}"
         else
            echo "${TMPBASHCONFIG} does not exist. Use »ssh $@«" >&2
@@ -350,7 +360,7 @@ vim-repair-vundle () {
 
 getbashrcfile () {
     if [ -z ${BASHRC+x} ] ; then
-        echo "bash uses default"
+        echo "bash uses default" >&2
     else
         cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}'
     fi
@@ -358,7 +368,7 @@ getbashrcfile () {
 
 catbashrcfile () {
     if [ -z ${BASHRC+x} ] ; then
-        echo "bash uses default"
+        echo "bash uses default" >&2
     else
         #cat $(cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}')
         cat $(getbashrcfile)
@@ -367,7 +377,7 @@ catbashrcfile () {
 
 getvimrcfile () {
     if [ -z ${VIMRC+x} ] ; then
-        echo "vim uses default"
+        echo "vim uses default" >&2
     else
         echo $VIMRC
     fi
@@ -375,7 +385,7 @@ getvimrcfile () {
 
 catvimrcfile () {
     if [ -z ${VIMRC+x} ] ; then
-        echo "vim uses default"
+        echo "vim uses default" >&2
     else
         #cat $VIMRC
         cat $(getvimrcfile)
@@ -523,6 +533,7 @@ turnonconfigsync() {
 }
 
 function gnome-shell-extensions-enable-defaults() { 
+    local i
     if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
         for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
             #gnome-shell-extension-tool -e $i;
@@ -563,5 +574,42 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
     #echo "${line}${EXTENSIONS}" | sudo tee -a "${file}"
     sudo sed -i "/\[org\/gnome\/shell\]/a${line}${EXTENSIONS}" "${file}"
     sudo dconf update
+}
+
+reachable-default () {
+    local SERVER=$1
+    local PORT=${2:-22}
+    local res=1
+    if nc -z $SERVER $PORT 2>/dev/null; then
+        echo "${SERVER}:${PORT} is reachable" >&2
+        res=0
+    else
+        echo "${SERVER}:${PORT} is not reachable" >&2
+        res=1
+    fi
+    return $res
+}
+
+reachable () {
+    local SERVER=$1
+    local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
+    local PORT=${2:-22}
+    local SEC=${3:-1}
+    local res=1
+    local i
+    echo -n "Try to connect to ${SERVER}:${PORT} " >&2
+    for i in $(seq 1 $SEC); do
+        echo -n "." >&2
+        if reachable-default ${IP} ${PORT} 2>/dev/null; then
+            res=0
+            break
+        fi
+        [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
+    done
+
+    [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2
+
+    return $res
+
 }
 #EOF

@@ -48,7 +48,7 @@ alias gcm='git checkout master'
 # xdg-user-dirs
 alias godesktop='[ -e $(xdg-user-dir DESKTOP) ] && cd $(xdg-user-dir DESKTOP)'
 alias godoc='[ -e $(xdg-user-dir DOCUMENTS) ] && cd $(xdg-user-dir DOCUMENTS)'
-alias godownload='[ -e $(xdg-user-dir DOWNLOAD) ] && cd $(xdg-user-dir DOWNLOAD'
+alias godownload='[ -e $(xdg-user-dir DOWNLOAD) ] && cd $(xdg-user-dir DOWNLOAD)'
 alias gomusic='[ -e $(xdg-user-dir MUSIC) ] && cd $(xdg-user-dir MUSIC)'
 alias gopublic='[ -e $(xdg-user-dir PUBLICSHARE) ] && cd $(xdg-user-dir PUBLICSHARE)'
 alias gotempl='[ -e $(xdg-user-dir TEMPLATES) ] && cd $(xdg-user-dir TEMPLATES)'
@@ -122,10 +122,10 @@ alias unetbootin='export QT_X11_NO_MITSHM=1 unetbootin'
 alias vi='/usr/bin/vim'
 alias vlc='VDPAU_DRIVER=va_gl vlc'
 alias tmux='tmux -f ~/.tmux.conf'
-alias youtube-dl-whole-video="youtube-dl --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(title)s.%(ext)s' -w -c "
-alias youtube-dl-whole-video-to-playlistdir="youtube-dl --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
-alias youtube-dl-whole-user="youtube-dl --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
-alias youtube-dl-whole-playlist="youtube-dl --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' -w -c "
+alias youtube-dl-whole-video="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(title)s-%(id)s.%(ext)s' -w -c "
+alias youtube-dl-whole-video-to-playlistdir="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
+alias youtube-dl-whole-user="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
+alias youtube-dl-whole-playlist="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 
 # rock64
 alias rock64='sudo  minicom -D /dev/ttyUSB0 --color=on'
@@ -177,3 +177,18 @@ alias aldebaranreboot='ssh aldebaran sudo systemctl reboot'
 #  nextcloud
 alias nextcloud-add-missing-indices='docker exec -ti nc_app_1 php occ db:add-missing-indices'
 alias nextcloud-upgrade='docker-compose down && docker image rm nc_app:latest nc_web:latest && docker-compose pull && docker-compose up --build -d'
+
+#--- JIRA ---
+alias gojiralib='cd /opt/atlassian/jira/atlassian-jira/WEB-INF/lib/'
+alias gojirainstall='cd /opt/atlassian/jira/'
+alias gojirahome='cd /var/atlassian/application-data/jira/'
+alias gojiralog='cd /var/atlassian/application-data/jira/log'
+alias tailjra='cd /var/atlassian/application-data/jira/log; tail -F atlassian-jira.log'
+
+#--- CONFLUENCE ---
+alias gocnflib='cd /opt/atlassian/confluence/confluence/WEB-INF/lib/'
+alias gocnfinstall='cd /opt/atlassian/confluence/'
+alias gocnfhome='cd /var/atlassian/application-data/confluence/'
+alias gocnflog='cd /var/atlassian/application-data/confluence/logs'
+alias tailcnf='cd /var/atlassian/application-data/confluence/logs; tail -F atlassian-confluence.log'
+
