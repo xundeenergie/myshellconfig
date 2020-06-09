@@ -20,7 +20,7 @@ alias s='sshs $(history -p \!ssh:$:t)'
 alias aptupgrade='sudo /usr/bin/apt update && sudo /usr/bin/apt dist-upgrade'
 alias apt-get-key='sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys'
 # -- dnf
-alias dnfupgrade='sudo dnf upgrade'
+alias dnfupgrade='sudo dnf upgrade --refresh'
 
 # docker and docker-compose
 alias dcdown='docker-compose down'
