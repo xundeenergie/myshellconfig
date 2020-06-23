@@ -134,7 +134,7 @@ alias rock64='sudo  minicom -D /dev/ttyUSB0 -b 1500000--color=on'
 # openvpn
 alias ovpnrestart='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl restart openvpn-client@${HOSTNAME}.service'
 alias ovpnstart='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl start openvpn-client@${HOSTNAME}.service'
-alias ovpnstatus='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl status openvpn-client@${HOSTNAME}.service'
+alias ovpnstatus='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl status openvpn-client@${HOSTNAME}.service; echo; ip a'
 alias ovpnstop='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl stop openvpn-client@${HOSTNAME}.service'
 
 # systemd
