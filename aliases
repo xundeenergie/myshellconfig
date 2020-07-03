@@ -126,6 +126,7 @@ alias youtube-dl-whole-video="youtube-dl -i --no-overwrites --write-description 
 alias youtube-dl-whole-video-to-playlistdir="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-whole-user="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-whole-playlist="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
+alias youtube-dl-mp4-best="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(title)s-%(id)s.%(ext)s' -w -c "
 
 # rock64
 alias rock64='sudo  minicom -D /dev/ttyUSB0 --color=on'
