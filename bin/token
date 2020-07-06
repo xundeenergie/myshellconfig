@@ -1,0 +1,29 @@
+#!/bin/sh
+#set -eu
+#set -x
+
+[ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+
+
+ssh-add -l &>/dev/null
+if [ "$?" == 2 ]; then
+  test -r ~/.ssh-agent && \
+    eval "$(<~/.ssh-agent)" >/dev/null
+
+  ssh-add -l &>/dev/null
+  if [ "$?" == 2 ]; then
+    (umask 066; ssh-agent > ~/.ssh-agent)
+    eval "$(<~/.ssh-agent)" >/dev/null
+
+  fi
+fi
+
+ssh-add -l &>/dev/null
+if [ "$?" == 0 ]; then
+    # Remove and add again $PKCS11_MODULE
+    ssh-add -e $PKCS11_MODULE
+    ssh-add -s $PKCS11_MODULE
+else
+    echo "not able to create ssh-agent"
+fi
+

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -eu
+set -x
+[ -z "${PKCS11_MODULE+x}" ] && PKCS11_MODULE="$(dnf repoquery --installed -l p11-kit | grep \/p11-kit-proxy.so\$ | head -1)"
+
+echo SSH_AGENT_PID before: $SSH_AGENT_PID
+
+[ -z "$(pidof ssh-agent)" -o "${SSH_AGENT_PID}" != "$(pidof ssh-agent)" ] && eval "$(ssh-agent -s)"
+
+
+echo SSH_AGENT_PID after: $SSH_AGENT_PID
+
+#if ssh-add -l | grep -q "${PKCS11_MODULE}"; then
+#    # Remove any stale loaded keys from token, ssh-agent does not automatically
+#    # reconnect with the token when you reinsert it.
+#    ssh-add -e "${PKCS11_MODULE}"
+#fi
+
+ssh-add -e "${PKCS11_MODULE}" 2>/dev/null
+echo $?
+# Tell ssh-agent to use the keys on the token
+ssh-add -s "${PKCS11_MODULE}"
