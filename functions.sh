@@ -13,7 +13,15 @@ cpb() {
 sudo() {
     local SUDO
     SUDO=$( if [ -e /bin/sudo ]; then echo /bin/sudo; else echo /usr/bin/sudo; fi )
-    $SUDO TMUX=$TMUX SSHS=$SSHS SSH_TTY=$SSH_TTY "$@"
+    $SUDO \
+        GIT_AUTHOR_EMAIL="$GIT_AUTHOR_EMAIL" \
+        GIT_AUTHOR_NAME="$GIT_AUTHOR_NAME" \
+        GIT_COMMITTER_EMAIL="$GIT_COMMITTER_EMAIL" \
+        GIT_COMMITTER_NAME="$GIT_COMMITTER_NAME" \
+        TMUX="$TMUX" \
+        SSHS="$SSHS" \
+        SSH_TTY="$SSH_TTY" \
+        "$@"
 
 }
 create_symlinks() {
@@ -589,6 +597,31 @@ reachable-default () {
     fi
     return $res
 }
+
+reachableim () {
+    
+    local SERVER=$1
+    local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
+    local PORT=${2:-22}
+    local SEC=${3:-1}
+    local res=1
+    local i
+    echo -n "Try to connect to ${SERVER}:${PORT} " >&2
+    for i in $(seq 1 $SEC); do
+        echo -n "." >&2
+        if reachable-default ${IP} ${PORT} 2>/dev/null; then
+            res=0
+            break
+        fi
+        [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
+    done
+
+    [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2
+
+    return $res
+
+}
+#EOF
 
 reachable () {
     local SERVER=$1
