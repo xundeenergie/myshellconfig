@@ -4,25 +4,78 @@
 
 [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
 
+echo SSH_AGENT_PID: $SSH_AGENT_PID
+echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+echo PKCS11_MODULE: $PKCS11_MODULE
 
 ssh-add -l &>/dev/null
 if [ "$?" == 2 ]; then
-  test -r ~/.ssh-agent && \
-    eval "$(<~/.ssh-agent)" >/dev/null
+    test -r ~/.ssh-agent && \
+    echo "create new ssh-agent" >&2
+    eval "$(<~/.ssh-agent)" >&2
+    #eval "$(<~/.ssh-agent)" >/dev/null
 
-  ssh-add -l &>/dev/null
-  if [ "$?" == 2 ]; then
-    (umask 066; ssh-agent > ~/.ssh-agent)
-    eval "$(<~/.ssh-agent)" >/dev/null
+    ssh-add -l &>/dev/null
+    if [ "$?" == 2 ]; then
+        echo "create new ssh-agent and load env for it" >&2
+        (umask 066; ssh-agent > ~/.ssh-agent)
+        eval "$(<~/.ssh-agent)"  >&2
+        #eval "$(<~/.ssh-agent)" >/dev/null
+    else
+        echo test X
 
-  fi
+    fi
+else
+    echo test6
+
 fi
 
+echo SSH_AGENT_PID: $SSH_AGENT_PID
+echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+echo PKCS11_MODULE: $PKCS11_MODULE
+
 ssh-add -l &>/dev/null
+#ssh-add -l & >&2
 if [ "$?" == 0 ]; then
     # Remove and add again $PKCS11_MODULE
     ssh-add -e $PKCS11_MODULE
     ssh-add -s $PKCS11_MODULE
+
+
+test -n "${SSH_AUTH_SOCK+x}"
+if [ "$?" == 0 ] ; then
+    echo test1
+    
+    test -n "${SSH_AGENT_PID+x}"
+    if [ "$?" == 0 ]; then
+        echo test2
+        cat << EOF > ~/.ssh-agent
+SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
+SSH_AGENT_PID=265136; export SSH_AGENT_PID;
+echo auth socket ${SSH_AUTH_SOCK};
+echo Agent pid 265136;
+EOF
+    else
+        cat << EOF > ~/.ssh-agent
+SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
+echo auth socket ${SSH_AUTH_SOCK};
+echo Agent pid not known;
+EOF
+        echo test3
+    fi
+else
+    echo test4
+fi
+
+
+cat << EOF
+
+Now run
+
+    eval "\$(<~/.ssh-agent)"
+
+EOF
+
 else
     echo "not able to create ssh-agent"
 fi
