@@ -3,6 +3,12 @@
 [user]
 	name = Jakobus Schürz
 	email = jakobus.schuerz@schuerz.at
+[author]
+	name = Jakobus Schürz
+	email = jakobus.schuerz@schuerz.at
+[committer]
+	name = Jakobus Schürz
+	email = jakobus.schuerz@schuerz.at
 [push]
 	default = simple
 [core]
