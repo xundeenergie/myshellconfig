@@ -45,6 +45,11 @@ if [ "$?" == 0 ]; then
 test -n "${SSH_AUTH_SOCK+x}"
 if [ "$?" == 0 ] ; then
     echo test1
+    sudo fuser "$SSH_AUTH_SOCK"|awk '{print $NF}'
+
+    SSH_AGENT_PID="$(sudo fuser "$SSH_AUTH_SOCK" |awk '{print $NF}')"
+    echo "SSH_AGENT_PID(fuser): $SSH_AGENT_PID"
+
     
     test -n "${SSH_AGENT_PID+x}"
     if [ "$?" == 0 ]; then
