@@ -4,9 +4,8 @@
 
 [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
 
-echo SSH_AGENT_PID: $SSH_AGENT_PID
-echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
-echo PKCS11_MODULE: $PKCS11_MODULE
+PASS=$(which pass 2>/dev/null || exit 127 )
+PKEY="bmi/etoken"
 
 ssh-add -l &>/dev/null
 if [ "$?" == 2 ]; then
@@ -26,13 +25,13 @@ if [ "$?" == 2 ]; then
 
     fi
 else
-    echo test6
-
+    :
 fi
 
-echo SSH_AGENT_PID: $SSH_AGENT_PID
-echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
-echo PKCS11_MODULE: $PKCS11_MODULE
+#echo SSH_AGENT_PID: $SSH_AGENT_PID
+#echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+#echo PKCS11_MODULE: $PKCS11_MODULE
+
 
 ssh-add -l &>/dev/null
 #ssh-add -l & >&2
@@ -44,7 +43,6 @@ if [ "$?" == 0 ]; then
 
 test -n "${SSH_AUTH_SOCK+x}"
 if [ "$?" == 0 ] ; then
-    echo test1
     sudo fuser "$SSH_AUTH_SOCK"|awk '{print $NF}'
 
     SSH_AGENT_PID="$(sudo fuser "$SSH_AUTH_SOCK" |awk '{print $NF}')"
@@ -53,12 +51,11 @@ if [ "$?" == 0 ] ; then
     
     test -n "${SSH_AGENT_PID+x}"
     if [ "$?" == 0 ]; then
-        echo test2
         cat << EOF > ~/.ssh-agent
 SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
-SSH_AGENT_PID=265136; export SSH_AGENT_PID;
+SSH_AGENT_PID=${SSH_AGENT_PID}; export SSH_AGENT_PID;
 echo auth socket ${SSH_AUTH_SOCK};
-echo Agent pid 265136;
+echo Agent pid ${SSH_AGENT_PID};
 EOF
     else
         cat << EOF > ~/.ssh-agent
@@ -66,10 +63,9 @@ SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
 echo auth socket ${SSH_AUTH_SOCK};
 echo Agent pid not known;
 EOF
-        echo test3
     fi
 else
-    echo test4
+    :
 fi
 
 
