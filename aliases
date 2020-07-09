@@ -20,7 +20,7 @@ alias s='sshs $(history -p \!ssh:$:t)'
 alias aptupgrade='sudo /usr/bin/apt update && sudo /usr/bin/apt dist-upgrade'
 alias apt-get-key='sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys'
 # -- dnf
-alias dnfupgrade='sudo dnf upgrade'
+alias dnfupgrade='sudo dnf upgrade --refresh'
 
 # docker and docker-compose
 alias dcdown='docker-compose down'
@@ -126,6 +126,7 @@ alias youtube-dl-whole-video="youtube-dl -i --no-overwrites --write-description 
 alias youtube-dl-whole-video-to-playlistdir="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-whole-user="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-whole-playlist="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
+alias youtube-dl-mp4-best="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(title)s-%(id)s.%(ext)s' -w -c "
 
 # rock64
 alias rock64='sudo  minicom -D /dev/ttyUSB0 --color=on'
@@ -134,7 +135,7 @@ alias rock64='sudo  minicom -D /dev/ttyUSB0 -b 1500000--color=on'
 # openvpn
 alias ovpnrestart='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl restart openvpn-client@${HOSTNAME}.service'
 alias ovpnstart='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl start openvpn-client@${HOSTNAME}.service'
-alias ovpnstatus='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl status openvpn-client@${HOSTNAME}.service'
+alias ovpnstatus='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl status openvpn-client@${HOSTNAME}.service; echo; ip a'
 alias ovpnstop='[ $(id -u) -ne 0 ] && { S=sudo; } || { S="" ; } ; $S systemctl stop openvpn-client@${HOSTNAME}.service'
 
 # systemd

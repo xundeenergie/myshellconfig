@@ -15,12 +15,12 @@ if [[ $- = *i* ]] ; then
     #[ -z "${MYSHELLCONFIG_ROOT_TMOUT+x}" ]  && MYSHELLCONFIG_ROOT_TMOUT=500
     #[ -z "${MYSHELLCONFIG_USER_TMOUT+x}" ]  && MYSHELLCONFIG_USER_TMOUT=0
     [ -z "${USERNAME+x}" ]                  && USERNAME="$USER"
-    [ -z "${USEREMAIL+x}" ]                 && USEREMAIL="$USER@$(domainname -f)"
+    [ -z "${USEREMAIL+x}" ]                 && USEREMAIL="$USER@$(domainname -d)"
     [ -z "${FULLNAME+x}" ]                  && FULLNAME="$(getent passwd $USER | cut -d ":" -f 5 | cut -d ',' -f 1)"
     [ -z "${GIT_AUTHOR_NAME+x}" ]           && GIT_AUTHOR_NAME=$FULLNAME
-    [ -z "${GIT_AUTHOR_EMAIL+x}" ]          && GIT_AUTHOR_EMAIL=$FULLNAME
+    [ -z "${GIT_AUTHOR_EMAIL+x}" ]          && GIT_AUTHOR_EMAIL=$USEREMAIL
     [ -z "${GIT_COMMITTER_NAME+x}" ]        && GIT_COMMITTER_NAME=$FULLNAME
-    [ -z "${GIT_COMMITTER_EMAIL+x}" ]       && GIT_COMMITTER_EMAIL=$FULLNAME
+    [ -z "${GIT_COMMITTER_EMAIL+x}" ]       && GIT_COMMITTER_EMAIL=$USEREMAIL
 
     [ -z "${MYSHELLCONFIG_SUBPATH+x}" ]     && MYSHELLCONFIG_SUBPATH=".local/myshellconfig"
     [ -z "${MYSHELLCONFIG_BASE+x}" ]        && MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"

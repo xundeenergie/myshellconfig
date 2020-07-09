@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ssh -fN bmi-pfwd
+
+x2goclient --hide --close-disconnect --session "BMI Thunderbird" &
+
