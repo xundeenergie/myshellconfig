@@ -271,7 +271,7 @@ sshs() {
 
     local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" )
+    local FILELIST=( "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
 
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
@@ -279,6 +279,10 @@ sshs() {
 [ -e /etc/bashrc ] && BASHRC=/etc/bashrc
 [ -e /etc/bash.bashrc ] && BASHRC=/etc/bash.bashrc
 . \$BASHRC
+
+export USERNAME="${USERNAME}"
+export FULLNAME="${FULLNAME}"
+export USEREMAIL="${USEREMAIL}"
 
 for i in /etc/profile.d/*.sh; do
     if [ -r "$i" ];then
@@ -455,10 +459,10 @@ function tmuxx() {
             echo no session specified return
             ;;
     esac
-    TMUX='/usr/bin/tmux'
-    $TMUX -f ~/.tmux.conf new-session -d
-    [ -e ${SESS[0]} ] && $TMUX source-file ${SESS[0]}
-    $TMUX attach-session -d
+    TMUX_BIN='/usr/bin/tmux'
+    $TMUX_BIN -f ~/.tmux.conf new-session -d
+    [ -e ${SESS[0]} ] && $TMUX_BIN source-file ${SESS[0]}
+    $TMUX_BIN attach-session -d
 }
 
 
