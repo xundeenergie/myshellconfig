@@ -2,8 +2,9 @@
 
 parse_git_branch() {
 
-     git branch 2>/dev/null | sed -ne 's/* \(.*\)/ (\1)/p'
-     #git symbolic-ref --short HEAD 2> /dev/null | sed -ne 's/\(.*\)/ (\1)/p'
+    local BRANCH=$(git branch 2>/dev/null | sed -ne 's/* \(.*\)/ (\1/p')
+    BRANCH="$BRANCH -> $( git rev-parse --symbolic-full-name --abbrev-ref @{u}) )"
+    echo $BRANCH
 }
 
 set_label() {
