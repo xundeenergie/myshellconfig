@@ -6,6 +6,19 @@ parse_git_branch() {
      #git symbolic-ref --short HEAD 2> /dev/null | sed -ne 's/\(.*\)/ (\1)/p'
 }
 
+set_label() {
+    local LABEL
+    # Labels: remote, tmpconfig, screen...
+    if [ ! -z ${SSH_TTY:+x} ]; then 
+        LABEL="${LABEL} \[$On_IRed\]\[$BBlack\]remote\[$Color_Off\]"
+    fi
+    if $SSHS ; then 
+        LABEL="${LABEL} \[$On_IWhite\]\[$BBlack\]tmpconfig\[$Color_Off\]"
+    fi
+    echo $LABEL
+
+}
+
 if [ -x "/usr/bin/getsyssubvol" ]; then
     if [ "$(/usr/bin/getsyssubvol /)" = "/" ] ; then
         SYSSUBVOL=""
@@ -117,10 +130,15 @@ case "$TERM" in
         fi
 
         # Base prompt
+#        if [ "`id -u`" -eq 0 ]; then
+#           PS1="\[$BRed\]$SCREEN\u@\h \[$BRed\]\[\e[m\]\[$IPurple\](\A)\[\e[m\]$LABEL\n\[$BRed\]${SYSSUBVOL}\w:\$(parse_git_branch) \[\e[m\]\[$BRed\]# "
+#        else
+#           PS1="\[$BIBlue\]$SCREEN\u@\h \[$BIBlue\]\[\e[m\]\[$IPurple\](\A)\[\e[m\]$LABEL\n\[$BIBlue\]${SYSSUBVOL}\w:\$(parse_git_branch) \[\e[m\]\[$BIBlue\]\$ "
+#        fi
         if [ "`id -u`" -eq 0 ]; then
-           PS1="\[$BRed\]$SCREEN\u@\h \[$BRed\]\[\e[m\]\[$IPurple\](\A)\[\e[m\]$LABEL\n\[$BRed\]${SYSSUBVOL}\w:\$(parse_git_branch) \[\e[m\]\[$BRed\]# "
+           PS1="\[$BRed\]$SCREEN\u@\h \[$BRed\]\[\e[m\]\[$IPurple\](\A)\[\e[m\]$(set_label)\n\[$BRed\]${SYSSUBVOL}\w:\$(parse_git_branch) \[\e[m\]\[$BRed\]# "
         else
-           PS1="\[$BIBlue\]$SCREEN\u@\h \[$BIBlue\]\[\e[m\]\[$IPurple\](\A)\[\e[m\]$LABEL\n\[$BIBlue\]${SYSSUBVOL}\w:\$(parse_git_branch) \[\e[m\]\[$BIBlue\]\$ "
+           PS1="\[$BIBlue\]$SCREEN\u@\h \[$BIBlue\]\[\e[m\]\[$IPurple\](\A)\[\e[m\]$(set_label)\n\[$BIBlue\]${SYSSUBVOL}\w:\$(parse_git_branch) \[\e[m\]\[$BIBlue\]\$ "
         fi
         RETVAL0="\342\234\223"
         RETVALN0="\342\234\227 "
