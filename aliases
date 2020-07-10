@@ -193,3 +193,5 @@ alias gocnfhome='cd /var/atlassian/application-data/confluence/'
 alias gocnflog='cd /var/atlassian/application-data/confluence/logs'
 alias tailcnf='cd /var/atlassian/application-data/confluence/logs; tail -F atlassian-confluence.log'
 
+# eToken
+alias agent='eval "$(<~/.ssh-agent)"'
