@@ -1,9 +1,11 @@
 # /etc/profile.d/PS1.sh: executed by Bourne-compatible login shells.
 
 parse_git_branch() {
-    local BRANCH=$(git branch 2>/dev/null | sed -ne 's/* \(.*\)/ (\1/p')
-    BRANCH="$BRANCH ${BRANCH-->} $( git rev-parse --symbolic-full-name --abbrev-ref @{u} 2>/dev/null ) )"
-    echo $BRANCH
+    local LBRANCH="$(git branch 2>/dev/null | sed -ne 's/* \(.*\)/ \1/p'|tr -d \"[:blank:]\")"
+    local RBRANCH="$( git rev-parse --symbolic-full-name --abbrev-ref @{u} 2>/dev/null |tr -d \"[:blank:]\" )"
+    [ -z "${RBRANCH-x}" ] && unset RBRANCH
+    local BRANCH="$LBRANCH ${RBRANCH+->} $RBRANCH"
+    [ -z "${LBRANCH+x}" -o -z "${RBRANCH}" ] || echo "($BRANCH)"
 }
 
 set_label() {
