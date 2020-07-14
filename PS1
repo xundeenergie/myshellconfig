@@ -1,8 +1,11 @@
 # /etc/profile.d/PS1.sh: executed by Bourne-compatible login shells.
 
 parse_git_branch() {
+    # local git-branch
     local LBRANCH="$(git branch 2>/dev/null | sed -ne 's/* \(.*\)/ \1/p'|sed -e 's/^[[:blank:]]*//;s/[[:blank:]]*$//')"
+    # remote git-branch
     local RBRANCH="$( git rev-parse --symbolic-full-name --abbrev-ref @{u} 2>/dev/null |sed -e 's/^[[:blank:]]*//' )"
+    # unset RBRANCH if it is empty
     [ -z "${RBRANCH-x}" ] && unset RBRANCH
     local BRANCH="${LBRANCH}${RBRANCH+ -> }${RBRANCH}"
     [ -z "${BRANCH-x}" ] || echo "($BRANCH)"|tr -s '()'
@@ -16,13 +19,16 @@ set_label() {
     # Labels: remote, tmpconfig, screen...
     if [ ! -z ${SSH_TTY:+x} ]; then 
         #LABEL="${LABEL} \[$On_IRed\]\[$BBlack\]remote\[$Color_Off\]"
-        LABEL="${LABEL} \[$On_IRed\]remote\[$Color_Off\]"
+        LABEL="${LABEL} ${On_IRed}${BBlack}remote${Color_Off}"
+        #LABEL="${LABEL} \[$On_IRed\]remote\[$Color_Off\]"
     fi
     if $SSHS ; then 
         #LABEL="${LABEL} \[$On_IWhite\]\[$BBlack\]tmpconfig\[$Color_Off\]"
-        LABEL="${LABEL} \[$On_IWhite\]\[$BBlack\]tmpconfig\[$Color_Off\]"
+        LABEL="${LABEL} ${On_IWhite}${BBlack}tmpconfig${Color_Off}"
+        #LABEL="${LABEL} \[$On_IWhite\]\[$BBlack\]tmpconfig\[$Color_Off\]"
     fi
-    echo ${LABEL@P}
+    echo -e ${LABEL}
+    #echo ${LABEL@P}
 }
 
 if [ -x "/usr/bin/getsyssubvol" ]; then
