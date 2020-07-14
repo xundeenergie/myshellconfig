@@ -18,14 +18,20 @@ set_label() {
 
     # Labels: remote, tmpconfig, screen...
     if [ ! -z ${SSH_TTY:+x} ]; then 
+        # oritinal
         #LABEL="${LABEL} \[$On_IRed\]\[$BBlack\]remote\[$Color_Off\]"
-        LABEL="${LABEL} ${On_IRed}${BBlack}remote${Color_Off}"
+        # use with echo ${LABEL@P}
         #LABEL="${LABEL} \[$On_IRed\]remote\[$Color_Off\]"
+        # use with echo -e ${LABEL}
+        LABEL="${LABEL} ${On_IRed}${BBlack}remote${Color_Off}"
     fi
     if $SSHS ; then 
+        # oritinal
         #LABEL="${LABEL} \[$On_IWhite\]\[$BBlack\]tmpconfig\[$Color_Off\]"
+        # use with echo ${LABEL@P}
+        #LABEL="${LABEL} \[$On_IWhite\]\[$BBlack\]tmpconfig\[$Color_Off\]"
+        # use with echo -e ${LABEL}
         LABEL="${LABEL} ${On_IWhite}${BBlack}tmpconfig${Color_Off}"
-        #LABEL="${LABEL} \[$On_IWhite\]\[$BBlack\]tmpconfig\[$Color_Off\]"
     fi
     echo -e ${LABEL}
     #echo ${LABEL@P}
