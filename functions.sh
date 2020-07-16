@@ -14,13 +14,13 @@ sudo() {
     local SUDO
     SUDO=$( if [ -e /bin/sudo ]; then echo /bin/sudo; else echo /usr/bin/sudo; fi )
     $SUDO \
-        export GIT_AUTHOR_EMAIL="$GIT_AUTHOR_EMAIL" \
-        export GIT_AUTHOR_NAME="$GIT_AUTHOR_NAME" \
-        export GIT_COMMITTER_EMAIL="$GIT_COMMITTER_EMAIL" \
-        export GIT_COMMITTER_NAME="$GIT_COMMITTER_NAME" \
-        export TMUX="$TMUX" \
-        export SSHS="$SSHS" \
-        export SSH_TTY="$SSH_TTY" \
+        GIT_AUTHOR_EMAIL="$GIT_AUTHOR_EMAIL" \
+        GIT_AUTHOR_NAME="$GIT_AUTHOR_NAME" \
+        GIT_COMMITTER_EMAIL="$GIT_COMMITTER_EMAIL" \
+        GIT_COMMITTER_NAME="$GIT_COMMITTER_NAME" \
+        TMUX="$TMUX" \
+        SSHS="$SSHS" \
+        SSH_TTY="$SSH_TTY" \
         "$@"
 
 }
