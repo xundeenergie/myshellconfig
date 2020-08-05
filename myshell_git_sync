@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Sync myshellconfig with configured git repo
+echo "source myshell_git_sync" >&2
 if ! $SSHS; then
     ### set userspecific variables #######
     [ -z "$PDSH_RCMD_TYPE" ] && export PDSH_RCMD_TYPE=ssh
