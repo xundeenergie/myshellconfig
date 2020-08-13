@@ -649,6 +649,10 @@ reachable () {
 
 }
 
+utoken () {
+[ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; ssh-add -e $PKCS11_MODULE; }
+
+}
 token () {
 
 [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
