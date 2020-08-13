@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo remove frozen mails from mailq
+
+sudo bash <<"EOF"
+exim -Mrm $(mailq|awk '$0 ~ /.*frozen.*/ {print $3}')
+EOF
