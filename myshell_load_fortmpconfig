@@ -21,3 +21,9 @@ export WORK=~/Work
 [ -z "${GIT_COMMITTER_EMAIL+x}" ]       && export GIT_COMMITTER_EMAIL=$USEREMAIL
 
 turnoffbeep
+
+export HISTCONTROL=erasedups:ignorespace:ignoredups
+export HISTIGNORE="ls:l:cd:exit:pwd:date:mencfs:"
+
+# append the commands to the history file instead of overwriting
+shopt -s histappend
