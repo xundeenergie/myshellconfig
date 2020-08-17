@@ -37,6 +37,7 @@ esac
 # Output
 #echo -n " remote: ${MYSHELLCONFIG_GIT_REMOTE_NAME}, branch: ${MYSHELLCONFIG_GIT_BRANCH}: "
 
+#echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
 $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { echo fetch failed; exit 1; }
 
 if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MYSHELLCONFIG_LOGFILE}" ; then
