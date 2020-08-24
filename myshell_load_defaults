@@ -14,7 +14,7 @@ case $(tty) in
         echo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
         ;;
     *)
-        echo "Run in other terminal - set no autologout" >&2
+        echo "Run in graphical terminal - set no autologout" >&2
         unset TMOUT
         ;;
 esac
