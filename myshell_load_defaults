@@ -123,3 +123,6 @@ export HISTSIZE=999999
 echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
 #echo "bashrc_add sourced" >&2
 
+# Export several functions for being usable in subshells
+export -f token
+export -f sudo
