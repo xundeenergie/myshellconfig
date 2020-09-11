@@ -620,7 +620,7 @@ reachable () {
     local SEC=${3:-1}
     local res=999
     local i
-    $MYSHELLCONFIG_DEBUG && echo -n "Try to connect to ${SERVER}(${IP}):${PORT} " >&2
+    $MYSHELLCONFIG_DEBUG && echo -n "Try to connect to ${SERVER} (${IP}):${PORT} " >&2
     for i in $(seq 1 $SEC); do
         $MYSHELLCONFIG_DEBUG && echo -n "." >&2
         if reachable-default ${IP} ${PORT} 2>/dev/null; then
