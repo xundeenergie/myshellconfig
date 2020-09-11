@@ -591,22 +591,25 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
 reachable-default () {
     local SERVER=$1
     local PORT=${2:-22}
-    local res=1
+    local res=3
     if nc -z $SERVER $PORT 2>/dev/null; then
         res=0
-    else
-        res=1
     fi
     return $res
 }
 
 reachable () {
+    # returncodes:
+    #   1: servername not resolveable
+    #   3: server:port not reachable
+    #   999999: something went wrong
+    #   0: server was resolve- and reachable
     local SERVER=$1
     # dig does not consult /etc/hosts, so use getent hosts instead
     #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
     # getent ahostsv4 returns only ipv4 addresses
-    local IP=$(getent ahostsv4 $SERVER|awk '$0 ~ /STREAM/ {print $1}'|uniq|head -n1)
     $MYSHELLCONFIG_DEBUG && echo -n "Try to resolve $SERVER: "
+    local IP=$(getent ahostsv4 $SERVER|awk '$0 ~ /STREAM/ {print $1}'|uniq|head -n1)
     if [ -z ${IP-x} ]; then 
         $MYSHELLCONFIG_DEBUG && echo "not resolvable -> exit"
         return 1
@@ -615,14 +618,15 @@ reachable () {
     fi
     local PORT=${2:-22}
     local SEC=${3:-1}
-    local res=1
+    local res=999999
     local i
     echo -n "Try to connect to ${SERVER}(${IP}):${PORT} " >&2
     for i in $(seq 1 $SEC); do
         echo -n "." >&2
         if reachable-default ${IP} ${PORT} 2>/dev/null; then
-            res=0
             break
+        else
+            res=$?
         fi
         [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
     done
