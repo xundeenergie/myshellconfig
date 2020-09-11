@@ -604,7 +604,15 @@ reachable () {
     local SERVER=$1
     # dig does not consult /etc/hosts, so use getent hosts instead
     #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
-    local IP=$(getent ahosts $SERVER|awk '$0 ~ /STREAM/ {print $1}')
+    # getent ahostsv4 returns only ipv4 addresses
+    local IP=$(getent ahostsv4 $SERVER|awk '$0 ~ /STREAM/ {print $1}'|uniq|head -n1)
+    $MYSHELLCONFIG_DEBUG && echo -n "Try to resolve $SERVER: "
+    if [ -z ${IP-x} ]; then 
+        $MYSHELLCONFIG_DEBUG && echo "not resolvable -> exit"
+        return 1
+    else
+        $MYSHELLCONFIG_DEBUG && echo $IP
+    fi
     local PORT=${2:-22}
     local SEC=${3:-1}
     local res=1
