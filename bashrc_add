@@ -2,8 +2,31 @@
 #debug
 
 # set SSHS to false, if not set
-if [ -z ${SSHS+x} ]; then SSHS=false;fi
-if [ -z ${MYSHELLCONFIG_DEBUG+x} ]; then MYSHELLCONFIG_DEBUG=false;fi
+if [ -z ${SSHS+x} ]; then export SSHS=false;fi
+
+# define debug default
+MYSHELLCONFIG_DEBUG_DEFAULT=false
+# set debug to default, if not set
+if [ -z ${MYSHELLCONFIG_DEBUG+x} ]; then export MYSHELLCONFIG_DEBUG=$MYSHELLCONFIG_DEBUG_DEFAULT;fi
+
+turnondebug() {
+    change_debug true
+}
+
+turnoffdebug() {
+    change_debug false
+}
+
+change_debug () {
+    if $1; then
+        echo turn ON debug myshellconfig
+        export MYSHELLCONFIG_DEBUG=true
+    else
+        echo turn OFF debug myshellconfig
+        export MYSHELLCONFIG_DEBUG=false
+    fi
+}
+
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
