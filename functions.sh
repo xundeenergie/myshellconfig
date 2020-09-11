@@ -608,7 +608,9 @@ reachable-default () {
 reachableim () {
     
     local SERVER=$1
-    local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
+    # dig does not consult /etc/hosts, so use getent hosts instead
+    #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
+    local IP=$(getent ahosts $SERVER|awk '$0 ~ /STREAM/ {print $1}')
     local PORT=${2:-22}
     local SEC=${3:-1}
     local res=1
@@ -631,7 +633,9 @@ reachableim () {
 
 reachable () {
     local SERVER=$1
-    local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
+    # dig does not consult /etc/hosts, so use getent hosts instead
+    #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
+    local IP=$(getent ahosts $SERVER|awk '$0 ~ /STREAM/ {print $1}')
     local PORT=${2:-22}
     local SEC=${3:-1}
     local res=1
