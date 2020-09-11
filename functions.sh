@@ -605,32 +605,6 @@ reachable-default () {
     return $res
 }
 
-reachableim () {
-    
-    local SERVER=$1
-    # dig does not consult /etc/hosts, so use getent hosts instead
-    #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
-    local IP=$(getent ahosts $SERVER|awk '$0 ~ /STREAM/ {print $1}')
-    local PORT=${2:-22}
-    local SEC=${3:-1}
-    local res=1
-    local i
-    echo -n "Try to connect to ${SERVER}:${PORT} " >&2
-    for i in $(seq 1 $SEC); do
-        echo -n "." >&2
-        if reachable-default ${IP} ${PORT} 2>/dev/null; then
-            res=0
-            break
-        fi
-        [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
-    done
-
-    [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2
-
-    return $res
-
-}
-
 reachable () {
     local SERVER=$1
     # dig does not consult /etc/hosts, so use getent hosts instead
