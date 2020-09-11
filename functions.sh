@@ -592,6 +592,9 @@ reachable-default () {
     local SERVER=$1
     local PORT=${2:-22}
     local res=1
+    if $MYSHELLCONFIG_DEBUG; then
+        echo SERVER:PORT "${SERVER}:${PORT}"
+    fi
     if nc -z $SERVER $PORT 2>/dev/null; then
         echo "${SERVER}:${PORT} is reachable" >&2
         res=0
