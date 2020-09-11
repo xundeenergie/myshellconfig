@@ -3,6 +3,7 @@
 
 # set SSHS to false, if not set
 if [ -z ${SSHS+x} ]; then SSHS=false;fi
+if [ -z ${MYSHELLCONFIG_DEBUG+x} ]; then MYSHELLCONFIG_DEBUG=false;fi
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
