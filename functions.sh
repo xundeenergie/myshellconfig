@@ -604,12 +604,35 @@ reachable () {
     #   3: server:port not reachable
     #   999999: something went wrong
     #   0: server was resolve- and reachable
+    GETENTHOSTS=ahosts
+#    echo $@
+#    while getopts ":i:" arg; do
+#        echo arg $arg
+#      case $arg in
+#        i) # Specify p value.
+#            echo OPTARG: ${OPTARG}
+#            case ${OPTARG} in
+#                4) 
+#                    GETENTHOSTS=ahostsv4
+#                    ;;
+#                6) # Specify strength, either 45 or 90.
+#                    GETENTHOSTS=ahostsv6
+#                    ;;
+#            esac
+#            ;;
+#        *)
+#            break
+#            ;;
+#      esac
+#    done
+#
+#    echo $@
     local SERVER=$1
     # dig does not consult /etc/hosts, so use getent hosts instead
     #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
     # getent ahostsv4 returns only ipv4 addresses
     $MYSHELLCONFIG_DEBUG && echo -n "Try to resolve $SERVER: "
-    local IP=$(getent ahostsv4 $SERVER|awk '$0 ~ /STREAM/ {print $1}'|uniq|head -n1)
+    local IP=$(getent $GETENTHOSTS $SERVER|awk '$0 ~ /STREAM/ {print $1}'|uniq|head -n1)
     if [ -z ${IP-x} ]; then 
         $MYSHELLCONFIG_DEBUG && echo "not resolvable -> exit"
         return 1
