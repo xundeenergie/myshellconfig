@@ -618,12 +618,13 @@ reachable () {
     fi
     local PORT=${2:-22}
     local SEC=${3:-1}
-    local res=999999
+    local res=999
     local i
-    echo -n "Try to connect to ${SERVER}(${IP}):${PORT} " >&2
+    $MYSHELLCONFIG_DEBUG && echo -n "Try to connect to ${SERVER}(${IP}):${PORT} " >&2
     for i in $(seq 1 $SEC); do
-        echo -n "." >&2
+        $MYSHELLCONFIG_DEBUG && echo -n "." >&2
         if reachable-default ${IP} ${PORT} 2>/dev/null; then
+            res=0
             break
         else
             res=$?
@@ -631,7 +632,9 @@ reachable () {
         [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
     done
 
-    [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2
+    if $MYSHELLCONFIG_DEBUG ; then
+        [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2; 
+    fi
 
     return $res
 
