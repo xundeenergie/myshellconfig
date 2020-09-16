@@ -741,17 +741,33 @@ fi
 #EOF
 
 token-extract-pubkey() {
+    if pkcs11-tool --module $PKCS11_MODULE --list-token-slots >&2 ;then
+        ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+        if [ $? -gt 0 ] ; then
+            token-list-objects
+        fi
+    else
+        echo "Please insert token. Exit"
+        return 1
+    fi
+#    case $1 in
+#        --id|-d|--label|-a)
+#            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+#            ;;
+#        --login|-l)
+#            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE --login -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+#            ;;
+#    esac
+}
+
+token-list-objects() {
     case $1 in
-        --id|-d|--label|-a)
-            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
-            ;;
         --login|-l)
-            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE --login -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+            pkcs11-tool --module $PKCS11_MODULE --login --list-objects
             ;;
         *)
-            echo "Please specify id or label as used in pkcs11-tool"
-            man pkcs11-tool
-            return 1
+            pkcs11-tool --module $PKCS11_MODULE --list-objects
             ;;
     esac
+
 }
