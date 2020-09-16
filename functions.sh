@@ -739,3 +739,19 @@ else
 fi
 }
 #EOF
+
+token-extract-pubkey() {
+    case $1 in
+        --id|-d|--label|-a)
+            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+            ;;
+        --login|-l)
+            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE --login -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+            ;;
+        *)
+            echo "Please specify id or label as used in pkcs11-tool"
+            man pkcs11-tool
+            return 1
+            ;;
+    esac
+}
