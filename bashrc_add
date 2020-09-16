@@ -127,6 +127,9 @@ EOF
     # source loading defaults part of myshellconfig
     . "${MYSHELLCONFIG_BASE}/myshell_load_defaults"
 
+    # source loading workaround for x2go to forward local etoken to remote machine with forwardagent
+    . "${MYSHELLCONFIG_BASE}/myshell_load_x2go_tokenforward"
+
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     --8<--- end ---------------- $(date) ---------------8<--
 
