@@ -71,6 +71,8 @@ alias gosystemd='cd /etc/systemd/system/'
 alias goudevrules='cd /etc/udev/rules.d/'
 alias gousrlocal='cd /usr/local/'
 alias gousrlocalbin='cd /usr/local/bin/'
+alias gossh='[ -e $(xdg-user-dir)/.ssh ] && cd $(xdg-user-dir)/.ssh'
+alias gosshd='[ -e /etc/ssh ] && cd /etc/ssh'
 
 # btrfs-backup
 alias golocbak='cd /var/cache/btrfs_pool_SYSTEM/'
