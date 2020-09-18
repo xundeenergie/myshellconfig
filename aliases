@@ -198,3 +198,7 @@ alias tailcnf='cd /var/atlassian/application-data/confluence/logs; tail -F atlas
 
 # eToken
 alias agent='eval "$(<~/.ssh-agent)"'
+
+# PasswordStore
+alias passbmi='PASSWORD_STORE_DIR=~/.password-store/bmi pass'
+alias passebcont='PASSWORD_STORE_DIR=~/.password-store/ebcont pass'
