@@ -698,7 +698,7 @@ if [ "$?" == 0 ]; then
     if [ "$?" == 0 ]; then
         test -n "${SSH_AUTH_SOCK+x}"
         if [ "$?" == 0 ] ; then
-            SSH_AGENT_PID="$(sudo fuser "$SSH_AUTH_SOCK" 2>/dev/null)"
+            SSH_AGENT_PID="$(sudo fuser "$SSH_AUTH_SOCK" 2>/dev/null | sed 's/ *//')"
             test -n "${SSH_AGENT_PID+x}"
             if [ "$?" == 0 ]; then
                 SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
