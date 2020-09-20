@@ -836,7 +836,7 @@ token-list-objects() {
 
 }
 
-loadagent () {
+ssh-loadagent () {
 
     # TODO: create agent if not running
     cat << EOF
@@ -844,14 +844,26 @@ loadagent () {
     SSH_AGENT_PID: ${SSH_AGENT_PID}
   ---------------------------------------------  
 EOF
-    ssh_identity=$1
+    ssh_identity=${1-default}
+    agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+    echo agentfile: $agentfile
 
     if [ -n "${ssh_identity+x}" ]; then
-        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
         if [ -e "$agentfile" ]; then 
             . $agentfile
+            if ssh-add -l >/dev/null ;then
+                echo agent is running
+            else
+                echo create new agent
+                ssh-agent > "$agentfile"
+            fi
+        else
+            echo create new agent
+            ssh-agent > "$agentfile"
         fi
     fi
+
+    eval $(<$agentfile)
 
     cat << EOF
     SSH_AUTH_SOCK: ${SSH_AUTH_SOCK}
