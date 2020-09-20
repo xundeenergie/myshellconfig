@@ -664,32 +664,98 @@ reachable () {
 }
 
 utoken () {
-[ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; ssh-add -e $PKCS11_MODULE; }
+
+    ssh_identity=$1
+
+    if [ -n "${ssh_identity+x}" ]; then
+        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+        if [ -e "$agentfile" ]; then 
+            local SSH_AUTH_SOCK
+            local SSH_AGENT_PID
+            . $agentfile
+        fi
+    fi
+
+    echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+    echo SSH_AGENT_PID: $SSH_AGENT_PID
+    export SSH_AUTH_SOCK SSH_AGENT_PID
+    ssh-add -l
+    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; ssh-add -e $PKCS11_MODULE; }
+
 
 }
+
 token () {
 
-[ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+    local FORCE
+    FORCE=false
+    case $1 in
+        -f)
+            FORCE=true
+            ssh_identity=$2
+            ;;
+        *)
+            ssh_identity=$1
+            ;;
+    esac
+    local fingerprints
+    declare -a fingerprints
+    local tokenfingerprint
 
-ssh-add -l &>/dev/null
-if [ "$?" == 2 ]; then
-    test -r ~/.ssh-agent && \
-    echo "create new ssh-agent" >&2
-    eval "$(<~/.ssh-agent)" >&2
-    #eval "$(<~/.ssh-agent)" >/dev/null
+    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
 
-    ssh-add -l &>/dev/null
-    if [ "$?" == 2 ]; then
-        echo "create new ssh-agent and load env for it" >&2
-        (umask 066; ssh-agent > ~/.ssh-agent)
-        eval "$(<~/.ssh-agent)"  >&2
-        #eval "$(<~/.ssh-agent)" >/dev/null
+    # TODO: write default-agent to default-agent-file on shell-start
+    if [ -n "${ssh_identity+x}" ]; then
+        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+        if [ -e "$agentfile" ]; then 
+            local SSH_AUTH_SOCK
+            local SSH_AGENT_PID
+            . $agentfile
+        fi
     fi
-else
-    :
-fi
 
-ssh-add -l &>/dev/null
+    echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+    echo SSH_AGENT_PID: $SSH_AGENT_PID
+    export SSH_AUTH_SOCK SSH_AGENT_PID
+    ssh-add -l
+    fingerprints=( $(ssh-add -l|awk '{print $2}') )
+    tokenfingerprint="$(ssh-keygen -l -D $PKCS11_MODULE|tr -s ' '|awk '{print $2}')"
+    
+    echo fingerprints ${fingerprints[*]}
+    echo -n "${tokenfingerprint}: "
+    if [[ ${fingerprints[*]} =~ $tokenfingerprint ]]; then
+        echo "loaded"
+        $FORCE && { \
+            ssh-add -e $PKCS11_MODULE; \
+            ssh-add -s $PKCS11_MODULE; \
+        }
+    else
+        echo "not loaded"
+        $FORCE && ssh-add -e $PKCS11_MODULE
+        ssh-add -s $PKCS11_MODULE
+    fi
+
+    return
+
+    ssh-add -l 2>/dev/null
+    if [ "$?" == 2 ]; then
+        test -r ~/.ssh-agent && \
+        echo "create new ssh-agent" >&2
+        eval "$(<~/.ssh-agent)" >&2
+        #eval "$(<~/.ssh-agent)" >/dev/null
+
+        ssh-add -l 2>/dev/null
+        if [ "$?" == 2 ]; then
+            echo "create new ssh-agent and load env for it" >&2
+            (umask 066; ssh-agent > ~/.ssh-agent)
+            eval "$(<~/.ssh-agent)"  >&2
+            #eval "$(<~/.ssh-agent)" >/dev/null
+        fi
+    else
+        :
+    fi
+
+ssh-add -l 2>/dev/null
 #ssh-add -l & >&2
 if [ "$?" == 0 ]; then
     # Remove and add again $PKCS11_MODULE
@@ -698,7 +764,7 @@ if [ "$?" == 0 ]; then
     if [ "$?" == 0 ]; then
         test -n "${SSH_AUTH_SOCK+x}"
         if [ "$?" == 0 ] ; then
-            SSH_AGENT_PID="$(sudo fuser "$SSH_AUTH_SOCK" 2>/dev/null | sed 's/ *//')"
+            SSH_AGENT_PID=$(sudo fuser $SSH_AUTH_SOCK | sed 's/  *//')
             test -n "${SSH_AGENT_PID+x}"
             if [ "$?" == 0 ]; then
                 SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
@@ -717,8 +783,6 @@ echo Auth socket ${SSH_AUTH_SOCK};
 echo Agent pid not known;
 EOF
             fi
-        else
-            :
         fi
         #eval "\$(<~/.ssh-agent)"
     else
@@ -771,3 +835,29 @@ token-list-objects() {
     esac
 
 }
+
+loadagent () {
+
+    # TODO: create agent if not running
+    cat << EOF
+    SSH_AUTH_SOCK: ${SSH_AUTH_SOCK}
+    SSH_AGENT_PID: ${SSH_AGENT_PID}
+  ---------------------------------------------  
+EOF
+    ssh_identity=$1
+
+    if [ -n "${ssh_identity+x}" ]; then
+        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+        if [ -e "$agentfile" ]; then 
+            . $agentfile
+        fi
+    fi
+
+    cat << EOF
+    SSH_AUTH_SOCK: ${SSH_AUTH_SOCK}
+    SSH_AGENT_PID: ${SSH_AGENT_PID}
+  ---------------------------------------------  
+EOF
+
+}
+
