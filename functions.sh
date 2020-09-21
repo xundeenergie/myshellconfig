@@ -793,3 +793,14 @@ ssh-runinagent () {
     fi
 }
 
+changeloglevel () {
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
+    if [[ ${loglevels[*]} =~ $1 ]]; then
+        export LOGLEVEL=$1
+    else
+        logerror "LOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
+    fi
+}
+
