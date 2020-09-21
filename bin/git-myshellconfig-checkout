@@ -20,6 +20,7 @@
 [ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME+x}" ] && export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
 [ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
 
+ENTRY
 cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 +-----BEGINN $(date) -------------------------------+
 EOF
@@ -107,5 +108,6 @@ cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 +-----ENDE $(date) ---------------------------------+
  
 EOF
+EXIT
 exit $rc
 
