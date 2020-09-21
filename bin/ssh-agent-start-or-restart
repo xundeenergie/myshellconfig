@@ -29,7 +29,7 @@ agent-start-or-restart () {
 #            sshsock=$SSH_AUTH_SOCK
 #            sshpid=$SSH_AGENT_PID
 #            unset SSH_AUTH_SOCK SSH_AGENT_PID
-            logdebug $(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >&2")
+            logdebug "$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >&2")"
             case $? in
                 0|1)
                     logdebug "agent is running" >&2
@@ -80,7 +80,7 @@ agent-load-identity-keys () {
         agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
         logdebug "agentfile: $agentfile" >&2
         logdebug "agentsocket: $agentsocket" >&2
-        logdebug ssh-identität: $ssh_identity >&2
+        logdebug "ssh-identität: $ssh_identity" >&2
 
         fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
         for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep -v "pub$\|so$"); do
