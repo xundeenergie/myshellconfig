@@ -108,3 +108,13 @@ function logtrace(){
         echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG
     fi
 }
+
+export -f logerror
+export -f logwarn
+export -f loginfo
+export -f logdebug
+export -f logtrace
+export -f SCRIPTENTRY
+export -f ENTRY
+export -f SCRIPTEXIT
+export -f EXIT

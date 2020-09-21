@@ -133,15 +133,6 @@ export -f token
 export -f sudo
 export -f reachable
 export -f reachable-default
-export -f logerror
-export -f logwarn
-export -f loginfo
-export -f logdebug
-export -f logtrace
-export -f SCRIPTENTRY
-export -f ENTRY
-export -f SCRIPTEXIT
-export -f EXIT
 
 
 
