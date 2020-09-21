@@ -6,6 +6,7 @@
 
 export TMUX_SESSION_DIRS SETPROXY_CREDS_DIRS KERBEROS_CONFIG_DIRS
 
+
 cpb() {
     scp "$1" ${SSH_CLIENT%% *}:~/Work
 }
@@ -682,6 +683,8 @@ utoken () {
 token () {
 
     [ -z "${SSH_ADD_OPTIONS+x}" ] && { SSH_ADD_OPTIONS=${SSH_ADD_DEFAULT_OPTIONS}; export SSH_ADD_OPTIONS; }
+    echo [ -z "${SSH_IDENTITIES_DIR+x}" ]
+    [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR=${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}; export SSH_IDENTITIES_DIR; }
     local FORCE
     local ssh_identity
     FORCE=false
@@ -695,7 +698,10 @@ token () {
             ;;
     esac
     identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
-    [ -e "${identitydir}/.config" ] && . "${identitydir}/.config"
+    echo identitydir: $identitydir 
+    [ -e "${identitydir}/config" ] && echo found "${identitydir}/config"
+    [ -e "${identitydir}/config" ] && eval $(<"${identitydir}/config")
+    echo SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS
     local fingerprints
     declare -a fingerprints
     local tokenfingerprint
