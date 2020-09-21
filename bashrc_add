@@ -36,7 +36,7 @@ change_debug () {
 }
 
 #### LOGGING
-SCRIPT_LOG=${HOME}/myshellconfig.log
+export SCRIPT_LOG=${HOME}/myshellconfig.log
 touch $SCRIPT_LOG
 
 export LOGLEVEL="INFO"
