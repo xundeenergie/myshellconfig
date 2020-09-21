@@ -29,7 +29,7 @@ agent-start-or-restart () {
 #            sshsock=$SSH_AUTH_SOCK
 #            sshpid=$SSH_AGENT_PID
 #            unset SSH_AUTH_SOCK SSH_AGENT_PID
-            /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >&2"
+            logdebug $(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >&2")
             case $? in
                 0|1)
                     logdebug "agent is running" >&2
