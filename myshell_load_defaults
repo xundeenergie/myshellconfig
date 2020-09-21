@@ -136,9 +136,9 @@ export -f reachable-default
 
 
 cat << EOF > ~/.ssh/agents/agent-default-$(hostname)
-SSH_AUTH_SOCK=\${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
-SSH_AGENT_PID=\${SSH_AGENT_PID}; export SSH_AGENT_PID;
-echo Agent pid \${SSH_AGENT_PID};
+SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
+SSH_AGENT_PID=${SSH_AGENT_PID}; export SSH_AGENT_PID;
+echo Agent pid ${SSH_AGENT_PID};
 EOF
 
 [ -z "${SSH_ADD_DEFAULT_OPTIONS+x}" ]       && { SSH_ADD_DEFAULT_OPTIONS="-t 7200"; export SSH_ADD_DEFAULT_OPTIONS; }
