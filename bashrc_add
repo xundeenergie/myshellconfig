@@ -263,3 +263,4 @@ else
     logtrace "non-interactive shell" >&2
 fi
 
+SCRIPTEXIT
