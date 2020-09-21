@@ -85,6 +85,7 @@ agent-load-identity-keys () {
         logdebug "agentfile: $agentfile" >&2
         logdebug "agentsocket: $agentsocket" >&2
         logdebug "ssh-identität: $ssh_identity" >&2
+        loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
 
         fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
         for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep -v "pub$\|so$"); do
