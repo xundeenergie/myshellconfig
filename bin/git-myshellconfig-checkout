@@ -12,8 +12,10 @@
 #################################################################################################
 
 [ -z "${SGIT+x}" ] && SGIT=git
-MYSHELLCONFIG_LOGDIR="./logs"
-MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/git.log"
+    [ -z "${MYSHELLCONFIG_LOGDIR+x}" ]                  && export MYSHELLCONFIG_LOGDIR="${HOME}/logs"
+    [ -z "${MYSHELLCONFIG_LOGFILE+x}" ]                 && export MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/myshellconfig.log"
+#MYSHELLCONFIG_LOGDIR="./logs"
+#MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/git.log"
 [ -d "${MYSHELLCONFIG_LOGDIR}" ] || mkdir -p "${MYSHELLCONFIG_LOGDIR}"
 [ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME+x}" ] && export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
 [ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
