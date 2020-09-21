@@ -45,27 +45,36 @@ function ERROR(){
  local function_name="${FUNCNAME[1]}"
     local msg="$1"
     timeAndDate=`date`
-    if [ ("ERROR") =~ "${LOGLEVEL}" ];then
+    local loglevels
+    declare -a loglevels
+    loglevels=()
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
     echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
 }
 
 function WARN(){
- local function_name="${FUNCNAME[1]}"
+    local function_name="${FUNCNAME[1]}"
     local msg="$1"
     timeAndDate=`date`
-    if [ ("ERROR" "WARN") =~ "${LOGLEVEL}" ];then
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" )
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
     echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
 }
 
 function INFO(){
- local function_name="${FUNCNAME[1]}"
+    local function_name="${FUNCNAME[1]}"
     local msg="$1"
     timeAndDate=`date`
-    if [ ("ERROR" "WARN" "INFO") =~ "${LOGLEVEL}" ];then
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" )
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
     echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
@@ -73,10 +82,13 @@ function INFO(){
 
 
 function DEBUG(){
- local function_name="${FUNCNAME[1]}"
+    local function_name="${funcname[1]}"
     local msg="$1"
     timeAndDate=`date`
-    if [ ("ERROR" "WARN" "INFO" "DEBUG") =~ "${LOGLEVEL}" ];then
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
  echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
@@ -111,6 +123,7 @@ if [[ $- = *i* ]] ; then
     MYSHELLCONFIG_BASH_COMPLETION="${HOME}/${MYSHELLCONFIG_SUBPATH}/bash_completion.d"
     [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ]                && MYSHELLCONFIG_GIT_SYNC=true
 
+    [ -z "${MYHSELLCONFIG_LOGLEVEL_DEFAULT+x}" ]        && { MYHSELLCONFIG_LOGLEVEL_DEFAULT="INFO"; export MYHSELLCONFIG_LOGLEVEL_DEFAULT; }
 
     export SGIT="git -C ${MYSHELLCONFIG_BASE}" 
     export MYSHELLCONFIG_VIM_PLUGINS
