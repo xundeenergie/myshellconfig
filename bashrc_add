@@ -12,138 +12,6 @@
 # set SSHS to false, if not set
 if [ -z ${SSHS+x} ]; then export SSHS=false;fi
 
-# define debug default
-MYSHELLCONFIG_DEBUG_DEFAULT=false
-# set debug to default, if not set
-if [ -z ${MYSHELLCONFIG_DEBUG+x} ]; then export MYSHELLCONFIG_DEBUG=$MYSHELLCONFIG_DEBUG_DEFAULT;fi
-
-turnondebug() {
-    change_debug true
-}
-
-turnoffdebug() {
-    change_debug false
-}
-
-change_debug () {
-    if $1; then
-        echo turn ON debug myshellconfig
-        export MYSHELLCONFIG_DEBUG=true
-    else
-        echo turn OFF debug myshellconfig
-        export MYSHELLCONFIG_DEBUG=false
-    fi
-}
-
-#### LOGGING
-## from https://www.cubicrace.com/2016/03/log-tracing-mechnism-for-shell-scripts.html
-export SCRIPT_LOG=${HOME}/logs/myshellconfig.log
-mkdir -p "$(dirname ${SCRIPT_LOG})"
-touch $SCRIPT_LOG
-
-function SCRIPTENTRY(){
-    timeAndDate=`date`
-    script_name=`basename "$0"`
-    script_name="${script_name%.*}"
-    echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $SCRIPT_LOG
-}
-
-function SCRIPTEXIT(){
-    script_name=`basename "$0"`
-    script_name="${script_name%.*}"
-    echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $SCRIPT_LOG
-}
-
-function ENTRY(){
-    local cfn="${FUNCNAME[1]}"
-    timeAndDate=`date`
-    echo "[$timeAndDate] [DEBUG]  > $cfn $FUNCNAME" >> $SCRIPT_LOG
-}
-
-function EXIT(){
-    local cfn="${FUNCNAME[1]}"
-    timeAndDate=`date`
-    echo "[$timeAndDate] [DEBUG]  < $cfn $FUNCNAME" >> $SCRIPT_LOG
-}
-
-function logerror(){
-    local function_name="${FUNCNAME[1]}"
-    local msg="$1"
-    timeAndDate=`date`
-    local loglevels
-    declare -a loglevels
-    loglevels=()
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
-    fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
-        echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
-    fi
-}
-
-function logwarn(){
-    local function_name="${FUNCNAME[1]}"
-    local msg="$1"
-    timeAndDate=`date`
-    local loglevels
-    declare -a loglevels
-    loglevels=("ERROR" )
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
-    fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
-        echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
-    fi
-}
-
-function loginfo(){
-    local function_name="${FUNCNAME[1]}"
-    local msg="$1"
-    timeAndDate=`date`
-    local loglevels
-    declare -a loglevels
-    loglevels=("ERROR" "WARN" )
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
-    fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
-        echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
-    fi
-}
-
-
-function logdebug(){
-    local function_name="${funcname[1]}"
-    local msg="$1"
-    timeAndDate=`date`
-    local loglevels
-    declare -a loglevels
-    loglevels=("ERROR" "WARN" "INFO")
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
-    fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
-        echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
-    fi
-}
-
-function logtrace(){
-    local function_name="${funcname[1]}"
-    local msg="$1"
-    timeAndDate=`date`
-    local loglevels
-    declare -a loglevels
-    loglevels=("ERROR" "WARN" "INFO" "DEBUG")
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
-    fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
-        echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG
-    fi
-}
-
-SCRIPTENTRY
-
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
 # https://www.tldp.org/LDP/abs/html/refcards.html#AEN22473
@@ -181,7 +49,8 @@ if [[ $- = *i* ]] ; then
     # Create necessary directories
     [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
 
-    ENTRY
+    . ${MYSHELLCONFIG_BASE}/logger
+    SCRIPTENTRY
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     ------- start -------------- $(date) ---------------8<--
 
@@ -256,11 +125,10 @@ EOF
   
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     --8<--- end ---------------- $(date) ---------------8<--
-    EXIT
+    SCRIPTEXIT
 
 EOF
 else
-    logtrace "non-interactive shell" >&2
+    echo "non-interactive shell" >&2
 fi
 
-SCRIPTEXIT
