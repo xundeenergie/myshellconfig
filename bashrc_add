@@ -56,15 +56,11 @@ if [[ $- = *i* ]] ; then
     MYSHELLCONFIG_BASH_COMPLETION="${HOME}/${MYSHELLCONFIG_SUBPATH}/bash_completion.d"
     [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ]                && MYSHELLCONFIG_GIT_SYNC=true
 
-    [ -n "${SSH_AGENTS_DIR+x}" ]                        && export AGENTS_DIR=${HOME}/.ssh/agents
-    [ -n "${SSH_AGENT_SOCKETS_DIR+x}" ]                 && export AGENTS_DIR=${HOME}/.ssh/agents
 
     export SGIT="git -C ${MYSHELLCONFIG_BASE}" 
     export MYSHELLCONFIG_VIM_PLUGINS
 
     # Create necessary directories
-    [ -n "${SSH_AGENTS_DIR-x}" ] && mkdir -p "$SSH_AGENTS_DIR"
-    [ -n "${SSH_AGENT_SOCKETS_DIR-x}" ] && mkdir -p "$SSH_AGENT_SOCKETS_DIR"
     [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
 
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
