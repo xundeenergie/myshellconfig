@@ -61,7 +61,7 @@ if [[ $- = *i* ]] ; then
     export MYSHELLCONFIG_VIM_PLUGINS
 
     # Create necessary directories
-    [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
+    [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
 
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     ------- start -------------- $(date) ---------------8<--
