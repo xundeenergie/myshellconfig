@@ -63,9 +63,9 @@ if [[ $- = *i* ]] ; then
     export MYSHELLCONFIG_VIM_PLUGINS
 
     # Create necessary directories
-    mkdir -p "$SSH_AGENTS_DIR"
-    mkdir -p "$SSH_AGENT_SOCKETS_DIR"
-    mkdir -p "$MYSHELLCONFIG_LOGDIR"
+    [ -n "${SSH_AGENTS_DIR-x}" ] && mkdir -p "$SSH_AGENTS_DIR"
+    [ -n "${SSH_AGENT_SOCKETS_DIR-x}" ] && mkdir -p "$SSH_AGENT_SOCKETS_DIR"
+    [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
 
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     ------- start -------------- $(date) ---------------8<--
