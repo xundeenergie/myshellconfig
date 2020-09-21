@@ -54,6 +54,7 @@ create_symlinks() {
 
 setproxy () {
 
+    ENTRY
     local CONFIG
     case $# in
         0)
@@ -81,10 +82,12 @@ setproxy () {
     fi
     export {http,https,ftp}_proxy="http://${PROXY_CREDS}${PROXY_SERVER}:${PROXY_PORT}"
     export {HTTP,HTTPS,FTP}_PROXY="http://${PROXY_CREDS}${PROXY_SERVER}:${PROXY_PORT}"
+    EXIT
 }
 
 mencfs () {
 
+    ENTRY
     [ $# -eq 0 ] && { logwarn "too few arguments" >&2; return 1; }
     local PKEY
     local ENCDIR
@@ -94,6 +97,7 @@ mencfs () {
     local CONFIG
     if [ -z ${ENCFS_CONFIG_DIRS+x} ] ; then
         logwarn "are you sure, ENCFS_CONFIG_DIRS is defined?"
+        EXIT
         return 1
     else
         CONFIG=$(find ${ENCFS_CONFIG_DIRS[*]} -mindepth 1 -name "$1.conf" -print -quit 2>/dev/null )
@@ -105,17 +109,19 @@ mencfs () {
         loginfo "sourced"
     else
         loginfo "${CONFIG} not existing"
+        EXIT
         return 2
     fi
 
-    [ -z ${PKEY+x} ] && return 3
-    [ -z ${ENCDIR+x} ] && return 4
+    [ -z ${PKEY+x} ] && { EXIT; return 3; }
+    [ -z ${ENCDIR+x} ] && { EXIT; return 4; }
     [ -z ${DESTDIR+x} ] && DESTDIR="$(dirname $ENCDIR)/$(basename $ENCDIR| tr '[:lower:]' '[:upper:]'| sed -e 's/^\.//')"
     $PASS "${PKEY}" 1>/dev/null 2>&1 || { logerror "entry $PKEY does not exist in passwordsotre"; return 5; }
     local ENCFS_PASSWORD=$($PASS "${PKEY}" | head -n1)
 
     if [ -z ${ENCDIR+x} -a -d ${ENCDIR} ];then
         logerror "no encrypted directory found -> exit"
+        EXIT
         return 4
     else
         loginfo "mount encrypted directory $ENCDIR on $DESTDIR"
@@ -127,16 +133,19 @@ $ENCFS_PASSWORD
             xdg-open $DESTDIR
         fi
     fi
+    EXIT
 }
 
 uencfs () {
 
+    ENTRY
     local FUSERMOUNT=$(which fusermount 2>/dev/null || exit 127 )
     local i
     [ -z ${FUSERMOUNT+x} ] && return 127
     if [ $# -eq 1 ]; then
         if [ ! -d ${1} ];then
             logwarn "encrypted directory ${1} not found -> exit" >&2
+            EXIT
             return 128
         else
             loginfo "umount encrypted directory" $1 >&2
@@ -150,30 +159,35 @@ uencfs () {
             sync
             $FUSERMOUNT -u "$i"
         done
+        EXIT
         return 1
     fi
+    EXIT
 }
 
 kinit-custom () {
 
+    ENTRY
     local PKEY
     local REALM
     local PASS=$(which pass 2>/dev/null || exit 127 )
     local KINIT=$(which kinit 2>/dev/null || exit 127 )
     local CONFIG
     if [ -z ${KERBEROS_CONFIG_DIRS+x} ] ; then
-        echo "are you sure, KERBEROS_CONFIG_DIRS is defined?"
+        logwarn "are you sure, KERBEROS_CONFIG_DIRS is defined?"
+        EXIT
         return 1
     else
         CONFIG=$(find ${KERBEROS_CONFIG_DIRS[*]} -mindepth 1 -name "$1.conf" -print -quit 2>/dev/null )
     fi
     
     if [ -e ${CONFIG} ]; then
-        echo -n "${CONFIG} existing: "
+        logdebug -n "${CONFIG} existing: "
         source "${CONFIG}"
-        echo "sourced"
+        logdebug "sourced"
     else
-        echo "${CONFIG} not existing"
+        logwarn "${CONFIG} not existing"
+        EXIT
         return 2
     fi
 
@@ -182,42 +196,49 @@ kinit-custom () {
     local KERBEROS_PASSWORD=$($PASS "${PKEY}" | head -n1)
     local KERBEROS_USER=$($PASS "${PKEY}" | grep login | sed -e 's/^login: //' )
     #echo KERBEROS_PASSWORD: $KERBEROS_PASSWORD
-    echo Get kerberos-ticket for: $KERBEROS_USER@$REALM
+    loginfo "Get kerberos-ticket for: $KERBEROS_USER@$REALM"
 
     if [ -z ${KERBEROS_USER+x} ];then
-        echo "no kerberos user found -> exit"
+        logwarn "no kerberos user found -> exit"
+        EXIT
         return 4
     else
         $KINIT -R "${KERBEROS_USER}@${REALM}" <<!
 ${KERBEROS_PASSWORD}
 !
         if [ $? -gt 0 ] ; then
-            echo renew kerberos-ticket failed. try to get a new one
+            loginfo renew kerberos-ticket failed. try to get a new one
             $KINIT "${KERBEROS_USER}@${REALM}" <<!
 ${KERBEROS_PASSWORD}
 !
         fi
 
     fi
+    EXIT
 }
 
 unsetproxy () {
+    ENTRY
     unset {HTTP,HTTPS,FTP}_PROXY
     unset PROXY_{CREDS,USER,PASS,SERVER,PORT}
     unset {http,https,ftp}_proxy
     unset proxy_{creds,user,pass,server,port}
+    EXIT
 }
 
 git-mergedetachedheadtomaster () {
+    ENTRY
     git checkout -b tmp
     git branch -f master tmp
     git checkout master
     git branch -d tmp
     git commit -m "Merged detached head into master" .
     #git push origin master
+    EXIT
 }
 
 pathmunge () {
+    ENTRY
     case ":${PATH}:" in
         *:"$1":*)
             ;;
@@ -228,6 +249,7 @@ pathmunge () {
                 PATH=$1:$PATH
             fi
     esac
+    EXIT
 }
 
 mkcd () {
@@ -237,6 +259,7 @@ mkcd () {
 
 sshmyshellconfig() {
 
+    ENTRY
     [ -z "${MYSHELLCONFIG_SUBPATH+x}" ]     && MYSHELLCONFIG_SUBPATH=".local/myshellconfig"
     [ -z "${MYSHELLCONFIG_BASE+x}" ]        && MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"
     MYSHELLCONFIG_BASE_PARENT="$(dirname $MYSHELLCONFIG_BASE)"
@@ -251,28 +274,30 @@ sshmyshellconfig() {
     $CMD /bin/bash << EOF
     [ -e /etc/bashrc ] && .  /etc/bashrc
     [ -e /etc/bash.bashrc ] && . /etc/bash.bashrc
-    echo "modify ~/.bashrc"
+    loginfo "modify ~/.bashrc"
     sed -i -e '/^\[ -f bashrc_add \] /d' ~/.bashrc
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
     printf "%s\n" "#MYSHELLCONFIG-start" "[ -f \"\${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add\" ] && . \"\${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add\""  "#MYSHELLCONFIG-end"| tee -a ~/.bashrc
     #printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
-    echo cleanup from old config
+    loginfo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
 
 EOF
+    EXIT
 
 }
 
 sshs() {
+    ENTRY
 
 #    MKTMPCMD='mktemp $(echo ${XDG_RUNTIME_DIR}/bashrc.XXXXXXXX.conf)'
 #    VIMMKTMPCMD="mktemp ${XDG_RUNTIME_DIR}/vimrc.XXXXXXXX.conf"
 
     local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
+    local FILELIST=( "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/loggingfunctions" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
 
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
@@ -319,7 +344,7 @@ export LS_OPTIONS="${LS_OPTIONS}"
 export VIMRC="${REMOTETMPVIMCONFIG}"
 export BASHRC="${REMOTETMPBASHCONFIG}"
 title "\$USER@\$HOSTNAME: \$PWD"
-echo "This bash runs with temporary config from \$BASHRC"
+loginfo "This bash runs with temporary config from \$BASHRC"
 EOF
 
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
@@ -329,37 +354,47 @@ EOF
            ssh -t ${SSH_OPTS} $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
            rm "${TMPBASHCONFIG}"
         else
-           echo "${TMPBASHCONFIG} does not exist. Use »ssh $@«" >&2
+           loginfo "${TMPBASHCONFIG} does not exist. Use »ssh $@«" >&2
            ssh -t "$@" 
         fi
     else
-        echo "too few arguments for sshs" >&2
+        logwarn "too few arguments for sshs" >&2
         ssh
     fi
+    
+    EXIT
 }
 
 
 VIMRC="${MYSHELLCONFIG_BASE}/vimrc"
 
 svi () { 
+    ENTRY
     if [ -f ${VIMRC} ]; then
         sudo vim -u "${VIMRC}" $@; 
     else
         sudo vim $@
     fi
+    EXIT
 }
 
 vim-plugins-update () {
+    ENTRY
     vim -c "PluginUpdate" -c ":qa!"
+    EXIT
     
 }
 
 vim-plugins-install () {
+    ENTRY
     vim -c "PluginInstall" -c ":qa!"
+    EXIT
     
 }
 
 vim-repair-vundle () {
+    ENTRY
+
     if [ -z ${MYSHELLCONFIG_BASE+x} ]; then   
         echo "MYSHELLCONFIG_BASE nicht gesetzt. Eventuell noch einmal ausloggen und wieder einloggen"
     else
@@ -369,48 +404,61 @@ vim-repair-vundle () {
         git clone  "${MYSHELLCONFIG_GIT_REMOTE_PUBLIC}Vim/gmarik/Vundle.vim.git"
         cd ~-
     fi
+    EXIT
 }
 
 getbashrcfile () {
+    ENTRY
     if [ -z ${BASHRC+x} ] ; then
         echo "bash uses default" >&2
     else
         cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}'
     fi
+    EXIT
 }
 
 catbashrcfile () {
+    ENTRY
     if [ -z ${BASHRC+x} ] ; then
         echo "bash uses default" >&2
     else
         #cat $(cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}')
         cat $(getbashrcfile)
     fi
+    EXIT
 }
 
 getvimrcfile () {
+    ENTRY
     if [ -z ${VIMRC+x} ] ; then
         echo "vim uses default" >&2
     else
         echo $VIMRC
     fi
+    EXIT
 }
 
 catvimrcfile () {
+    ENTRY
     if [ -z ${VIMRC+x} ] ; then
         echo "vim uses default" >&2
     else
         #cat $VIMRC
         cat $(getvimrcfile)
     fi
+    EXIT
 }
 
 
 # Functions to set the correct title of the terminal
 function title()
 {
+    
+    ENTRY
    # change the title of the current window or tab
    echo -ne "\033]0;$*\007"
+   
+    EXIT
 }
 
 function sshx()
@@ -452,22 +500,26 @@ function pdsh-update-hetzner()
 }
 
 function tmuxx() {
+    ENTRY
+    
     case $# in
         1)
             SESS=($(find ${TMUX_SESSION_DIRS[*]} -mindepth 1 -name "$1.session" 2>/dev/null ))
             ;;
         *)
-            echo no session specified return
+            logwarn no session specified return
             ;;
     esac
     TMUX_BIN='/usr/bin/tmux'
     $TMUX_BIN -f ~/.tmux.conf new-session -d
     [ -e ${SESS[0]} ] && $TMUX_BIN source-file ${SESS[0]}
     $TMUX_BIN attach-session -d
+    EXIT
 }
 
 
 function checkbkp() {
+    ENTRY
     if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
         local SSH="/usr/bin/ssh"
         local CMD="$SSH -T backup.vpn"
@@ -479,8 +531,10 @@ EOF
         return 1
         
     fi
+    EXIT
 }
 function checkbkp-full() {
+    ENTRY
     if ping -c 3 backup.vpn >/dev/null 2>&1 ; then
         local SSH="/usr/bin/ssh"
         local CMD="$SSH -T backup.vpn"
@@ -491,17 +545,21 @@ EOF
         which pdsh 1>/dev/null 2>&1 && pdsh -g vpn sudo systemctl status backup.service
 
     else
-        echo "backup.vpn is not reachable -> exit"
+        logwarn "backup.vpn is not reachable -> exit"
         return 1
         
     fi
+    EXIT
 }
 
 turnoffbeep() {
+    ENTRY
     changebeep none
+    EXIT
 }
 
 changebeep() {
+    ENTRY
     local style
     case $1 in
         none)
@@ -514,7 +572,8 @@ changebeep() {
             style=audible
             ;;
         *)
-            echo "usage: changebeep [none|visible|audible]"
+            logwarn "usage: changebeep [none|visible|audible]"
+            EXIT
             return 1
             ;;
     esac
@@ -525,27 +584,33 @@ changebeep() {
     fi
     echo "${line} ${style}" >> "${file}"
     return 0
+    EXIT
 }
 
 turnoffconfigsync() {
+    ENTRY
     local line='MYSHELLCONFIG_GIT_SYNC='
     local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
     fi
     sed -i -e "/#MYSHELLCONFIG-start/i${line}false" "${file}"
+    EXIT
 }
 
 turnonconfigsync() {
+    ENTRY
     local line='MYSHELLCONFIG_GIT_SYNC='
     local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
     fi
     sed -i "/#MYSHELLCONFIG-start/i${line}true" "${file}"
+    EXIT
 }
 
 function gnome-shell-extensions-enable-defaults() { 
+    ENTRY
     local i
     if [ -f ~/.config/gnome-shell-extensions-default.list ]; then
         for i in $(cat ~/.config/gnome-shell-extensions-default.list); do 
@@ -553,16 +618,18 @@ function gnome-shell-extensions-enable-defaults() {
             gnome-extensions enable $i;
         done; 
     fi
+    EXIT
 }
 
 gnome-shell-extensions-make-actual-permanent-systemwide() {
+    ENTRY
     # https://people.gnome.org/~pmkovar/system-admin-guide/extensions-enable.html
     # https://askubuntu.com/questions/359958/extensions-are-turned-off-after-reboot
     local file="/etc/dconf/profile/user"
     sudo mkdir -p "/etc/dconf/profile/"
     local line='user-db:user'
     if [ -e "${file}" ] ; then
-        echo "$command"
+        logtrace "$command"
         sudo sh -c "$command"
     fi
     local line='system-db:local'
@@ -583,10 +650,11 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
     sudo sh -c "$command"
 
     local line='enabled-extensions='
-    echo "Update or add extensions"
+    loginfo "Update or add extensions"
     #echo "${line}${EXTENSIONS}" | sudo tee -a "${file}"
     sudo sed -i "/\[org\/gnome\/shell\]/a${line}${EXTENSIONS}" "${file}"
     sudo dconf update
+    EXIT
 }
 
 reachable-default () {
