@@ -6,6 +6,9 @@
 echo SSH_AGENTS_DIR: $SSH_AGENTS_DIR >&2
 echo SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR >&2
 echo SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR >&2
+[ -z "${SSH_AGENTS_DIR-x}" ]                || mkdir -vp "$SSH_AGENTS_DIR"
+[ -z "${SSH_AGENT_SOCKETS_DIR-x}" ]         || mkdir -vp "$SSH_AGENT_SOCKETS_DIR"
+[ -z "${SSH_IDENTITIES_DIR-x}" ]            || mkdir -vp "$SSH_IDENTITIES_DIR"
 agent-start-or-restart () {
     
     local ssh_identity
