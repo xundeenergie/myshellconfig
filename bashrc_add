@@ -36,13 +36,38 @@ change_debug () {
 }
 
 #### LOGGING
-export SCRIPT_LOG=${HOME}/myshellconfig.log
+## from https://www.cubicrace.com/2016/03/log-tracing-mechnism-for-shell-scripts.html
+export SCRIPT_LOG=${HOME}/logs/myshellconfig.log
+mkdir -p "$(dirname ${SCRIPT_LOG})"
 touch $SCRIPT_LOG
 
-export LOGLEVEL="INFO"
+function SCRIPTENTRY(){
+    timeAndDate=`date`
+    script_name=`basename "$0"`
+    script_name="${script_name%.*}"
+    echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $SCRIPT_LOG
+}
+
+function SCRIPTEXIT(){
+    script_name=`basename "$0"`
+    script_name="${script_name%.*}"
+    echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $SCRIPT_LOG
+}
+
+function ENTRY(){
+    local cfn="${FUNCNAME[1]}"
+    timeAndDate=`date`
+    echo "[$timeAndDate] [DEBUG]  > $cfn $FUNCNAME" >> $SCRIPT_LOG
+}
+
+function EXIT(){
+    local cfn="${FUNCNAME[1]}"
+    timeAndDate=`date`
+    echo "[$timeAndDate] [DEBUG]  < $cfn $FUNCNAME" >> $SCRIPT_LOG
+}
 
 function logerror(){
- local function_name="${FUNCNAME[1]}"
+    local function_name="${FUNCNAME[1]}"
     local msg="$1"
     timeAndDate=`date`
     local loglevels
@@ -117,6 +142,7 @@ function logtrace(){
     fi
 }
 
+SCRIPTENTRY
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
@@ -155,6 +181,7 @@ if [[ $- = *i* ]] ; then
     # Create necessary directories
     [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
 
+    ENTRY
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     ------- start -------------- $(date) ---------------8<--
 
@@ -229,6 +256,7 @@ EOF
   
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     --8<--- end ---------------- $(date) ---------------8<--
+    EXIT
 
 EOF
 else
