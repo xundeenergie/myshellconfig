@@ -41,7 +41,7 @@ esac
 #echo -n " remote: ${MYSHELLCONFIG_GIT_REMOTE_NAME}, branch: ${MYSHELLCONFIG_GIT_BRANCH}: "
 
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
-$SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { echo fetch failed; exit 1; }
+$SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; exit 1; }
 
 if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MYSHELLCONFIG_LOGFILE}" ; then
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
@@ -71,7 +71,7 @@ EOF
     $SGIT diff-index HEAD --|awk '{print $5, $6}' >>  "${MYSHELLCONFIG_LOGFILE}"
     $SGIT diff-index -p HEAD -- >> "${MYSHELLCONFIG_LOGFILE}"
 
-    echo "Lokale Änderungen festgestellt: Siehe Logfile ${MYSHELLCONFIG_LOGFILE}" >&2
+    logwarn "Lokale Änderungen festgestellt: Siehe Logfile ${MYSHELLCONFIG_LOGFILE}" >&2
 cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 
 +-----ENDE $(date) ---------------------------------+
@@ -87,21 +87,15 @@ cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
  
 EOF
 rc=0
-## Update/init submodules
-#$SGIT submodule update --remote --merge 2>>"${MYSHELLCONFIG_LOGFILE}"|| { echo update submodules failed: continue ; }
-#$SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo update submodules failed; exit 1; }
-#$SGIT submodule sync 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo sync submodules failed; exit 1; }
-#$SGIT submodule foreach "$SGIT branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo set-upstream submodules failed; exit 1; }
-#$SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo update submodules failed; exit 1; }
 
-#echo "update submodules" >&2
+logdebug "update submodules" >&2
 # Submodules always have origin and master as repo and branch to track
-$SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo update submodules failed on ini; rc=5; }
-$SGIT submodule sync 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo sync submodules failed on sync; rc=6;  }
-$SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo checkout master submodules failed on set upstream; rc=7;  }
-$SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo set-upstream submodules failed on set upstream; rc=8;  }
-$SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { echo update submodules failed on update; rc=9;  }
-#echo "submodules updated" >&2
+$SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "update submodules failed on ini"; rc=5; }
+$SGIT submodule sync 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "sync submodules failed on sync"; rc=6;  }
+$SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1               || { logwarn "checkout master submodules failed on set upstream"; rc=7;  }
+$SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "set-upstream submodules failed on set upstream"; rc=8;  }
+$SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
+logdebug "submodules updated" >&2
 
 cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 
