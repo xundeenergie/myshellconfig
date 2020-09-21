@@ -89,7 +89,7 @@ if ! $SSHS; then
             if [ -d "${MYSHELLCONFIG_BASE}" -a $($SGIT status 1>/dev/null 2>&1; echo $?) -eq 0 ]; then
                 [ -d "${MYSHELLCONFIG_LOGDIR}" ] || mkdir -p "${MYSHELLCONFIG_LOGDIR}"
                 if ! $SGIT rev-parse --git-dir > /dev/null 2>&1 ; then
-                    echo "Init ${MYSHELLCONFIG_BASE} as git-repo" >&2
+                    loginfo "Init ${MYSHELLCONFIG_BASE} as git-repo" >&2
                     $SGIT init
                 fi
                 
@@ -102,29 +102,29 @@ if ! $SSHS; then
 
                 # sync repo with origin if git is reachable 
                 if ckrepo ; then
-                    echo "git checokut" >&2
+                    loginfo "git checokut" >&2
                     sync_config
                     . ${MYSHELLCONFIG_BASE}/functions.sh
                     create_symlinks "$MYSHELLCONFIG_BASE"
                 else 
-                    echo "${MYSHELLCONFIG_GIT_SERVER}" not reachable >&2;
-                    echo profile not syncing >&2;
+                    loginfo "${MYSHELLCONFIG_GIT_SERVER}" not reachable >&2;
+                    loginfo profile not syncing >&2;
                 fi
 
             else
-                echo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
+                loginfo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
 
                 if $( timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" ); then
                     :
                 else
                     MYSHELLCONFIG_GIT_REMOTE="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}${MYSHELLCONFIG_GIT_REPO_NAME}"
-                    echo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
+                    loginfo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
                     timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" || return 1 2>/dev/null || exit 1
                 fi
 
 
 
-                [ -d "${MYSHELLCONFIG_BASE}" ] && { echo create ${MYSHELLCONFIG_LOGDIR} >&2; mkdir -p "${MYSHELLCONFIG_LOGDIR}"; }
+                [ -d "${MYSHELLCONFIG_BASE}" ] && { loginfo create ${MYSHELLCONFIG_LOGDIR} >&2; mkdir -p "${MYSHELLCONFIG_LOGDIR}"; }
 
                 $SGIT config user.email "${USERNAME}"
                 $SGIT config user.name "${FULLNAME}"
@@ -133,10 +133,10 @@ if ! $SSHS; then
                 #$SGIT submodule update --init --recursive
                 #$SGIT submodule foreach 'git checkout master'
 
-                echo "sync config" >&2
+                loginfo "sync config" >&2
                 sync_config
                 . ${MYSHELLCONFIG_BASE}/functions.sh
-                echo "config synced, functions.sh sourced" >&2
+                loginfo "config synced, functions.sh sourced" >&2
                 create_symlinks "$MYSHELLCONFIG_BASE"
 
                 # Install vim Plugins
@@ -146,13 +146,13 @@ if ! $SSHS; then
             [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ] || $SGIT remote set-url --push ${MYSHELLCONFIG_GIT_REMOTE_NAME} "${MYSHELLCONFIG_GIT_REMOTE_PUSH}" 
             ;;
         *screen*)
-            echo "I'm in sceen/tmux now" >&2
+            loginfo "I'm in sceen/tmux now" >&2
             ;;
         *dumb*)
-            echo "Run with dumb terminal" 1>&2
+            loginfo "Run with dumb terminal" 1>&2
             ;;
         *)
-            echo "Run with $TERM" >&2
+            loginfo "Run with $TERM" >&2
             ;;
     esac
 fi
