@@ -138,6 +138,11 @@ export -f logwarn
 export -f loginfo
 export -f logdebug
 export -f logtrace
+export -f SCRIPTENTRY
+export -f ENTRY
+export -f SCRIPTEXIT
+export -f EXIT
+
 
 
 cat << EOF > ~/.ssh/agents/agent-default-$(hostname)
