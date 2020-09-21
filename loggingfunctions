@@ -35,13 +35,19 @@ function EXIT(){
 
 function logerror(){
     local function_name="${FUNCNAME[1]}"
+    case $1 in
+        -n)
+            local opts="-n"
+            shift
+            ;;
+    esac
     local msg="$1"
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
     loglevels=()
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
+        echo $opts $msg >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
@@ -50,13 +56,19 @@ function logerror(){
 
 function logwarn(){
     local function_name="${FUNCNAME[1]}"
+    case $1 in
+        -n)
+            local opts="-n"
+            shift
+            ;;
+    esac
     local msg="$1"
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" )
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
+        echo $opts $msg >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
@@ -65,13 +77,19 @@ function logwarn(){
 
 function loginfo(){
     local function_name="${FUNCNAME[1]}"
+    case $1 in
+        -n)
+            local opts="-n"
+            shift
+            ;;
+    esac
     local msg="$1"
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" )
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
+        echo $opts $msg >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
@@ -81,13 +99,19 @@ function loginfo(){
 
 function logdebug(){
     local function_name="${funcname[1]}"
+    case $1 in
+        -n)
+            local opts="-n"
+            shift
+            ;;
+    esac
     local msg="$1"
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO")
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
+        echo $opts $msg >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
@@ -96,13 +120,19 @@ function logdebug(){
 
 function logtrace(){
     local function_name="${funcname[1]}"
+    case $1 in
+        -n)
+            local opts="-n"
+            shift
+            ;;
+    esac
     local msg="$1"
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG")
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
-        echo $msg >&2
+        echo $opts $msg >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG

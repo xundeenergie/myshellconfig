@@ -656,7 +656,7 @@ reachable () {
         [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
     done
 
-    [ ${res} -gt 0 ] && loginfo " not reachable" >&2 || loginfo " success" >&2; 
+    [ ${res} -gt 0 ] && loginfo -n " not reachable" >&2 || loginfo -n " success" >&2; 
 
     return $res
 
