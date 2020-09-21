@@ -57,12 +57,12 @@ setproxy () {
     local CONFIG
     case $# in
         0)
-            echo too few arguments
+            logwarn "too few arguments"
             return
             ;;
         *)
             if [ -z ${SETPROXY_CREDS_DIRS+x} ] ; then
-                echo "are you sure, SETPROXY_CREDS_DIRS is defined?"
+                logwarn "are you sure, SETPROXY_CREDS_DIRS is defined?"
                 return 1
             else
                 CONFIG=$(find ${SETPROXY_CREDS_DIRS[*]} -mindepth 1 -name "$1.conf" -print -quit 2>/dev/null )
@@ -71,12 +71,12 @@ setproxy () {
     esac
 
     if [ -e ${CONFIG} ]; then
-        echo -n "${CONFIG} existing: "
+        loginfo -n "${CONFIG} existing: "
         source "${CONFIG}"
-        echo "sourced"
+        loginfo "sourced"
         export PROXY_CREDS="${PROXY_USER}:${PROXY_PASS}@"
     else
-        echo "${CONFIG} not existing"
+        loginfo "${CONFIG} not existing"
         export PROXY_CREDS=""
     fi
     export {http,https,ftp}_proxy="http://${PROXY_CREDS}${PROXY_SERVER}:${PROXY_PORT}"
@@ -85,7 +85,7 @@ setproxy () {
 
 mencfs () {
 
-    [ $# -eq 0 ] && { echo "too few arguments" >&2; return 1; }
+    [ $# -eq 0 ] && { logwarn "too few arguments" >&2; return 1; }
     local PKEY
     local ENCDIR
     local DESTDIR
@@ -93,37 +93,37 @@ mencfs () {
     local ENCFS=$(which encfs 2>/dev/null || exit 127 )
     local CONFIG
     if [ -z ${ENCFS_CONFIG_DIRS+x} ] ; then
-        echo "are you sure, ENCFS_CONFIG_DIRS is defined?"
+        logwarn "are you sure, ENCFS_CONFIG_DIRS is defined?"
         return 1
     else
         CONFIG=$(find ${ENCFS_CONFIG_DIRS[*]} -mindepth 1 -name "$1.conf" -print -quit 2>/dev/null )
     fi
     
     if [ -e ${CONFIG} ]; then
-        echo -n "${CONFIG} existing: "
+        loginfo -n "${CONFIG} existing: "
         source "${CONFIG}"
-        echo "sourced"
+        loginfo "sourced"
     else
-        echo "${CONFIG} not existing"
+        loginfo "${CONFIG} not existing"
         return 2
     fi
 
     [ -z ${PKEY+x} ] && return 3
     [ -z ${ENCDIR+x} ] && return 4
     [ -z ${DESTDIR+x} ] && DESTDIR="$(dirname $ENCDIR)/$(basename $ENCDIR| tr '[:lower:]' '[:upper:]'| sed -e 's/^\.//')"
-    $PASS "${PKEY}" 1>/dev/null 2>&1 || { echo entry $PKEY does not exist in passwordsotre; return 5; }
+    $PASS "${PKEY}" 1>/dev/null 2>&1 || { logerror "entry $PKEY does not exist in passwordsotre"; return 5; }
     local ENCFS_PASSWORD=$($PASS "${PKEY}" | head -n1)
 
     if [ -z ${ENCDIR+x} -a -d ${ENCDIR} ];then
-        echo "no encrypted directory found -> exit"
+        logerror "no encrypted directory found -> exit"
         return 4
     else
-        echo mount encrypted directory $ENCDIR on $DESTDIR
+        loginfo "mount encrypted directory $ENCDIR on $DESTDIR"
         $ENCFS -S $ENCDIR $DESTDIR <<!
 $ENCFS_PASSWORD
 !
         if [ $? ]; then
-            echo open "$DESTDIR"
+            loginfo "open $DESTDIR"
             xdg-open $DESTDIR
         fi
     fi
@@ -136,17 +136,17 @@ uencfs () {
     [ -z ${FUSERMOUNT+x} ] && return 127
     if [ $# -eq 1 ]; then
         if [ ! -d ${1} ];then
-            echo "encrypted directory ${1} not found -> exit" >&2
+            logwarn "encrypted directory ${1} not found -> exit" >&2
             return 128
         else
-            echo umount encrypted directory $1 >&2
+            loginfo "umount encrypted directory" $1 >&2
             sync
             $FUSERMOUNT -u "$1"
         fi
     else
-        echo "no arguments given. Umount all mounted encfs-dirs" >&2
+        loginfo "no arguments given. Umount all mounted encfs-dirs" >&2
         for i in $(mount|grep encfs|sed -e 's/^encfs on \(.*\)\ type.*$/\1/');do
-            echo $FUSERMOUNT -u "$i"
+            loginfo "$FUSERMOUNT -u $i"
             sync
             $FUSERMOUNT -u "$i"
         done
@@ -600,6 +600,7 @@ reachable-default () {
 }
 
 reachable () {
+    ENTRY
     # returncodes:
     #   1: servername not resolveable
     #   3: server:port not reachable
@@ -658,12 +659,14 @@ reachable () {
 
     [ ${res} -gt 0 ] && loginfo -n " not reachable" >&2 || loginfo -n " success" >&2; 
 
+    EXIT
     return $res
 
 }
 
 utoken () {
 
+    ENTRY
     ssh_identity=$1
 
     [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
@@ -676,9 +679,11 @@ utoken () {
             /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; ssh-add -l; ssh-add -e $PKCS11_MODULE; ssh-add -l"
         fi
     fi
+    EXIT
 }
 
 token () {
+    ENTRY
 
     [ -z "${SSH_ADD_OPTIONS+x}" ] && { SSH_ADD_OPTIONS=${SSH_ADD_DEFAULT_OPTIONS}; export SSH_ADD_OPTIONS; }
     [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR=${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}; export SSH_IDENTITIES_DIR; }
@@ -724,11 +729,13 @@ token () {
                 $FORCE && logdebug "$(ssh-runinagent $agentfile ssh-add -e $PKCS11_MODULE)"
                 loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s $PKCS11_MODULE)"
             fi
+            EXIT
             return 0
         fi
+        EXIT
         return 1
     fi
-
+    EXIT
     return 2
 }
 #EOF
@@ -766,11 +773,13 @@ token-list-objects() {
 }
 
 loadagent() {
+    ENTRY
     local af
     af=$(ssh-agent-start-or-restart $1 2>/dev/null)
     echo $af
 #    eval $(<$af)
     . $af
+    EXIT
 }
 
 ssh-runinagent () {
@@ -792,6 +801,7 @@ ssh-runinagent () {
 }
 
 setloglevel () {
+    ENTRY
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
@@ -801,9 +811,11 @@ setloglevel () {
         logerror "LOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
     fi
     logerror "new LOGLEVEL is $LOGLEVEL"
+    EXIT
 }
 
 setfileloglevel () {
+    ENTRY
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
@@ -813,5 +825,6 @@ setfileloglevel () {
         logerror "FILELOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
     fi
     logerror "new FILELOGLEVEL is $FILELOGLEVEL"
+    EXIT
 }
 
