@@ -632,21 +632,21 @@ reachable () {
     # dig does not consult /etc/hosts, so use getent hosts instead
     #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
     # getent ahostsv4 returns only ipv4 addresses
-    $MYSHELLCONFIG_DEBUG && echo -n "Try to resolve $SERVER: "
+    loginfo -n "Try to resolve $SERVER: "
     local IP=$(getent $GETENTHOSTS $SERVER|awk '$0 ~ /STREAM/ {print $1}'|uniq|head -n1)
     if [ -z ${IP-x} ]; then 
-        $MYSHELLCONFIG_DEBUG && echo "not resolvable -> exit"
+        logwarn "not resolvable -> exit"
         return 1
     else
-        $MYSHELLCONFIG_DEBUG && echo $IP
+        logwarn $IP
     fi
     local PORT=${2:-22}
     local SEC=${3:-1}
     local res=999
     local i
-    $MYSHELLCONFIG_DEBUG && echo -n "Try to connect to ${SERVER} (${IP}):${PORT} " >&2
+    loginfo -n "Try to connect to ${SERVER} (${IP}):${PORT} " >&2
     for i in $(seq 1 $SEC); do
-        $MYSHELLCONFIG_DEBUG && echo -n "." >&2
+        loginfo -n "." >&2
         if reachable-default ${IP} ${PORT} 2>/dev/null; then
             res=0
             break
@@ -656,9 +656,7 @@ reachable () {
         [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
     done
 
-    if $MYSHELLCONFIG_DEBUG ; then
-        [ ${res} -gt 0 ] && echo " not reachable" >&2 || echo " success" >&2; 
-    fi
+    [ ${res} -gt 0 ] && loginfo " not reachable" >&2 || loginfo " success" >&2; 
 
     return $res
 
