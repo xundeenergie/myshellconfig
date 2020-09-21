@@ -41,7 +41,7 @@ touch $SCRIPT_LOG
 
 export LOGLEVEL="INFO"
 
-function ERROR(){
+function logerror(){
  local function_name="${FUNCNAME[1]}"
     local msg="$1"
     timeAndDate=`date`
@@ -54,7 +54,7 @@ function ERROR(){
     echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
 }
 
-function WARN(){
+function logwarn(){
     local function_name="${FUNCNAME[1]}"
     local msg="$1"
     timeAndDate=`date`
@@ -64,10 +64,10 @@ function WARN(){
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
-    echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
+    echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
 }
 
-function INFO(){
+function loginfo(){
     local function_name="${FUNCNAME[1]}"
     local msg="$1"
     timeAndDate=`date`
@@ -81,7 +81,7 @@ function INFO(){
 }
 
 
-function DEBUG(){
+function logdebug(){
     local function_name="${funcname[1]}"
     local msg="$1"
     timeAndDate=`date`
@@ -91,7 +91,20 @@ function DEBUG(){
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
- echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
+    echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
+}
+
+function logtrace(){
+    local function_name="${funcname[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO" "DEBUG")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+        echo $msg >&2
+    fi
+    echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG
 }
 
 
@@ -145,7 +158,7 @@ EOF
                 return 1
             fi
         else
-            INFO "no sync allowed from config" >&2
+            logwarn "no sync allowed from config" >&2
             return 0
         fi
 
@@ -168,10 +181,10 @@ EOF
                 [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
 
             else
-                echo "git not installed, no configuration possible, please install git" >&2
+                logwarn "git not installed, no configuration possible, please install git" >&2
             fi
         else
-            INFO "Not syncing profile in case of configuration"
+            logwarn "Not syncing profile in case of configuration"
         fi
     }
 
@@ -185,7 +198,7 @@ EOF
                 . "${XDG_CONFIG_HOME:-$HOME/.config}/bash_completion"
             if shopt -q progcomp && [ -r /usr/share/bash-completion/bash_completion ]; then
                 # Source completion code.
-                echo "Source bash-completion"
+                logdebug "Source bash-completion"
                 . /usr/share/bash-completion/bash_completion
             fi
         fi
@@ -207,7 +220,7 @@ EOF
     --8<--- end ---------------- $(date) ---------------8<--
 
 EOF
-#else
-#    echo "non-interactive shell" >&2
+else
+    logtrace "non-interactive shell" >&2
 fi
 
