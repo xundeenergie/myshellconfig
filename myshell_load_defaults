@@ -11,10 +11,10 @@ case $(tty) in
                 TMOUT=${MYSHELLCONFIG_USER_TMOUT:-1000}
                 ;;
         esac
-        echo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
+        loginfo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
         ;;
     *)
-        echo "Run in graphical terminal - set no autologout" >&2
+        loginfo "Run in graphical terminal - set no autologout" >&2
         unset TMOUT
         ;;
 esac
@@ -100,7 +100,7 @@ else
 
     case $TERM in
         *screen*)
-            echo BASHRC: $BASHRC -> source it
+            loginfo BASHRC: $BASHRC -> source it
             #[ -e $BASHRC ] && . "$BASHRC"
             if [ ! -z ${BASHRC+x} ]; then
                 if [ -e $BASHRC ] ; then
@@ -125,7 +125,7 @@ export HISTIGNORE="ls:l:cd:exit:pwd:date:mencfs:"
 export HISTTIMEFORMAT='%F %T  '
 export HISTSIZE=999999
 
-echo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
+loginfo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
 #echo "bashrc_add sourced" >&2
 
 # Export several functions for being usable in subshells
@@ -133,12 +133,17 @@ export -f token
 export -f sudo
 export -f reachable
 export -f reachable-default
+export -f logerror
+export -f logwarn
+export -f loginfo
+export -f logdebug
+export -f logtrace
 
 
 cat << EOF > ~/.ssh/agents/agent-default-$(hostname)
 SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
 SSH_AGENT_PID=${SSH_AGENT_PID}; export SSH_AGENT_PID;
-echo Agent pid ${SSH_AGENT_PID};
+loginfo Agent pid ${SSH_AGENT_PID};
 EOF
 
 [ -z "${SSH_ADD_DEFAULT_OPTIONS+x}" ]       && { SSH_ADD_DEFAULT_OPTIONS="-t 7200"; export SSH_ADD_DEFAULT_OPTIONS; }
