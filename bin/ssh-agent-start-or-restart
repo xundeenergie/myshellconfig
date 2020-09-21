@@ -84,24 +84,25 @@ agent-load-identity-keys () {
 
         fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
         for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep -v "pub$\|so$"); do
-            logdebug "key: $key"
+            logtrace "key: $key"
             fingerprint=$(ssh-keygen -l -f ~/.ssh/identities/bmi/id_ed25519|awk '{print $2}')
-            logdebug "${fingerprints[*]} and $fingerprint"
+            logtrace "${fingerprints[*]} and $fingerprint"
             if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                 logdebug "$key is loaded" >&2
             else
                 logdebug "$key is not loaded" >&2
-                ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${identitydir}/${key}
+                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${identitydir}/${key})"
             fi
         done
         for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep  "so$"); do
-            logdebug "token: $token"
+            logtrace "token: $token"
             tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
+            logtrace "${fingerprints[*]} and $tokenfingerprint"
             if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                 logdebug "$token is loaded" >&2
             else
                 logdebug "$token is not loaded" >&2
-                ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${identitydir}/${token}
+                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${identitydir}/${token})"
             fi
         done
     fi
