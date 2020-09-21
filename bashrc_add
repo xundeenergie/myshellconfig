@@ -51,11 +51,11 @@ if [[ $- = *i* ]] ; then
 
     [ -z "${SCRIPT_LOG+x}" ]        && { SCRIPT_LOG="${MYSHELLCONFIG_LOGFILE}"; export SCRIPT_LOG; }
     . ${MYSHELLCONFIG_BASE}/loggingfunctions
-    SCRIPTENTRY
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     ------- start -------------- $(date) ---------------8<--
 
 EOF
+    SCRIPTENTRY
     # define functions
     ckrepo () {
         # check if remote repo is reachable
