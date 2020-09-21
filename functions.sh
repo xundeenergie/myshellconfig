@@ -688,12 +688,14 @@ token () {
     case $1 in
         -f)
             FORCE=true
-            ssh_identity=$2
+            ssh_identity=${2-default}
             ;;
         *)
-            ssh_identity=$1
+            ssh_identity=${1-default}
             ;;
     esac
+    identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
+    [ -e "${identitydir}/.config" ] && . "${identitydir}/.config"
     local fingerprints
     declare -a fingerprints
     local tokenfingerprint

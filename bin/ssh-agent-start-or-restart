@@ -73,9 +73,10 @@ agent-load-identity-keys () {
 
     if [ -n "${1+x}" ]; then
         ssh_identity="$1"
+        identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
+        [ -e "${identitydir}/.config" ] && . "${identitydir}/.config"
         agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
         agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
-        identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
         echo "agentfile: $agentfile" >&2
         echo "agentsocket: $agentsocket" >&2
         echo ssh-identität: $ssh_identity >&2
