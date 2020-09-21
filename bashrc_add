@@ -35,6 +35,53 @@ change_debug () {
     fi
 }
 
+#### LOGGING
+SCRIPT_LOG=${HOME}/myshellconfig.log
+touch $SCRIPT_LOG
+
+export LOGLEVEL="INFO"
+
+function ERROR(){
+ local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    if [ ("ERROR") =~ "${LOGLEVEL}" ];then
+        echo $msg >&2
+    fi
+    echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
+}
+
+function WARN(){
+ local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    if [ ("ERROR" "WARN") =~ "${LOGLEVEL}" ];then
+        echo $msg >&2
+    fi
+    echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
+}
+
+function INFO(){
+ local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    if [ ("ERROR" "WARN" "INFO") =~ "${LOGLEVEL}" ];then
+        echo $msg >&2
+    fi
+    echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
+}
+
+
+function DEBUG(){
+ local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    if [ ("ERROR" "WARN" "INFO" "DEBUG") =~ "${LOGLEVEL}" ];then
+        echo $msg >&2
+    fi
+ echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
+}
+
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
@@ -85,7 +132,7 @@ EOF
                 return 1
             fi
         else
-            echo "no sync allowed from config" >&2
+            INFO "no sync allowed from config" >&2
             return 0
         fi
 
@@ -111,7 +158,7 @@ EOF
                 echo "git not installed, no configuration possible, please install git" >&2
             fi
         else
-            echo "Not syncing profile in case of configuration"
+            INFO "Not syncing profile in case of configuration"
         fi
     }
 
