@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SCRIPTENTRY
 [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
 [ -z "${SSH_AGENTS_DIR+x}" ] && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
 [ -z "${SSH_AGENT_SOCKETS_DIR+x}" ] && { SSH_AGENT_SOCKETS_DIR=${SSH_AGENT_SOCKETS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENT_SOCKETS_DIR; }
@@ -11,6 +12,7 @@ logdebug "SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR" >&2
 [ -z "${SSH_IDENTITIES_DIR-x}" ]            || mkdir -vp "$SSH_IDENTITIES_DIR"
 agent-start-or-restart () {
     
+    ENTRY
     local ssh_identity
     local agentfile
     local agentsocket
@@ -59,11 +61,13 @@ agent-start-or-restart () {
         return 1
     fi
 
+    EXIT
 
 }
 
 agent-load-identity-keys () {
 
+    ENTRY
     local ssh_identity
     local agentfile
     local agentsocket
@@ -106,9 +110,12 @@ agent-load-identity-keys () {
             fi
         done
     fi
+    EXIT
 }
 
 ssh-runinagent () {
+
+    ENTRY
 
     local agentfile
     local command
@@ -119,13 +126,18 @@ ssh-runinagent () {
     logtrace "run command »$sshcommand« in agent $agentfile" >&2
     if [ -e "$agentfile" ]; then 
         /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>/dev/null; $sshcommand"
+        EXIT
         return $?
     else
         logwarn "agentfile not existent" >&2
+        EXIT
         return 1
     fi
+
+
 }
 
 agent-start-or-restart $1
 agent-load-identity-keys $1
+SCRIPTEXIT
 exit $?
