@@ -49,7 +49,8 @@ agent-start-or-restart () {
             logdebug "agent started" >&2
         fi
 
-        loginfo -n "agent for $ssh_identity: " >&2
+        loginfo "agent for $ssh_identity: $agentfile" >&2
+        echo -n "agent for $ssh_identity: " 
         echo $agentfile
         return 0
 
