@@ -1,0 +1,44 @@
+#!/bin/bash
+
+agent-start-or-restart () {
+    
+    local ssh_identity
+    local agentfile
+    local agentsocket
+
+    if [ -n "${1+x}" ]; then
+        ssh_identity="$1"
+        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+        agentsocket="${HOME}/.ssh/agents/socket-${ssh_identity}-$(hostname)"
+        echo ssh-identität: $ssh_identity >&2
+        if  [ -e $agentsocket ]; then
+
+            /bin/sh -c ". $agentfile >/dev/null 2>&1; ssh-add -l >&2; exit $?"
+            if [ $? -eq 2 ]; then
+                echo "agent is not running" >&2
+                rm "$agentsocket"
+                ssh-agent -a $agentsocket > $agentfile 2>/dev/null
+                echo "agent started" >&2
+            else
+                echo "agent is running" >&2
+            fi
+        else
+                echo "agent is not running" >&2
+                ssh-agent -a $agentsocket > $agentfile 2>/dev/null
+                echo "agent startet" >&2
+
+        fi
+        echo -n "agent for $ssh_identity: " >&2
+        echo $agentfile
+        return 0
+    else
+        echo no identity given - exit >&2
+        return 1
+    fi
+
+
+}
+
+
+agent-start-or-restart $1
+exit $?

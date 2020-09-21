@@ -667,27 +667,22 @@ utoken () {
 
     ssh_identity=$1
 
+    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+    
     if [ -n "${ssh_identity+x}" ]; then
         agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
         if [ -e "$agentfile" ]; then 
             local SSH_AUTH_SOCK
             local SSH_AGENT_PID
-            . $agentfile
+            /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; ssh-add -l; ssh-add -e $PKCS11_MODULE; ssh-add -l"
         fi
     fi
-
-    echo SSH_AUTH_SOCK: $SSH_AUTH_SOCK
-    echo SSH_AGENT_PID: $SSH_AGENT_PID
-    export SSH_AUTH_SOCK SSH_AGENT_PID
-    ssh-add -l
-    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; ssh-add -e $PKCS11_MODULE; }
-
-
 }
 
 token () {
 
     local FORCE
+    local ssh_identity
     FORCE=false
     case $1 in
         -f)
@@ -704,13 +699,12 @@ token () {
 
     [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
 
-    # TODO: write default-agent to default-agent-file on shell-start
     if [ -n "${ssh_identity+x}" ]; then
         agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
         if [ -e "$agentfile" ]; then 
             local SSH_AUTH_SOCK
             local SSH_AGENT_PID
-            . $agentfile
+            /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; ssh-add -l; ssh-add -e $PKCS11_MODULE; ssh-add -l"
         fi
     fi
 
@@ -836,6 +830,13 @@ token-list-objects() {
 
 }
 
+loadagent() {
+    local af
+    af=$(ssh-agent-start-or-restart $1)
+    echo $af
+    eval $(<$af)
+}
+
 ssh-loadagent () {
 
     # TODO: create agent if not running
@@ -855,10 +856,12 @@ EOF
                 echo agent is running
             else
                 echo create new agent
+                mkdir -p "$(dirname $agentfile)"
                 ssh-agent > "$agentfile"
             fi
         else
             echo create new agent
+            mkdir -p "$(dirname $agentfile)"
             ssh-agent > "$agentfile"
         fi
     fi
@@ -869,7 +872,63 @@ EOF
     SSH_AUTH_SOCK: ${SSH_AUTH_SOCK}
     SSH_AGENT_PID: ${SSH_AGENT_PID}
   ---------------------------------------------  
+  Show loaded keys from current ssh-agent
 EOF
+    ssh-add -l
 
 }
 
+ssh-runinagent () {
+
+    local agentfile
+    local command
+    agentfile=${1-default}
+    command=${2}
+
+    if [ -n "${ssh_identity+x}" ]; then
+        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+        if [ -e "$agentfile" ]; then 
+            local SSH_AUTH_SOCK
+            local SSH_AGENT_PID
+            /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; $command"
+        fi
+    fi
+}
+
+agent-start-or-restart () {
+    
+    local ssh_identity
+    local agentfile
+    local agentsocket
+
+    if [ -n "${1+x}" ]; then
+        ssh_identity="$1"
+        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+        agentsocket="${HOME}/.ssh/agents/socket-${ssh_identity}-$(hostname)"
+        echo ssh-identity: $ssh_identity >&2
+        if  [ -e $agentsocket ]; then
+
+            /bin/sh -c ". $agentfile >/dev/null 2>&1; ssh-add -l >&2; exit $?"
+            if [ $? -eq 2 ]; then
+                echo agent is not running >&2
+                rm "$agentsocket"
+                ssh-agent -a $agentsocket > $agentfile 2>/dev/null
+            else
+                echo agent is running >&2
+            fi
+        else
+                echo agent is not running \(2\) >&2
+                ssh-agent -a $agentsocket > $agentfile 2>/dev/null
+                echo agent startet \(2\) >&2
+
+        fi
+        echo -n "agent for $ssh_identity: ">&2
+        echo $agentfile
+        return 0
+    else
+        echo no identity given - exit >&2
+        return 1
+    fi
+
+
+}
