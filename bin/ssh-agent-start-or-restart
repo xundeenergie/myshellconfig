@@ -3,9 +3,9 @@
 [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
 [ -z "${SSH_AGENTS_DIR+x}" ] && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
 [ -z "${SSH_AGENT_SOCKETS_DIR+x}" ] && { SSH_AGENT_SOCKETS_DIR=${SSH_AGENT_SOCKETS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENT_SOCKETS_DIR; }
-logdebug SSH_AGENTS_DIR: $SSH_AGENTS_DIR >&2
-logdebug SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR >&2
-logdebug SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR >&2
+logdebug "SSH_AGENTS_DIR: $SSH_AGENTS_DIR" >&2
+logdebug "SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR" >&2
+logdebug "SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR" >&2
 [ -z "${SSH_AGENTS_DIR-x}" ]                || mkdir -vp "$SSH_AGENTS_DIR"
 [ -z "${SSH_AGENT_SOCKETS_DIR-x}" ]         || mkdir -vp "$SSH_AGENT_SOCKETS_DIR"
 [ -z "${SSH_IDENTITIES_DIR-x}" ]            || mkdir -vp "$SSH_IDENTITIES_DIR"
@@ -29,7 +29,7 @@ agent-start-or-restart () {
 #            sshsock=$SSH_AUTH_SOCK
 #            sshpid=$SSH_AGENT_PID
 #            unset SSH_AUTH_SOCK SSH_AGENT_PID
-            logdebug "$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >&2")"
+            logdebug "$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l")"
             case $? in
                 0|1)
                     logdebug "agent is running" >&2
@@ -84,9 +84,9 @@ agent-load-identity-keys () {
 
         fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
         for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep -v "pub$\|so$"); do
-            logdebug key: $key
+            logdebug "key: $key"
             fingerprint=$(ssh-keygen -l -f ~/.ssh/identities/bmi/id_ed25519|awk '{print $2}')
-            logdebug ${fingerprints[*]} and $fingerprint
+            logdebug "${fingerprints[*]} and $fingerprint"
             if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                 logdebug "$key is loaded" >&2
             else
@@ -95,7 +95,7 @@ agent-load-identity-keys () {
             fi
         done
         for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep  "so$"); do
-            logdebug token: $token
+            logdebug "token: $token"
             tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
             if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                 logdebug "$token is loaded" >&2
