@@ -683,7 +683,6 @@ utoken () {
 token () {
 
     [ -z "${SSH_ADD_OPTIONS+x}" ] && { SSH_ADD_OPTIONS=${SSH_ADD_DEFAULT_OPTIONS}; export SSH_ADD_OPTIONS; }
-    echo [ -z "${SSH_IDENTITIES_DIR+x}" ]
     [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR=${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}; export SSH_IDENTITIES_DIR; }
     local FORCE
     local ssh_identity
@@ -698,10 +697,10 @@ token () {
             ;;
     esac
     identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
-    echo identitydir: $identitydir 
+    logtrace "identitydir: $identitydir"
     [ -e "${identitydir}/config" ] && echo found "${identitydir}/config"
     [ -e "${identitydir}/config" ] && eval $(<"${identitydir}/config")
-    echo SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS
+    logtrace "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
     local fingerprints
     declare -a fingerprints
     local tokenfingerprint
@@ -714,19 +713,18 @@ token () {
             fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
             tokenfingerprint="$(ssh-keygen -l -D $PKCS11_MODULE|tr -s ' '|awk '{print $2}')"
             
-            echo fingerprints ${fingerprints[*]}
-            echo -n "${tokenfingerprint}: "
+            logdebug "fingerprints ${fingerprints[*]}"
             if [[ ${fingerprints[*]} =~ $tokenfingerprint ]]; then
-                echo "loaded"
+                logdebug "${tokenfingerprint}: loaded"
                 if $FORCE; then
-                    echo "remove token and readd it again" >&2
-                    ssh-runinagent $agentfile ssh-add -e $PKCS11_MODULE
-                    ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s $PKCS11_MODULE
+                    logdebug "remove token and readd it again" >&2
+                    logdebug "$(ssh-runinagent $agentfile ssh-add -e $PKCS11_MODULE)"
+                    loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s $PKCS11_MODULE)"
                 fi
             else
-                echo "not loaded"
-                $FORCE && ssh-runinagent $agentfile ssh-add -e $PKCS11_MODULE
-                ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s $PKCS11_MODULE
+                logdebug "${tokenfingerprint}: not loaded"
+                $FORCE && logdebug "$(ssh-runinagent $agentfile ssh-add -e $PKCS11_MODULE)"
+                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s $PKCS11_MODULE)"
             fi
             return 0
         fi
@@ -785,12 +783,12 @@ ssh-runinagent () {
     shift
     sshcommand=${@}
 
-    echo "run command »$sshcommand« in agent $agentfile" >&2
+    logtrace "run command »$sshcommand« in agent $agentfile" >&2
     if [ -e "$agentfile" ]; then 
         /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>/dev/null; $sshcommand"
         return $?
     else
-        echo "agentfile not existent" >&2
+        logwarn "agentfile not existent" >&2
         return 1
     fi
 }

@@ -115,7 +115,7 @@ ssh-runinagent () {
     shift
     sshcommand=${@}
 
-    logdebug "run command »$sshcommand« in agent $agentfile" >&2
+    logtrace "run command »$sshcommand« in agent $agentfile" >&2
     if [ -e "$agentfile" ]; then 
         /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>/dev/null; $sshcommand"
         return $?
