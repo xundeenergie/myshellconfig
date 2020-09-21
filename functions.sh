@@ -805,3 +805,15 @@ setloglevel () {
     logerror "new LOGLEVEL is $LOGLEVEL"
 }
 
+setfileloglevel () {
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
+    if [[ ${loglevels[*]} =~ "$1" ]]; then
+        export FILELOGLEVEL=$1
+    else
+        logerror "FILELOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
+    fi
+    logerror "new FILELOGLEVEL is $FILELOGLEVEL"
+}
+

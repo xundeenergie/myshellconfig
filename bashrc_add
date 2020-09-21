@@ -51,7 +51,9 @@ function logerror(){
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
-    echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
+    fi
 }
 
 function logwarn(){
@@ -64,7 +66,9 @@ function logwarn(){
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
-    echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
+    fi
 }
 
 function loginfo(){
@@ -77,7 +81,9 @@ function loginfo(){
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
-    echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
+    fi
 }
 
 
@@ -91,7 +97,9 @@ function logdebug(){
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
-    echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
+    fi
 }
 
 function logtrace(){
@@ -104,7 +112,9 @@ function logtrace(){
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
         echo $msg >&2
     fi
-    echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG
+    fi
 }
 
 
@@ -137,6 +147,7 @@ if [[ $- = *i* ]] ; then
     [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ]                && MYSHELLCONFIG_GIT_SYNC=true
 
     [ -z "${MYHSELLCONFIG_LOGLEVEL_DEFAULT+x}" ]        && { MYHSELLCONFIG_LOGLEVEL_DEFAULT="INFO"; export MYHSELLCONFIG_LOGLEVEL_DEFAULT; }
+    [ -z "${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT+x}" ]    && { MYHSELLCONFIG_FILELOGLEVEL_DEFAULT="INFO"; export MYHSELLCONFIG_FILELOGLEVEL_DEFAULT; }
 
     export SGIT="git -C ${MYSHELLCONFIG_BASE}" 
     export MYSHELLCONFIG_VIM_PLUGINS
