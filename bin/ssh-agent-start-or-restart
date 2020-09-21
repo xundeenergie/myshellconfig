@@ -1,7 +1,11 @@
 #!/bin/bash
 
-[ -n "${SSH_AGENTS_DIR+x} ] && { AGENTS_DIR=${HOME}/.ssh/agents; export AGENTS_DIR; }
-[ -n "${SSH_AGENT_SOCKETS_DIR+x} ] && { AGENTS_DIR=${HOME}/.ssh/agents; export AGENTS_DIR; }
+[ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
+[ -z "${SSH_AGENTS_DIR+x}" ] && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
+[ -z "${SSH_AGENT_SOCKETS_DIR+x}" ] && { SSH_AGENT_SOCKETS_DIR=${SSH_AGENT_SOCKETS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENT_SOCKETS_DIR; }
+echo SSH_AGENTS_DIR: $SSH_AGENTS_DIR >&2
+echo SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR >&2
+echo SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR >&2
 agent-start-or-restart () {
     
     local ssh_identity
@@ -11,28 +15,41 @@ agent-start-or-restart () {
     if [ -n "${1+x}" ]; then
         ssh_identity="$1"
         agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
-        agentsocket="${SSH_AGENTS_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
+        agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
+        echo "agentfile: $agentfile" >&2
+        echo "agentsocket: $agentsocket" >&2
         echo ssh-identität: $ssh_identity >&2
-        if  [ -e $agentsocket ]; then
+        if [ -e $agentfile ]; then
 
-            /bin/sh -c ". $agentfile >/dev/null 2>&1; ssh-add -l >&2; exit $?"
-            if [ $? -eq 2 ]; then
-                echo "agent is not running" >&2
-                rm "$agentsocket"
-                ssh-agent -a $agentsocket > $agentfile 2>/dev/null
-                echo "agent started" >&2
-            else
-                echo "agent is running" >&2
-            fi
+            # look if agent is reachable
+#            local sshsock sshpid
+#            sshsock=$SSH_AUTH_SOCK
+#            sshpid=$SSH_AGENT_PID
+#            unset SSH_AUTH_SOCK SSH_AGENT_PID
+            /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >&2"
+            case $? in
+                0|1)
+                    echo "agent is running" >&2
+                    ;;
+                2)
+                    echo "agent is not running 1" >&2
+                    [ -e $agentsocket ] && rm "$agentsocket"
+                    ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile 2>&2
+                    echo "agent started" >&2
+                    ;;
+            esac
         else
-                echo "agent is not running" >&2
-                ssh-agent -a $agentsocket > $agentfile 2>/dev/null
-                echo "agent startet" >&2
-
+            echo "agent is not running 2" >&2
+            #rm "$agentsocket"
+            echo ssh-agent -a $agentsocket \> $agentfile
+            ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile 2>&2
+            echo "agent started" >&2
         fi
+
         echo -n "agent for $ssh_identity: " >&2
         echo $agentfile
         return 0
+
     else
         echo no identity given - exit >&2
         return 1
@@ -41,6 +58,68 @@ agent-start-or-restart () {
 
 }
 
+agent-load-identity-keys () {
+
+    local ssh_identity
+    local agentfile
+    local agentsocket
+    local fingerprints
+    declare -a fingerprints
+    local fingerprint
+    local tokenfingerprint
+
+    if [ -n "${1+x}" ]; then
+        ssh_identity="$1"
+        agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
+        agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
+        identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
+        echo "agentfile: $agentfile" >&2
+        echo "agentsocket: $agentsocket" >&2
+        echo ssh-identität: $ssh_identity >&2
+
+        fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
+        for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep -v "pub$\|so$"); do
+            echo key: $key
+            fingerprint=$(ssh-keygen -l -f ~/.ssh/identities/bmi/id_ed25519|awk '{print $2}')
+            echo ${fingerprints[*]} and $fingerprint
+            if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
+                echo "$key is loaded" >&2
+            else
+                echo "$key is not loaded" >&2
+                ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${identitydir}/${key}
+            fi
+        done
+        for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep  "so$"); do
+            echo token: $token
+            tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
+            if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
+                echo "$token is loaded" >&2
+            else
+                echo "$token is not loaded" >&2
+                ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${identitydir}/${token}
+            fi
+        done
+    fi
+}
+
+ssh-runinagent () {
+
+    local agentfile
+    local command
+    agentfile=${1}
+    shift
+    sshcommand=${@}
+
+    echo "run command »$sshcommand« in agent $agentfile" >&2
+    if [ -e "$agentfile" ]; then 
+        /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>/dev/null; $sshcommand"
+        return $?
+    else
+        echo "agentfile not existent" >&2
+        return 1
+    fi
+}
 
 agent-start-or-restart $1
+agent-load-identity-keys $1
 exit $?
