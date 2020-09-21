@@ -21,7 +21,7 @@ agent-start-or-restart () {
         agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
         logdebug "agentfile: $agentfile" >&2
         logdebug "agentsocket: $agentsocket" >&2
-        logdebug ssh-identität: $ssh_identity >&2
+        logdebug "ssh-identität: $ssh_identity" >&2
         if [ -e $agentfile ]; then
 
             # look if agent is reachable
@@ -44,7 +44,7 @@ agent-start-or-restart () {
         else
             logdebug "agent is not running 2" >&2
             #rm "$agentsocket"
-            logdebug ssh-agent -a $agentsocket \> $agentfile
+            logdebug "ssh-agent -a $agentsocket \> $agentfile"
             ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile 2>&2
             logdebug "agent started" >&2
         fi
@@ -55,7 +55,7 @@ agent-start-or-restart () {
         return 0
 
     else
-        logwarn no identity given - exit >&2
+        logwarn "no identity given - exit" >&2
         return 1
     fi
 
