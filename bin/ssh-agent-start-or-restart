@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[ -n "${SSH_AGENTS_DIR+x} ] && { AGENTS_DIR=${HOME}/.ssh/agents; export AGENTS_DIR; }
+[ -n "${SSH_AGENT_SOCKETS_DIR+x} ] && { AGENTS_DIR=${HOME}/.ssh/agents; export AGENTS_DIR; }
 agent-start-or-restart () {
     
     local ssh_identity
@@ -8,8 +10,8 @@ agent-start-or-restart () {
 
     if [ -n "${1+x}" ]; then
         ssh_identity="$1"
-        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
-        agentsocket="${HOME}/.ssh/agents/socket-${ssh_identity}-$(hostname)"
+        agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
+        agentsocket="${SSH_AGENTS_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
         echo ssh-identität: $ssh_identity >&2
         if  [ -e $agentsocket ]; then
 

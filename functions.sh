@@ -932,3 +932,12 @@ agent-start-or-restart () {
 
 
 }
+
+
+createdirs () {
+
+    for i in $@;do
+        echo mkdir -p "$i"
+    done
+    
+}
