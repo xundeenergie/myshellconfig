@@ -14,9 +14,9 @@ if [ -n "$SSH_AUTH_SOCK" ] && \
         chmod 600 ~/.x2go/agentsocket
         chown $USER ~/.x2go/agentsocket
         # write file name of agent socket into file
-        logdebug old agentsock $( cat ~/.x2go/agentsocket)
+        loginfo "old agentsock $( cat ~/.x2go/agentsocket)"
         echo $SSH_AUTH_SOCK > ~/.x2go/agentsocket
-        logdebug "write SSH_AUTH_SOCK (${SSH_AUTH_SOCK}) to ~/.x2go/agentsocket"
+        loginfo "write SSH_AUTH_SOCK (${SSH_AUTH_SOCK}) to ~/.x2go/agentsocket"
 fi
 
 # Part that runs in X2Go session
@@ -42,7 +42,7 @@ if which x2golistsessions >/dev/null && \
         if [ -S "$MIGHTBEOURAGENT" ]; then
                 # export path to agent socket
                 export SSH_AUTH_SOCK=$MIGHTBEOURAGENT
-                logdebug export it
+                logdebug "export it"
         fi
 fi
 
