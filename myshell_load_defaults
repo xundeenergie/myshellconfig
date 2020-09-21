@@ -141,5 +141,5 @@ EOF
     [ -z "${SSH_IDENTITIES_DEFAULT_DIR+x}" ]    && { SSH_IDENTITIES_DEFAULT_DIR="${HOME}/.ssh/identities"; export SSH_IDENTITIES_DEFAULT_DIR; }
     [ -z "${SSH_AGENTS_DEFAULT_DIR+x}" ]        && { SSH_AGENTS_DEFAULT_DIR="${HOME}/.ssh/agents"; export SSH_AGENTS_DEFAULT_DIR; }
     [ -z "${SSH_AGENT_SOCKETS_DEFAULT_DIR+x}" ] && { SSH_AGENT_SOCKETS_DEFAULT_DIR="${HOME}/.ssh/agents"; export SSH_AGENT_SOCKETS_DEFAULT_DIR; }
-    [ -n "${SSH_AGENTS_DIR-x}" ]                && mkdir -p "$SSH_AGENTS_DIR"
-    [ -n "${SSH_AGENT_SOCKETS_DIR-x}" ]         && mkdir -p "$SSH_AGENT_SOCKETS_DIR"
+    [ -n "${SSH_AGENTS_DIR-x}" ]                && mkdir -p "$SSH_AGENTS_DIR"
+    [ -n "${SSH_AGENT_SOCKETS_DIR-x}" ]         && mkdir -p "$SSH_AGENT_SOCKETS_DIR"
