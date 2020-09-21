@@ -1,0 +1,110 @@
+#!/bin/bash
+#### LOGGING
+## from https://www.cubicrace.com/2016/03/log-tracing-mechnism-for-shell-scripts.html
+[ -z "${SCRIPT_LOG+x}" ] && export SCRIPT_LOG=${HOME}/logs/scriptlog
+mkdir -p "$(dirname ${SCRIPT_LOG})"
+touch $SCRIPT_LOG
+
+[ -z "${MYHSELLCONFIG_LOGLEVEL_DEFAULT+x}" ] && { MYHSELLCONFIG_LOGLEVEL_DEFAULT="INFO"; export MYHSELLCONFIG_LOGLEVEL_DEFAULT; }
+[ -z "${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT+x}" ] && { MYHSELLCONFIG_FILELOGLEVEL_DEFAULT="INFO"; export MYHSELLCONFIG_FILELOGLEVEL_DEFAULT; }
+
+function SCRIPTENTRY(){
+    timeAndDate=`date`
+    script_name=`basename "$0"`
+    script_name="${script_name%.*}"
+    echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $SCRIPT_LOG
+}
+
+function SCRIPTEXIT(){
+    script_name=`basename "$0"`
+    script_name="${script_name%.*}"
+    echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $SCRIPT_LOG
+}
+
+function ENTRY(){
+    local cfn="${FUNCNAME[1]}"
+    timeAndDate=`date`
+    echo "[$timeAndDate] [DEBUG]  > $cfn $FUNCNAME" >> $SCRIPT_LOG
+}
+
+function EXIT(){
+    local cfn="${FUNCNAME[1]}"
+    timeAndDate=`date`
+    echo "[$timeAndDate] [DEBUG]  < $cfn $FUNCNAME" >> $SCRIPT_LOG
+}
+
+function logerror(){
+    local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    local loglevels
+    declare -a loglevels
+    loglevels=()
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+        echo $msg >&2
+    fi
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
+    fi
+}
+
+function logwarn(){
+    local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" )
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+        echo $msg >&2
+    fi
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
+    fi
+}
+
+function loginfo(){
+    local function_name="${FUNCNAME[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" )
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+        echo $msg >&2
+    fi
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
+    fi
+}
+
+
+function logdebug(){
+    local function_name="${funcname[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+        echo $msg >&2
+    fi
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
+    fi
+}
+
+function logtrace(){
+    local function_name="${funcname[1]}"
+    local msg="$1"
+    timeAndDate=`date`
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO" "DEBUG")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+        echo $msg >&2
+    fi
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+        echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG
+    fi
+}
