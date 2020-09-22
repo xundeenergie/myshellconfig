@@ -297,7 +297,7 @@ sshs() {
 
     local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/loggingfunctions" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
+    local FILELIST=( "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/logging" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
 
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
