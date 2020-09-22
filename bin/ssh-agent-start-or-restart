@@ -10,6 +10,7 @@ logdebug "SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR" >&2
 [ -z "${SSH_AGENTS_DIR-x}" ]                || mkdir -vp "$SSH_AGENTS_DIR"
 [ -z "${SSH_AGENT_SOCKETS_DIR-x}" ]         || mkdir -vp "$SSH_AGENT_SOCKETS_DIR"
 [ -z "${SSH_IDENTITIES_DIR-x}" ]            || mkdir -vp "$SSH_IDENTITIES_DIR"
+
 agent-start-or-restart () {
     
     ENTRY
@@ -26,33 +27,30 @@ agent-start-or-restart () {
         logdebug "ssh-identität: $ssh_identity" >&2
         if [ -e $agentfile ]; then
 
-            # look if agent is reachable
-#            local sshsock sshpid
-#            sshsock=$SSH_AUTH_SOCK
-#            sshpid=$SSH_AGENT_PID
-#            unset SSH_AUTH_SOCK SSH_AGENT_PID
-            logdebug "$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l")"
+            loginfo "$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >/dev/null")"
             case $? in
-                0|1)
-                    logdebug "agent is running" >&2
+                0)
+                    loginfo "agent is running" >&2
+                    ;;
+                1)
+                    logwarn "command failed on ssh-agent"
                     ;;
                 2)
-                    logdebug "agent is not running 1" >&2
-                    [ -e $agentsocket ] && rm "$agentsocket"
-                    ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile 2>&2
-                    logdebug "agent started" >&2
+                    loginfo "former agent is not running" >&2
+                    [ -e $agentsocket ] && { logdebug -n "remove socketfile: $( rm -v "$agentsocket" )"; }
+                    logdebug "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
+                    loginfo "agent started" >&2
                     ;;
             esac
         else
-            logdebug "agent is not running 2" >&2
+            loginfo "agent did not exist" >&2
             #rm "$agentsocket"
             logdebug "ssh-agent -a $agentsocket \> $agentfile"
-            ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile 2>&2
-            logdebug "agent started" >&2
+            logdebug "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
+            loginfo "agent started" >&2
         fi
 
-        loginfo "agent for $ssh_identity: $agentfile"
-        echo -n "agent for $ssh_identity: "  >&2
+        logdebug "agent for $ssh_identity: $agentfile"
         echo $agentfile
         return 0
 
@@ -79,37 +77,39 @@ agent-load-identity-keys () {
     if [ -n "${1+x}" ]; then
         ssh_identity="$1"
         identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
-        [ -e "${identitydir}/.config" ] && . "${identitydir}/.config"
+        [ -e "${identitydir}/config" ] && . "${identitydir}/config"
         agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
         agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
         logdebug "agentfile: $agentfile" >&2
         logdebug "agentsocket: $agentsocket" >&2
-        logdebug "ssh-identität: $ssh_identity" >&2
+        logdebug "identitydir: $identitydir"
+        loginfo "ssh-identität: $ssh_identity" >&2
         loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
 
         fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
-        for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep -v "pub$\|so$"); do
-            logtrace "key: $key"
+        for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep -v "pub$\|so$\|config$\|public$"); do
+            logdebug "key: $key"
             fingerprint=$(ssh-keygen -l -f ~/.ssh/identities/bmi/id_ed25519|awk '{print $2}')
             logtrace "${fingerprints[*]} and $fingerprint"
             if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                 logdebug "$key is loaded" >&2
             else
                 logdebug "$key is not loaded" >&2
-                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${identitydir}/${key})"
+                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key})"
             fi
         done
-        for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}|grep  "so$"); do
-            logtrace "token: $token"
+        for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
+            logdebug "token: $token"
             tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
             logtrace "${fingerprints[*]} and $tokenfingerprint"
             if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                 logdebug "$token is loaded" >&2
             else
                 logdebug "$token is not loaded" >&2
-                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${identitydir}/${token})"
+                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s /${token})"
             fi
         done
+        logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
     fi
     EXIT
 }
@@ -124,7 +124,7 @@ ssh-runinagent () {
     shift
     sshcommand=${@}
 
-    logtrace "run command »$sshcommand« in agent $agentfile" >&2
+    logdebug "run command »$sshcommand« in agent $agentfile" >&2
     if [ -e "$agentfile" ]; then 
         /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>/dev/null; $sshcommand"
         EXIT

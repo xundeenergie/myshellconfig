@@ -844,7 +844,7 @@ loadagent() {
     ENTRY
     local af
     af=$(ssh-agent-start-or-restart $1 2>/dev/null)
-    echo $af
+    loginfo "Load agent from $af"
 #    eval $(<$af)
     . $af
     EXIT
@@ -871,6 +871,7 @@ ssh-runinagent () {
 setloglevel () {
     ENTRY
     local loglevels
+    local oldloglevel=$LOGLEVEL
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
     if [[ ${loglevels[*]} =~ "$1" ]]; then
@@ -878,13 +879,14 @@ setloglevel () {
     else
         logerror "LOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
     fi
-    logerror "new LOGLEVEL is $LOGLEVEL"
+    logerror "new LOGLEVEL is $LOGLEVEL (changed from $oldloglevel)"
     EXIT
 }
 
 setfileloglevel () {
     ENTRY
     local loglevels
+    local oldloglevel=${FILELOGLEVEL-${MYSHELLCONFIG_FILELOGLEVEL_DEFAULT}}
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
     if [[ ${loglevels[*]} =~ "$1" ]]; then
@@ -892,7 +894,7 @@ setfileloglevel () {
     else
         logerror "FILELOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
     fi
-    logerror "new FILELOGLEVEL is $FILELOGLEVEL"
+    logerror "new FILELOGLEVEL is $FILELOGLEVEL (changed from $oldloglevel)"
     EXIT
 }
 

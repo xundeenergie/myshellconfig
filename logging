@@ -5,32 +5,50 @@
 mkdir -p "$(dirname ${SCRIPT_LOG})"
 touch $SCRIPT_LOG
 
-[ -z "${MYHSELLCONFIG_LOGLEVEL_DEFAULT+x}" ] && { MYHSELLCONFIG_LOGLEVEL_DEFAULT="INFO"; export MYHSELLCONFIG_LOGLEVEL_DEFAULT; }
-[ -z "${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT+x}" ] && { MYHSELLCONFIG_FILELOGLEVEL_DEFAULT="INFO"; export MYHSELLCONFIG_FILELOGLEVEL_DEFAULT; }
 
 function SCRIPTENTRY(){
-    timeAndDate=`date`
-    script_name=`basename -- "$0"`
-    script_name="${script_name%.*}"
-    echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $SCRIPT_LOG
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
+        timeAndDate=`date`
+        script_name=`basename -- "$0"`
+        script_name="${script_name%.*}"
+        echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $SCRIPT_LOG
+    fi
 }
 
 function SCRIPTEXIT(){
-    script_name=`basename -- "$0"`
-    script_name="${script_name%.*}"
-    echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $SCRIPT_LOG
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
+        script_name=`basename -- "$0"`
+        script_name="${script_name%.*}"
+        echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $SCRIPT_LOG
+    fi
 }
 
 function ENTRY(){
-    local cfn="${FUNCNAME[1]}"
-    timeAndDate=`date`
-    echo "[$timeAndDate] [DEBUG]  > $cfn $FUNCNAME" >> $SCRIPT_LOG
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
+        local cfn="${FUNCNAME[1]}"
+        timeAndDate=`date`
+        echo "[$timeAndDate] [DEBUG]  > $cfn $FUNCNAME" >> $SCRIPT_LOG
+    fi
 }
 
 function EXIT(){
-    local cfn="${FUNCNAME[1]}"
-    timeAndDate=`date`
-    echo "[$timeAndDate] [DEBUG]  < $cfn $FUNCNAME" >> $SCRIPT_LOG
+    local loglevels
+    declare -a loglevels
+    loglevels=("ERROR" "WARN" "INFO")
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
+        local cfn="${FUNCNAME[1]}"
+        timeAndDate=`date`
+        echo "[$timeAndDate] [DEBUG]  < $cfn $FUNCNAME" >> $SCRIPT_LOG
+    fi
 }
 
 function logerror(){
@@ -46,10 +64,10 @@ function logerror(){
     local loglevels
     declare -a loglevels
     loglevels=()
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
         echo $opts $msg >&2
     fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
     fi
 }
@@ -67,10 +85,10 @@ function logwarn(){
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" )
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
         echo $opts $msg >&2
     fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
     fi
 }
@@ -88,10 +106,10 @@ function loginfo(){
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" )
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
         echo $opts $msg >&2
     fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
     fi
 }
@@ -110,10 +128,10 @@ function logdebug(){
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO")
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
         echo $opts $msg >&2
     fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
     fi
 }
@@ -131,10 +149,10 @@ function logtrace(){
     local loglevels
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG")
-    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$MYHSELLCONFIG_LOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
         echo $opts $msg >&2
     fi
-    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$MYHSELLCONFIG_FILELOGLEVEL_DEFAULT}" ]];then
+    if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG
     fi
 }
