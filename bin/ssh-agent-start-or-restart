@@ -28,7 +28,7 @@ SCRIPTENTRY
 [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
 [ -z "${SSH_AGENTS_DIR+x}" ] && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
 [ -z "${SSH_AGENT_SOCKETS_DIR+x}" ] && { SSH_AGENT_SOCKETS_DIR=${SSH_AGENT_SOCKETS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENT_SOCKETS_DIR; }
-[ -z "${SSH_AGENT_OPTIONS+x}" ] && { SSH_AGENT_OPTIONS=${SSH_AGENT_DEFAULT_OPTIONS-'-t 7200'}; export SSH_AGENT_OPTIONS; }
+[ -z "${SSH_AGENT_OPTIONS+x}" ] && { SSH_AGENT_OPTIONS=${SSH_AGENT_DEFAULT_OPTIONS--t 7200 }; export SSH_AGENT_OPTIONS; }
 logdebug "SSH_AGENTS_DIR: $SSH_AGENTS_DIR" >&2
 logdebug "SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR" >&2
 logdebug "SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR" >&2
@@ -71,7 +71,7 @@ agent-start-or-restart () {
                     2)
                         loginfo "former agent is not running" >&2
                         [ -e $agentsocket ] && { logdebug -n "remove socketfile: $( rm -v "$agentsocket" )"; }
-                        logdebug "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
+                        logdebug "$(ssh-agent -a $agentsocket ${SSH_AGENT_OPTIONS} > $agentfile )"
                         loginfo "agent started" >&2
                         ;;
                 esac

@@ -145,6 +145,6 @@ EOF
 [ -z "${SSH_IDENTITIES_DEFAULT_DIR+x}" ]            && { SSH_IDENTITIES_DEFAULT_DIR="${HOME}/.ssh/identities"; export SSH_IDENTITIES_DEFAULT_DIR; }
 [ -z "${SSH_AGENTS_DEFAULT_DIR+x}" ]                && { SSH_AGENTS_DEFAULT_DIR="${HOME}/.ssh/agents"; export SSH_AGENTS_DEFAULT_DIR; }
 [ -z "${SSH_AGENT_SOCKETS_DEFAULT_DIR+x}" ]         && { SSH_AGENT_SOCKETS_DEFAULT_DIR="${HOME}/.ssh/agents"; export SSH_AGENT_SOCKETS_DEFAULT_DIR; }
-[ -z "${SSH_AGENT_DEFAULT_OPTIONS+x}" ]             && { SSH_AGENT_DEFAULT_OPTIONS='-t 7200'}; export SSH_AGENT_DEFAULT_OPTIONS; }
+[ -z "${SSH_AGENT_DEFAULT_OPTIONS+x}" ]             && { SSH_AGENT_DEFAULT_OPTIONS='-t 7200'; export SSH_AGENT_DEFAULT_OPTIONS; }
 [ -z "${SSH_ADD_DEFAULT_OPTIONS+x}" ]               && { SSH_ADD_DEFAULT_OPTIONS="-t 7200"; export SSH_ADD_DEFAULT_OPTIONS; }
 [ -z "${SSH_DEFAULT_IDENTITY+x}" ]                  && { SSH_DEFAULT_IDENTITY="default"; export SSH_DEFAULT_IDENTITY; }
