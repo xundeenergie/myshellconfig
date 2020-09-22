@@ -206,7 +206,8 @@ agent-load-identity-keys () {
                     logtrace "${fingerprints[*]} and $fingerprint"
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                         logdebug "$key is loaded" >&2
-                        if [ $readd -o $remove ]; then
+                        logwarn "$readd $remove"
+                        if  $readd || $remove ; then
                             $readd && logwarn "readd key $key" >&2
                             $remove && logwarn "remove key $key" >&2
                             loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
@@ -226,13 +227,12 @@ agent-load-identity-keys () {
                     logtrace "${fingerprints[*]} and $tokenfingerprint"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                         logdebug "$token is loaded" >&2
-                        if [ $readd -o $remove ]; then
+                        if  $readd || $remove ; then
                             $readd && logwarn "readd token $token" >&2
                             $remove && logwarn "remove token $token" >&2
                             loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token} 2>&1)"
                             $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token} 2>&1)"
                         fi
-                        $remove loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token} 2>&1)"
                     else
                         logwarn "$token is not loaded -> load it" >&2
                         loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token} 2>&1)"
