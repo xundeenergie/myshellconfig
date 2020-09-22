@@ -750,14 +750,23 @@ utoken () {
     EXIT
 }
 
-token () {
+token(){
+    ssh-agent-start-or-restart -t $1
+}
+tokenold () {
     ENTRY
 
+    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
     [ -z "${SSH_ADD_OPTIONS+x}" ] && { SSH_ADD_OPTIONS=${SSH_ADD_DEFAULT_OPTIONS}; export SSH_ADD_OPTIONS; }
     [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR=${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}; export SSH_IDENTITIES_DIR; }
     local FORCE
     local ssh_identity
-    FORCE=false
+    local fingerprints
+    declare -a fingerprints
+    local tokenfingerprint
+    local agentfile
+    local FORCE=false
+
     case $1 in
         -f)
             FORCE=true
@@ -767,21 +776,23 @@ token () {
             ssh_identity=${1-default}
             ;;
     esac
-    identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
-    logtrace "identitydir: $identitydir"
-    [ -e "${identitydir}/config" ] && echo found "${identitydir}/config"
-    [ -e "${identitydir}/config" ] && eval $(<"${identitydir}/config")
-    logtrace "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
-    local fingerprints
-    declare -a fingerprints
-    local tokenfingerprint
 
-    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+
 
     if [ -n "${ssh_identity+x}" ]; then
-        agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
+        identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
+        [ -e "${identitydir}/config" ] && logdebug "found ${identitydir}/config"
+        [ -e "${identitydir}/config" ] && eval $(<"${identitydir}/config")
+        loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
+        agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
+        agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
+        loginfo "ssh-identität: $ssh_identity" >&2
+        loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
+        logdebug "agentfile: $agentfile" >&2
+        logdebug "agentsocket: $agentsocket" >&2
+        logdebug "identitydir: $identitydir"
+        fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
         if [ -e "$agentfile" ]; then 
-            fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
             tokenfingerprint="$(ssh-keygen -l -D $PKCS11_MODULE|tr -s ' '|awk '{print $2}')"
             
             logdebug "fingerprints ${fingerprints[*]}"

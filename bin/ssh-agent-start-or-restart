@@ -1,5 +1,24 @@
 #!/bin/bash
 
+loadonly=false
+tokenonly=false
+while :; do
+    case $1 in
+        -l|--load-only-agent)
+            loadonly=true
+            shift
+            ;;
+        -t|--token-only)
+            tokenonly=true
+            shift
+            ;;
+        *)
+            ssh_identity=$1
+            break
+            ;;
+    esac
+done
+
 SCRIPTENTRY
 [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
 [ -z "${SSH_AGENTS_DIR+x}" ] && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
@@ -27,8 +46,10 @@ agent-start-or-restart () {
         logdebug "ssh-identität: $ssh_identity" >&2
         if [ -e $agentfile ]; then
 
-            loginfo "$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l >/dev/null")"
-            case $? in
+            local msg="$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l")"
+            local ret=$?
+            logdebug "$msg"
+            case $ret in
                 0)
                     loginfo "agent is running" >&2
                     ;;
@@ -80,24 +101,26 @@ agent-load-identity-keys () {
         [ -e "${identitydir}/config" ] && . "${identitydir}/config"
         agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
         agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
+        loginfo "ssh-identität: $ssh_identity" >&2
+        loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
         logdebug "agentfile: $agentfile" >&2
         logdebug "agentsocket: $agentsocket" >&2
         logdebug "identitydir: $identitydir"
-        loginfo "ssh-identität: $ssh_identity" >&2
-        loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
 
         fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
-        for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep -v "pub$\|so$\|config$\|public$"); do
-            logdebug "key: $key"
-            fingerprint=$(ssh-keygen -l -f ~/.ssh/identities/bmi/id_ed25519|awk '{print $2}')
-            logtrace "${fingerprints[*]} and $fingerprint"
-            if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
-                logdebug "$key is loaded" >&2
-            else
-                logdebug "$key is not loaded" >&2
-                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key})"
-            fi
-        done
+        if ! $tokenonly ; then
+            for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep -v "pub$\|so$\|config$\|public$"); do
+                logdebug "key: $key"
+                fingerprint=$(ssh-keygen -l -f ~/.ssh/identities/bmi/id_ed25519|awk '{print $2}')
+                logtrace "${fingerprints[*]} and $fingerprint"
+                if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
+                    logdebug "$key is loaded" >&2
+                else
+                    logdebug "$key is not loaded" >&2
+                    loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key})"
+                fi
+            done
+        fi
         for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
             logdebug "token: $token"
             tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
@@ -106,7 +129,7 @@ agent-load-identity-keys () {
                 logdebug "$token is loaded" >&2
             else
                 logdebug "$token is not loaded" >&2
-                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s /${token})"
+                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token})"
             fi
         done
         logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
@@ -138,7 +161,7 @@ ssh-runinagent () {
 
 }
 
-agent-start-or-restart $1
-agent-load-identity-keys $1
+agent-start-or-restart $ssh_identity
+! $loadonly && agent-load-identity-keys $ssh_identity
 SCRIPTEXIT
 exit $?
