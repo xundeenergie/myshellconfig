@@ -871,7 +871,7 @@ ssh-runinagent () {
 setloglevel () {
     ENTRY
     local loglevels
-    local oldloglevel=$LOGLEVEL
+    local oldloglevel=${LOGLEVEL-$LOGLEVEL_DEFAULT}
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
     if [[ ${loglevels[*]} =~ "$1" ]]; then
@@ -879,14 +879,14 @@ setloglevel () {
     else
         logerror "LOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
     fi
-    logerror "new LOGLEVEL is $LOGLEVEL (changed from $oldloglevel)"
+    logerror "change LOGLEVEL from $oldloglevel -> $LOGLEVEL"
     EXIT
 }
 
 setfileloglevel () {
     ENTRY
     local loglevels
-    local oldloglevel=${FILELOGLEVEL-${MYSHELLCONFIG_FILELOGLEVEL_DEFAULT}}
+    local oldloglevel=${FILELOGLEVEL-${FILELOGLEVEL_DEFAULT}}
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
     if [[ ${loglevels[*]} =~ "$1" ]]; then
@@ -894,7 +894,7 @@ setfileloglevel () {
     else
         logerror "FILELOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
     fi
-    logerror "new FILELOGLEVEL is $FILELOGLEVEL (changed from $oldloglevel)"
+    logerror "change FILELOGLEVEL from $oldloglevel -> $FILELOGLEVEL"
     EXIT
 }
 
