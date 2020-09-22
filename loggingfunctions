@@ -10,13 +10,13 @@ touch $SCRIPT_LOG
 
 function SCRIPTENTRY(){
     timeAndDate=`date`
-    script_name=`basename "$0"`
+    script_name=`basename -- "$0"`
     script_name="${script_name%.*}"
     echo "[$timeAndDate] [DEBUG]  > $script_name $FUNCNAME" >> $SCRIPT_LOG
 }
 
 function SCRIPTEXIT(){
-    script_name=`basename "$0"`
+    script_name=`basename -- "$0"`
     script_name="${script_name%.*}"
     echo "[$timeAndDate] [DEBUG]  < $script_name $FUNCNAME" >> $SCRIPT_LOG
 }
