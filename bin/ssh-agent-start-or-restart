@@ -1,24 +1,72 @@
 #!/bin/bash
 
-loadonly=false
+usage(){
+    cat << EOF
+
+    Usage: ssh-agent-start-or-restart [[-c]|[--create-only]]|[[-t]|[--token-only]]|[[-k]|[--key-only]]|[[-r]|[-f]|[--reload]|[--force]] [<ssh-identity>]
+
+    If started only with <ssh-identity>, the script looks up in configured identity-path \$SSH_IDENTITIES_DIR (${SSH_IDENTITIES_DIR}) if it can find a directory named after <ssh-identity>.
+    If no <ssh_identity> is given, the identity is set to \$SSH_DEFAULT_IDENTITY ($SSH_DEFAULT_IDENTITY) configured via Environment.
+    IF \$SSH_DEFAULT_IDENTITY is also not set, default is the SSH_DEFAULT_IDENTITY
+
+    The output is the name of the file, where ssh-agent infomations are hold to load it to current shell for further actions.
+    Use "$ eval \$(<outputfilenam>)", if you want to load the SSH_AUTH_SOCK and SSH_AGENT_PID in current shell or shorter "$ loadagent [<ssh_identity>]"
+
+    -c|--create-only                Create or restart only the agent. Do not load any 
+                                    key or token in it.
+                                    The Output is used for loading the agent in the current
+                                    shell. (loadagent <identity>)
+    -t|--token-only                 To add or renew only configured pkcs11-hardware-token
+                                    configured in ${SSH_IDENTITIES_DIR}/<ssh-identity>,
+                                    just use this. 
+    -k|--key-only                   To add or renew only configured keys configured in
+                                    ${SSH_IDENTITIES_DIR}/<ssh-identity>, just use this.
+    -r|-f|--reload-token|--force    remove all in ${SSH_IDENTITIES_DIR}/<ssh-identity> 
+                                    configured keys and tokens and readd them again.
+                                    Depends on -t an -k Option to select wheter only 
+                                    keys or tokens only. If no -t and -k is given, all 
+                                    keys and token are removed and readded again.
+                                    Just to be asked for password again, if you plugged off
+                                    hardware-token and plugged it in again.
+    -h|--info                       Show this info
+
+
+EOF
+
+}
+
+createonly=false
 tokenonly=false
-reloadtoken=false
+reload=false
+keyonly=false
 while :; do
     case $1 in
-        -l|--load-only)
-            loadonly=true
+        -c|--create-only)
+            createonly=true
             shift
             ;;
         -t|--token-only)
             tokenonly=true
             shift
             ;;
-        -r|-f|--reload-token)
-            reloadtoken=true
+        -k|--key-only)
+            keyonly=true
             shift
             ;;
+        -r|-f|--reload-token|--force)
+            reload=true
+            shift
+            ;;
+        -h|--info)
+            usage
+            exit 0
+            ;;
+        -*)
+            echo "Unknown urgument: »$1«"
+            exit 1
+            ;;
         *)
-            ssh_identity=${1-$SSH_DEFAULT_IDENTITY}
+            ssh_identity=${1-${SSH_DEFAULT_IDENTITY-default}}
             break
             ;;
     esac
@@ -36,6 +84,7 @@ logdebug "ssh-identität: $ssh_identity" >&2
 [ -z "${SSH_AGENTS_DIR-x}" ]                || mkdir -vp "$SSH_AGENTS_DIR"
 [ -z "${SSH_AGENT_SOCKETS_DIR-x}" ]         || mkdir -vp "$SSH_AGENT_SOCKETS_DIR"
 [ -z "${SSH_IDENTITIES_DIR-x}" ]            || mkdir -vp "$SSH_IDENTITIES_DIR"
+
 
 agent-start-or-restart () {
     
@@ -66,7 +115,10 @@ agent-start-or-restart () {
                         loginfo "agent is running" >&2
                         ;;
                     1)
-                        logwarn "command failed on ssh-agent"
+                        #logwarn "command failed on ssh-agent"
+                        #logwarn "Output: $msg"
+                        loginfo "agent is running, but:" >&2
+                        logwarn "$msg"
                         ;;
                     2)
                         loginfo "former agent is not running" >&2
@@ -84,7 +136,7 @@ agent-start-or-restart () {
             fi
 
             logdebug "agent for $ssh_identity: $agentfile"
-            $logonly && logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
+            $createonly && logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
             echo $agentfile
             ret=0
         else
@@ -134,28 +186,35 @@ agent-load-identity-keys () {
                     logtrace "${fingerprints[*]} and $fingerprint"
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                         logdebug "$key is loaded" >&2
+                        if $reload; then
+                            logwarn "reload key $key" >&2
+                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key})"
+                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key})"
+                        fi
                     else
-                        logdebug "$key is not loaded" >&2
+                        logwarn "$key is not loaded -> load it" >&2
                         loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key})"
                     fi
                 done
             fi
-            for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
-                logdebug "token: $token"
-                tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
-                logtrace "${fingerprints[*]} and $tokenfingerprint"
-                if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
-                    logdebug "$token is loaded" >&2
-                    if $reloadtoken; then
-                        logdebug "reload token $token" >&2
-                        loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token})"
+            if ! $keyonly ; then
+                for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
+                    logdebug "token: $token"
+                    tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
+                    logtrace "${fingerprints[*]} and $tokenfingerprint"
+                    if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
+                        logdebug "$token is loaded" >&2
+                        if $reload; then
+                            logwarn "reload token $token" >&2
+                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token})"
+                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token})"
+                        fi
+                    else
+                        logwarn "$token is not loaded -> load it" >&2
                         loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token})"
                     fi
-                else
-                    logdebug "$token is not loaded" >&2
-                    loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token})"
-                fi
-            done
+                done
+            fi
             logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
         else
             logwarn "ssh-identity $ssh_identity is not configured. Please create $identitydir and add keys"
@@ -189,6 +248,6 @@ ssh-runinagent () {
 }
 
 agent-start-or-restart $ssh_identity
-! $loadonly && agent-load-identity-keys $ssh_identity
+! $createonly && agent-load-identity-keys $ssh_identity
 SCRIPTEXIT
 exit $?

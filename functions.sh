@@ -850,10 +850,13 @@ token-list-objects() {
 loadagent() {
     ENTRY
     local af
-    af=$(ssh-agent-start-or-restart --load-only $1 )
+    af=$(ssh-agent-start-or-restart --create-only $1 )
     loginfo "Load agent from $af"
 #    eval $(<$af)
-    . $af
+    . $af >/dev/null
+    loginfo "SSH_AUTH_SOCK: $SSH_AUTH_SOCK"
+    loginfo "SSH_AGENT_PID: $SSH_AGENT_PID"
+
     EXIT
 }
 
