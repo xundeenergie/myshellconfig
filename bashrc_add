@@ -140,7 +140,7 @@ EOF
     SCRIPTEXIT
 
 EOF
-else
-    echo "non-interactive shell" >&2
+#else
+#    echo "non-interactive shell" >&2
 fi
 
