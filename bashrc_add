@@ -55,6 +55,7 @@ if [[ $- = *i* ]] ; then
     ------- start -------------- $(date) ---------------8<--
 
 EOF
+
     SCRIPTENTRY
     # define functions
     ckrepo () {
@@ -95,7 +96,6 @@ EOF
             logwarn "Not syncing profile in case of configuration"
         fi
     }
-
     # Check for interactive bash and that we haven't already been sourced.
     if [ -n "${BASH_VERSION-}" -a -n "${PS1-}" -a -z "${BASH_COMPLETION_VERSINFO-}" ]; then
 
