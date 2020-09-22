@@ -3,7 +3,7 @@
 usage(){
     cat << EOF
 
-    Usage: ssh-agent-start-or-restart [[-c]|[--create-only]]|[[-t]|[--token-only]]|[[-k]|[--key-only]]|[[-r]|[-f]|[--reload]|[--force]] [<ssh-identity>]
+    Usage: ssh-agent-start-or-restart [[-c]|[--create-only]]|[[-t]|[--token-only]]|[[-k]|[--key-only]]|[[-r]|[-f]|[--readd]|[--force]] [<ssh-identity>]
 
     If started only with <ssh-identity>, the script looks up in configured identity-path \$SSH_IDENTITIES_DIR (${SSH_IDENTITIES_DIR}) if it can find a directory named after <ssh-identity>.
     If no <ssh_identity> is given, the identity is set to \$SSH_DEFAULT_IDENTITY ($SSH_DEFAULT_IDENTITY) configured via Environment.
@@ -21,13 +21,14 @@ usage(){
                                     just use this. 
     -k|--key-only                   To add or renew only configured keys configured in
                                     ${SSH_IDENTITIES_DIR}/<ssh-identity>, just use this.
-    -r|-f|--reload-token|--force    remove all in ${SSH_IDENTITIES_DIR}/<ssh-identity> 
+    -r|-f|--readd-token|--force    remove all in ${SSH_IDENTITIES_DIR}/<ssh-identity> 
                                     configured keys and tokens and readd them again.
                                     Depends on -t an -k Option to select wheter only 
                                     keys or tokens only. If no -t and -k is given, all 
                                     keys and token are removed and readded again.
                                     Just to be asked for password again, if you plugged off
                                     hardware-token and plugged it in again.
+    --rm|--remove                   remove keys and token instead of adding them.
     -h|--info                       Show this info
 
 
@@ -37,8 +38,9 @@ EOF
 
 createonly=false
 tokenonly=false
-reload=false
+readd=false
 keyonly=false
+remove=false
 while :; do
     case $1 in
         -c|--create-only)
@@ -53,8 +55,12 @@ while :; do
             keyonly=true
             shift
             ;;
-        -r|-f|--reload-token|--force)
-            reload=true
+        -r|-f|--readd-token|--force)
+            readd=true
+            shift
+            ;;
+        --rm|--remove)
+            remove=true
             shift
             ;;
         -h|--info)
@@ -104,35 +110,42 @@ agent-start-or-restart () {
             logdebug "agentfile: $agentfile" >&2
             logdebug "agentsocket: $agentsocket" >&2
             logdebug "SSH_AGENT_OPTIONS: $SSH_AGENT_OPTIONS"
-            if [ -e $agentfile ]; then
+            if (! $keyonly && ! $tokenonly ) && $remove ; then
+                loginfo "delete keys and tokens in ssh-agent"
+                loginfo "$(ssh-runinagent $agentfile ssh-add -D 2>&1)"
+                createonly=true
 
-                local msg
-                msg="$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l")"
-                local ret=$?
-                logtrace "$msg"
-                case $ret in
-                    0)
-                        loginfo "agent is running" >&2
-                        ;;
-                    1)
-                        #logwarn "command failed on ssh-agent"
-                        #logwarn "Output: $msg"
-                        loginfo "agent is running, but:" >&2
-                        logwarn "$msg"
-                        ;;
-                    2)
-                        loginfo "former agent is not running" >&2
-                        [ -e $agentsocket ] && { logdebug -n "remove socketfile: $( rm -v "$agentsocket" )"; }
-                        logdebug "$(ssh-agent -a $agentsocket ${SSH_AGENT_OPTIONS} > $agentfile )"
-                        loginfo "agent started" >&2
-                        ;;
-                esac
             else
-                loginfo "agent did not exist" >&2
-                #rm "$agentsocket"
-                logdebug "ssh-agent -a $agentsocket \> $agentfile"
-                logdebug "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
-                loginfo "agent started" >&2
+                if [ -e $agentfile ]; then
+
+                    local msg
+                    msg="$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l 2>&1")"
+                    local ret=$?
+                    logtrace "$msg"
+                    case $ret in
+                        0)
+                            loginfo "agent is running" >&2
+                            ;;
+                        1)
+                            #logwarn "command failed on ssh-agent"
+                            #logwarn "Output: $msg"
+                            loginfo "agent is running, but:" >&2
+                            logwarn "$msg"
+                            ;;
+                        2)
+                            loginfo "former agent is not running" >&2
+                            [ -e $agentsocket ] && { logdebug -n "remove socketfile: $( rm -v "$agentsocket" )"; }
+                            logdebug "$(ssh-agent -a $agentsocket ${SSH_AGENT_OPTIONS} > $agentfile )"
+                            loginfo "agent started" >&2
+                            ;;
+                    esac
+                else
+                    loginfo "agent did not exist" >&2
+                    #rm "$agentsocket"
+                    logdebug "ssh-agent -a $agentsocket \> $agentfile"
+                    logdebug "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
+                    loginfo "agent started" >&2
+                fi
             fi
 
             logdebug "agent for $ssh_identity: $agentfile"
@@ -179,6 +192,13 @@ agent-load-identity-keys () {
             logdebug "identitydir: $identitydir"
 
             fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
+#            if $remove; then
+#                if [ ! $keyonly -a ! $tokenonly ] ; then
+#                    loginfo "Remove all keys and token"
+#                    /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -D 2>&1"
+#                fi
+#            fi
+#
             if ! $tokenonly ; then
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep -v "pub$\|so$\|config$\|public$"); do
                     logdebug "key: $key"
@@ -186,14 +206,16 @@ agent-load-identity-keys () {
                     logtrace "${fingerprints[*]} and $fingerprint"
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                         logdebug "$key is loaded" >&2
-                        if $reload; then
-                            logwarn "reload key $key" >&2
-                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key})"
-                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key})"
+                        if [ $readd -o $remove ]; then
+                            $readd && logwarn "readd key $key" >&2
+                            $remove && logwarn "remove key $key" >&2
+                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
+                            $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                         fi
                     else
                         logwarn "$key is not loaded -> load it" >&2
-                        loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key})"
+                        loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
+                        $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                     fi
                 done
             fi
@@ -204,14 +226,17 @@ agent-load-identity-keys () {
                     logtrace "${fingerprints[*]} and $tokenfingerprint"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                         logdebug "$token is loaded" >&2
-                        if $reload; then
-                            logwarn "reload token $token" >&2
-                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token})"
-                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token})"
+                        if [ $readd -o $remove ]; then
+                            $readd && logwarn "readd token $token" >&2
+                            $remove && logwarn "remove token $token" >&2
+                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token} 2>&1)"
+                            $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token} 2>&1)"
                         fi
+                        $remove loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token} 2>&1)"
                     else
                         logwarn "$token is not loaded -> load it" >&2
-                        loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token})"
+                        loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token} 2>&1)"
+                        $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token} 2>&1)"
                     fi
                 done
             fi
