@@ -751,8 +751,12 @@ utoken () {
 }
 
 token(){
-    ssh-agent-start-or-restart -t $1
+    # Usage:
+    #   token <identity>                        will load token in agent. does nothing, if token is already loaded
+    #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
+    ssh-agent-start-or-restart -t $1 $2
 }
+
 tokenold () {
     ENTRY
 
@@ -829,14 +833,6 @@ token-extract-pubkey() {
         echo "Please insert token. Exit"
         return 1
     fi
-#    case $1 in
-#        --id|-d|--label|-a)
-#            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
-#            ;;
-#        --login|-l)
-#            ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE --login -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
-#            ;;
-#    esac
 }
 
 token-list-objects() {
@@ -854,7 +850,7 @@ token-list-objects() {
 loadagent() {
     ENTRY
     local af
-    af=$(ssh-agent-start-or-restart $1 2>/dev/null)
+    af=$(ssh-agent-start-or-restart --load-only $1 )
     loginfo "Load agent from $af"
 #    eval $(<$af)
     . $af
@@ -863,20 +859,26 @@ loadagent() {
 
 ssh-runinagent () {
 
+    ENTRY
+
     local agentfile
     local command
-    agentfile=${1}
+    local agentfile=${1}
     shift
-    sshcommand=${@}
+    local sshcommand=${@}
 
     logtrace "run command »$sshcommand« in agent $agentfile" >&2
     if [ -e "$agentfile" ]; then 
         /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>/dev/null; $sshcommand"
-        return $?
+        ret=$?
     else
         logwarn "agentfile not existent" >&2
-        return 1
+        ret=99
     fi
+
+    EXIT
+    return $ret
+
 }
 
 setloglevel () {
