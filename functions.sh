@@ -309,6 +309,7 @@ sshs() {
 export USERNAME="${USERNAME}"
 export FULLNAME="${FULLNAME}"
 export USEREMAIL="${USEREMAIL}"
+export SCRIPT_LOG="${TMPBASHCONFIG//.conf/.log}"
 
 for i in /etc/profile.d/*.sh; do
     if [ -r "$i" ];then
