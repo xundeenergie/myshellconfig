@@ -6,6 +6,17 @@
 
 export TMUX_SESSION_DIRS SETPROXY_CREDS_DIRS KERBEROS_CONFIG_DIRS
 
+## this function updates in combination with PROMPT_COMMAND the shell-environment-variables in tmus-sessions,
+#  every time prompt is called. It does it only, when called from tmux (Environment TMUX is set)
+function prompt_command() {
+    [ -z "${TMUX+x}" ] || eval "$(tmux show-environment -s)"
+
+#    if [ -n "${TMUX}" ]; then
+#        eval "$(tmux show-environment -s)"
+#    fi
+}
+PROMPT_COMMAND=prompt_command
+
 
 cpb() {
     scp "$1" ${SSH_CLIENT%% *}:~/Work
@@ -22,6 +33,7 @@ sudo() {
         TMUX="$TMUX" \
         SSHS="$SSHS" \
         SSH_TTY="$SSH_TTY" \
+        SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
         "$@"
 
 }
