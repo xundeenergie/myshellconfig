@@ -146,7 +146,7 @@ export -f reachable-default
 
 [ -z "${SSH_AGENTS_DEFAULT_DIR+x}" ] || mkdir -p "${SSH_AGENTS_DEFAULT_DIR}"
 
-cat << EOF > ${SSH_AGENTS_DEFAULT_DIR}"/agent-default-$(hostname)
+cat << EOF > "${SSH_AGENTS_DEFAULT_DIR}/agent-default-$(hostname)"
 SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
 SSH_AGENT_PID=${SSH_AGENT_PID}; export SSH_AGENT_PID;
 loginfo Agent pid ${SSH_AGENT_PID};
