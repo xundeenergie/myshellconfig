@@ -48,3 +48,11 @@ fi
 
 
 # ---- END X2Go SSH forwarding workaround ----
+
+https://www.johntobin.ie/blog/updating_environment_variables_from_tmux/
+function prompt_command() {
+    if [ -n "${TMUX}" ]; then
+        eval "$(tmux show-environment -s)"
+    fi
+}
+PROMPT_COMMAND=prompt_command
