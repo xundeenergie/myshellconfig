@@ -868,8 +868,8 @@ loadagent() {
     local af
     af=$(ssh-agent-start-or-restart --create-only $1 )
     loginfo "Load agent from $af"
-#    eval $(<$af)
-    . $af >/dev/null
+    eval $(<$af)
+#    . $af
     loginfo "SSH_AUTH_SOCK: $SSH_AUTH_SOCK"
     loginfo "SSH_AGENT_PID: $SSH_AGENT_PID"
 
