@@ -72,7 +72,8 @@ while :; do
             exit 1
             ;;
         *)
-            ssh_identity=${1-${SSH_DEFAULT_IDENTITY}}
+            #ssh_identity=${1-${SSH_DEFAULT_IDENTITY}}
+            ssh_identity=${1}
             break
             ;;
     esac
@@ -150,7 +151,8 @@ agent-start-or-restart () {
             fi
 
             logdebug "ssh-agent for identity »$ssh_identity«: $agentfile"
-            $createonly && logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
+            $createonly && logdebug "current loaded keys after action:
+$(ssh-runinagent $agentfile ssh-add -l)"
             echo $agentfile
             ret=0
         else
@@ -165,6 +167,9 @@ agent-start-or-restart () {
             agentfile="${SSH_AGENTS_DIR}/agent-gnome_session-$(hostname)"
             agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-gnome-session-$(hostname)"
             gnome-keyring-daemon -s > $agentfile
+            logdebug "ssh-agent for identity »$ssh_identity«: $agentfile"
+            logdebug "currently loaded keys after action: 
+$(ssh-runinagent $agentfile ssh-add -l)"
             echo $agentfile
             ret=0
         else
@@ -204,14 +209,7 @@ agent-load-identity-keys () {
             logtrace "identitydir: $identitydir"
 
             fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
-#            if $remove; then
-#                if [ ! $keyonly -a ! $tokenonly ] ; then
-#                    loginfo "Remove all keys and token"
-#                    /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -D 2>&1"
-#                fi
-#            fi
-#
-            logdebug "fingerprints from loaded keys:"
+            logdebug "fingerprints from loaded keys before action:"
             for f in ${fingerprints[*]};do
                 logdebug "$f"
             done
@@ -251,7 +249,7 @@ agent-load-identity-keys () {
                     fi
                 done
             fi
-            logdebug "currently loaded keys: 
+            logdebug "currently loaded keys after action: 
 $(ssh-runinagent $agentfile ssh-add -l)"
         else
             logwarn "ssh-identity $ssh_identity is not configured. Please create $identitydir and add keys"
