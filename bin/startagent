@@ -72,7 +72,7 @@ while :; do
             exit 1
             ;;
         *)
-    #        ssh_identity=${1-${SSH_DEFAULT_IDENTITY-default}}
+            ssh_identity=${1-${SSH_DEFAULT_IDENTITY}}
             break
             ;;
     esac
@@ -211,12 +211,15 @@ agent-load-identity-keys () {
 #                fi
 #            fi
 #
-            logdebug "fingerprints: ${fingerprints[*]}"
+            logdebug "fingerprints from loaded keys:"
+            for f in ${fingerprints[*]};do
+                logdebug "$f"
+            done
             if ! $tokenonly ; then
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep -v "pub$\|so$\|config$\|public$"); do
                     fingerprint=$(ssh-keygen -l -f $key|awk '{print $2}')
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
-                        logdebug "key: $key is loaded" >&2
+                        logdebug "key: $(basename $key) (with fp $fingerprint) is loaded" >&2
                         if  $readd || $remove ; then
                             $readd && logwarn "readd key $key" >&2
                             $remove && logwarn "remove key $key" >&2
@@ -225,7 +228,7 @@ agent-load-identity-keys () {
                         fi
                     else
                         logwarn "key: $key is not loaded -> load it" >&2
-                        loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
+                        #loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
                         $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                     fi
                 done
@@ -234,7 +237,7 @@ agent-load-identity-keys () {
                 for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
                     tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
-                        logdebug "token: $token is loaded" >&2
+                        logdebug "token: $token ($fingerprint) is loaded" >&2
                         if  $readd || $remove ; then
                             $readd && logwarn "readd token $token" >&2
                             $remove && logwarn "remove token $token" >&2
@@ -248,7 +251,8 @@ agent-load-identity-keys () {
                     fi
                 done
             fi
-            logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
+            logdebug "currently loaded keys: 
+$(ssh-runinagent $agentfile ssh-add -l)"
         else
             logwarn "ssh-identity $ssh_identity is not configured. Please create $identitydir and add keys"
         fi

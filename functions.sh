@@ -770,7 +770,7 @@ token(){
     # Usage:
     #   token <identity>                        will load token in agent. does nothing, if token is already loaded
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
-    ssh-agent-start-or-restart -t $1 $2
+    startagent -t $1 $2
 }
 
 tokenold () {
@@ -866,7 +866,7 @@ token-list-objects() {
 loadagent() {
     ENTRY
     local af
-    af=$(ssh-agent-start-or-restart --create-only $1 )
+    af=$(startagent --create-only $1 )
     loginfo "Load agent from $af"
     eval $(<$af)
 #    . $af

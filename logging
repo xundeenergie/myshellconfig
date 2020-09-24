@@ -65,7 +65,7 @@ function logerror(){
     declare -a loglevels
     loglevels=()
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
-        echo $opts $msg >&2
+        echo $opts "$msg" >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [ERROR]  $msg" >> $SCRIPT_LOG
@@ -86,7 +86,7 @@ function logwarn(){
     declare -a loglevels
     loglevels=("ERROR" )
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
-        echo $opts $msg >&2
+        echo $opts "$msg" >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [WARN]  $msg" >> $SCRIPT_LOG
@@ -107,7 +107,7 @@ function loginfo(){
     declare -a loglevels
     loglevels=("ERROR" "WARN" )
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
-        echo $opts $msg >&2
+        echo $opts "$msg" >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [INFO]  $msg" >> $SCRIPT_LOG
@@ -129,7 +129,7 @@ function logdebug(){
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO")
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
-        echo $opts $msg >&2
+        echo $opts "$msg" >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [DEBUG]  $msg" >> $SCRIPT_LOG
@@ -150,7 +150,7 @@ function logtrace(){
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG")
     if [[ ! ${loglevels[*]} =~ "${LOGLEVEL-$LOGLEVEL_DEFAULT}" ]];then
-        echo $opts $msg >&2
+        echo $opts "$msg" >&2
     fi
     if [[ ! ${loglevels[*]} =~ "${FILELOGLEVEL-$FILELOGLEVEL_DEFAULT}" ]];then
         echo "[$timeAndDate] [TRACE]  $msg" >> $SCRIPT_LOG

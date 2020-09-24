@@ -1,0 +1,14 @@
+#!/bin/bash
+
+function _sshidentities() {
+    [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
+
+    COMPREPLY=()
+    local CUR KEYS
+    CUR="${COMP_WORDS[COMP_CWORD]}"
+    KEYS="$(find $SSH_IDENTITIES_DEFAULT_DIR -maxdepth 1 -mindepth 1 -type d -exec basename {} \;)"
+    COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
+    return 0
+}
+complete -F _sshidentities startagent loadagent
+
