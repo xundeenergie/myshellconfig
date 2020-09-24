@@ -10,5 +10,5 @@ function _sshidentities() {
     COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
     return 0
 }
-complete -F _sshidentities startagent loadagent
+complete -F _sshidentities startagent loadagent token
 

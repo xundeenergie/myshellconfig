@@ -134,14 +134,14 @@ agent-start-or-restart () {
                             logwarn "$msg"
                             ;;
                         2)
-                            loginfo "former agent is not running" >&2
+                            loginfo "former agent is not running -> start it" >&2
                             [ -e $agentsocket ] && { logdebug -n "remove socketfile: $( rm -v "$agentsocket" )"; }
                             logdebug "$(ssh-agent -a $agentsocket ${SSH_AGENT_OPTIONS} > $agentfile )"
                             loginfo "agent started" >&2
                             ;;
                     esac
                 else
-                    loginfo "agent did not exist" >&2
+                    loginfo "agent did not exist -> create it" >&2
                     #rm "$agentsocket"
                     logdebug "ssh-agent -a $agentsocket \> $agentfile"
                     logdebug "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
@@ -149,12 +149,12 @@ agent-start-or-restart () {
                 fi
             fi
 
-            logdebug "agent for $ssh_identity: $agentfile"
+            logdebug "ssh-agent for identity »$ssh_identity«: $agentfile"
             $createonly && logdebug "current loaded keys: $(ssh-runinagent $agentfile ssh-add -l)"
             echo $agentfile
             ret=0
         else
-            logwarn "ssh-identity $ssh_identity is not configured. Please create $identitydir and add keys"
+            logwarn "ssh-identity »$ssh_identity« is not configured. Please create $identitydir and add keys"
             ret=2
         fi
 
