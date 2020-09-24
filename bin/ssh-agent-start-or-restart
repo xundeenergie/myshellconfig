@@ -72,7 +72,7 @@ while :; do
             exit 1
             ;;
         *)
-            ssh_identity=${1-${SSH_DEFAULT_IDENTITY-default}}
+    #        ssh_identity=${1-${SSH_DEFAULT_IDENTITY-default}}
             break
             ;;
     esac
@@ -107,11 +107,11 @@ agent-start-or-restart () {
             [ -e "${identitydir}/config" ] && . "${identitydir}/config"
             agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
             agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
-            logdebug "agentfile: $agentfile" >&2
-            logdebug "agentsocket: $agentsocket" >&2
+            logtrace "agentfile: $agentfile" >&2
+            logtrace "agentsocket: $agentsocket" >&2
             logdebug "SSH_AGENT_OPTIONS: $SSH_AGENT_OPTIONS"
             if (! $keyonly && ! $tokenonly ) && $remove ; then
-                loginfo "delete keys and tokens in ssh-agent"
+                loginfo "delete keys and tokens in ssh-agent $agentsocket"
                 loginfo "$(ssh-runinagent $agentfile ssh-add -D 2>&1)"
                 createonly=true
 
@@ -119,6 +119,7 @@ agent-start-or-restart () {
                 if [ -e $agentfile ]; then
 
                     local msg
+                    # TODO make in runinagent
                     msg="$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l 2>&1")"
                     local ret=$?
                     logtrace "$msg"
@@ -158,8 +159,19 @@ agent-start-or-restart () {
         fi
 
     else
-        logwarn "no identity given - exit" >&2
-        ret=1
+
+        if which gnome-keyring-daemon >/dev/null 2>&1; then
+            loginfo "no identity given -> gnome-keyrings ssh-agent"
+            agentfile="${SSH_AGENTS_DIR}/agent-gnome_session-$(hostname)"
+            agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-gnome-session-$(hostname)"
+            gnome-keyring-daemon -s > $agentfile
+            echo $agentfile
+            ret=0
+        else
+            logwarn "no identity given -> exit"
+            ret=1
+        fi
+
     fi
 
     EXIT
@@ -186,10 +198,10 @@ agent-load-identity-keys () {
             agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
             agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
             loginfo "ssh-identität: $ssh_identity" >&2
-            loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
-            logdebug "agentfile: $agentfile" >&2
-            logdebug "agentsocket: $agentsocket" >&2
-            logdebug "identitydir: $identitydir"
+            logdebug "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
+            logtrace "agentfile: $agentfile" >&2
+            logtrace "agentsocket: $agentsocket" >&2
+            logtrace "identitydir: $identitydir"
 
             fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
 #            if $remove; then
@@ -199,14 +211,12 @@ agent-load-identity-keys () {
 #                fi
 #            fi
 #
+            logdebug "fingerprints: ${fingerprints[*]}"
             if ! $tokenonly ; then
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep -v "pub$\|so$\|config$\|public$"); do
-                    logdebug "key: $key"
-                    fingerprint=$(ssh-keygen -l -f ~/.ssh/identities/bmi/id_ed25519|awk '{print $2}')
-                    logtrace "${fingerprints[*]} and $fingerprint"
+                    fingerprint=$(ssh-keygen -l -f $key|awk '{print $2}')
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
-                        logdebug "$key is loaded" >&2
-                        logwarn "$readd $remove"
+                        logdebug "key: $key is loaded" >&2
                         if  $readd || $remove ; then
                             $readd && logwarn "readd key $key" >&2
                             $remove && logwarn "remove key $key" >&2
@@ -214,7 +224,7 @@ agent-load-identity-keys () {
                             $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                         fi
                     else
-                        logwarn "$key is not loaded -> load it" >&2
+                        logwarn "key: $key is not loaded -> load it" >&2
                         loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
                         $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                     fi
@@ -222,11 +232,9 @@ agent-load-identity-keys () {
             fi
             if ! $keyonly ; then
                 for token in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
-                    logdebug "token: $token"
                     tokenfingerprint="$(ssh-keygen -l -D $token|tr -s ' '|awk '{print $2}')"
-                    logtrace "${fingerprints[*]} and $tokenfingerprint"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
-                        logdebug "$token is loaded" >&2
+                        logdebug "token: $token is loaded" >&2
                         if  $readd || $remove ; then
                             $readd && logwarn "readd token $token" >&2
                             $remove && logwarn "remove token $token" >&2
@@ -234,7 +242,7 @@ agent-load-identity-keys () {
                             $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token} 2>&1)"
                         fi
                     else
-                        logwarn "$token is not loaded -> load it" >&2
+                        logwarn "token: $token is not loaded -> load it" >&2
                         loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${token} 2>&1)"
                         $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${token} 2>&1)"
                     fi
