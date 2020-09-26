@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#type -t logerror >/dev/null || logerror() {echo blubb; }
-if type -t logerror > /dev/null| grep -q 'function'; then
-  echo there is a logerror function
-else
-  echo there is NO logerror function
-  logerror () {
-    echo "$1" >&2
-  }
-fi
+##type -t logerror >/dev/null || logerror() {echo blubb; }
+#if type -t logerror > /dev/null| grep -q 'function'; then
+#  echo there is a logerror function
+#else
+#  echo there is NO logerror function
+#  logerror () {
+#    echo "$1" >&2
+#  }
+#fi
 
 
 
