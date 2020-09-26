@@ -691,28 +691,6 @@ reachable () {
     #   999999: something went wrong
     #   0: server was resolve- and reachable
     GETENTHOSTS=ahosts
-#    echo $@
-#    while getopts ":i:" arg; do
-#        echo arg $arg
-#      case $arg in
-#        i) # Specify p value.
-#            echo OPTARG: ${OPTARG}
-#            case ${OPTARG} in
-#                4) 
-#                    GETENTHOSTS=ahostsv4
-#                    ;;
-#                6) # Specify strength, either 45 or 90.
-#                    GETENTHOSTS=ahostsv6
-#                    ;;
-#            esac
-#            ;;
-#        *)
-#            break
-#            ;;
-#      esac
-#    done
-#
-#    echo $@
     local SERVER=$1
     # dig does not consult /etc/hosts, so use getent hosts instead
     #local IP=$(dig +nocmd $SERVER a +noall +answer|tail -n 1 |awk '{print $5}')
@@ -767,77 +745,20 @@ utoken () {
 }
 
 token(){
+
+    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+
     # Usage:
     #   token <identity>                        will load token in agent. does nothing, if token is already loaded
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
-    startagent -t $1 $2
+#    startagent -t $@
+    loadagent $@
+    loginfo "$(ssh-add -s $PKCS11_MODULE)"
+    loginfo "$(ssh-add -l)"
+
+    
 }
 
-tokenold () {
-    ENTRY
-
-    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
-    [ -z "${SSH_ADD_OPTIONS+x}" ] && { SSH_ADD_OPTIONS=${SSH_ADD_DEFAULT_OPTIONS}; export SSH_ADD_OPTIONS; }
-    [ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR=${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}; export SSH_IDENTITIES_DIR; }
-    local FORCE
-    local ssh_identity
-    local fingerprints
-    declare -a fingerprints
-    local tokenfingerprint
-    local agentfile
-    local FORCE=false
-
-    case $1 in
-        -f)
-            FORCE=true
-            ssh_identity=${2-default}
-            ;;
-        *)
-            ssh_identity=${1-default}
-            ;;
-    esac
-
-
-
-    if [ -n "${ssh_identity+x}" ]; then
-        identitydir=${SSH_IDENTITIES_DIR}/${ssh_identity}
-        [ -e "${identitydir}/config" ] && logdebug "found ${identitydir}/config"
-        [ -e "${identitydir}/config" ] && eval $(<"${identitydir}/config")
-        loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
-        agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
-        agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
-        loginfo "ssh-identität: $ssh_identity" >&2
-        loginfo "SSH_ADD_OPTIONS: $SSH_ADD_OPTIONS"
-        logdebug "agentfile: $agentfile" >&2
-        logdebug "agentsocket: $agentsocket" >&2
-        logdebug "identitydir: $identitydir"
-        fingerprints=( $(ssh-runinagent $agentfile "ssh-add -l|awk '{print \$2}'") )
-        if [ -e "$agentfile" ]; then 
-            tokenfingerprint="$(ssh-keygen -l -D $PKCS11_MODULE|tr -s ' '|awk '{print $2}')"
-            
-            logdebug "fingerprints ${fingerprints[*]}"
-            if [[ ${fingerprints[*]} =~ $tokenfingerprint ]]; then
-                logdebug "${tokenfingerprint}: loaded"
-                if $FORCE; then
-                    logdebug "remove token and readd it again" >&2
-                    logdebug "$(ssh-runinagent $agentfile ssh-add -e $PKCS11_MODULE)"
-                    loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s $PKCS11_MODULE)"
-                fi
-            else
-                logdebug "${tokenfingerprint}: not loaded"
-                $FORCE && logdebug "$(ssh-runinagent $agentfile ssh-add -e $PKCS11_MODULE)"
-                loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s $PKCS11_MODULE)"
-            fi
-            EXIT
-            return 0
-        fi
-        EXIT
-        return 1
-    fi
-    EXIT
-    return 2
-}
-#EOF
 
 token-extract-pubkey() {
     if pkcs11-tool --module $PKCS11_MODULE --list-token-slots >&2 ;then
@@ -868,36 +789,15 @@ loadagent() {
     local af
     af=$(startagent --create-only $1 )
     loginfo "Load agent from $af"
+    unset SSH_AUTH_SOCKET SSH_AGENT_PID
     eval $(<$af)
 #    . $af
-    loginfo "SSH_AUTH_SOCK: $SSH_AUTH_SOCK"
-    loginfo "SSH_AGENT_PID: $SSH_AGENT_PID"
+    logdebug "SSH_AUTH_SOCK: ${SSH_AUTH_SOCK-not set}"
+    logdebug "SSH_AGENT_PID: ${SSH_AGENT_PID-not set}"
+    loginfo "currently loaded keys in agent:
+$(ssh-add -l)"
 
     EXIT
-}
-
-ssh-runinagent () {
-
-    ENTRY
-
-    local agentfile
-    local command
-    local agentfile=${1}
-    shift
-    local sshcommand=${@}
-
-    logtrace "run command »$sshcommand« in agent $agentfile" >&2
-    if [ -e "$agentfile" ]; then 
-        /bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>/dev/null; $sshcommand"
-        ret=$?
-    else
-        logwarn "agentfile not existent" >&2
-        ret=99
-    fi
-
-    EXIT
-    return $ret
-
 }
 
 setloglevel () {
@@ -930,3 +830,4 @@ setfileloglevel () {
     EXIT
 }
 
+#EOF
