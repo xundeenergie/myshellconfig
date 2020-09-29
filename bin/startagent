@@ -245,13 +245,13 @@ agent-load-identity-keys () {
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                         logdebug "key: $(basename $key) (with fp $fingerprint) is loaded" 
                         if  $readd || $remove ; then
-                            $readd && logwarn "re-add key $key" 
-                            $remove && logwarn "remove key $key"
+                            $readd && loginfo "re-add key $key" 
+                            $remove && loginfo "remove key $key"
                             loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
                             $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                         fi
                     else
-                        logwarn "key: $key is not loaded -> load it" 
+                        loginfo "key: $key is not loaded -> load it" 
                         #loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
                         $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                     fi
@@ -263,13 +263,13 @@ agent-load-identity-keys () {
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                         logdebug "token: $key ($fingerprint) is loaded"
                         if  $readd || $remove ; then
-                            $readd && logwarn "re-add token $key"
-                            $remove && logwarn "remove token $key"
+                            $readd && loginfo "re-add token $key"
+                            $remove && loginfo "remove token $key"
                             loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
                             $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
                         fi
                     else
-                        logwarn "token: $key is not loaded -> load it" 
+                        loginfo "token: $key is not loaded -> load it" 
                         loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
                         $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
                     fi
