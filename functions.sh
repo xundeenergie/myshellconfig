@@ -323,8 +323,8 @@ export USERNAME="${USERNAME}"
 export FULLNAME="${FULLNAME}"
 export USEREMAIL="${USEREMAIL}"
 export SCRIPT_LOG="\$(cat /proc/\$$/cmdline | xargs -0 echo|awk '{print \$3}' |sed 's/.conf$/.log/')"
-export LOGLEVEL_DEFAULT="INFO"
-export FILELOGLEVEL_DEFAULT="INFO"
+export LOGLEVEL_DEFAULT="${LOGLEVEL_DEFAULT}"
+export FILELOGLEVEL_DEFAULT="${FILELOGLEVEL_DEFAULT}"
 
 for i in /etc/profile.d/*.sh; do
     if [ -r "$i" ];then
