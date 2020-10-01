@@ -305,6 +305,7 @@ EOF
 sshs() {
     ENTRY
 
+    local LOGLEVEL="WARN"
 #    MKTMPCMD='mktemp $(echo ${XDG_RUNTIME_DIR}/bashrc.XXXXXXXX.conf)'
 #    VIMMKTMPCMD="mktemp ${XDG_RUNTIME_DIR}/vimrc.XXXXXXXX.conf"
 
