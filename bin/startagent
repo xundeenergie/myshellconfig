@@ -112,10 +112,9 @@ SCRIPTENTRY
 [ -z "${SSH_AGENTS_DIR+x}" ] && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
 [ -z "${SSH_AGENT_SOCKETS_DIR+x}" ] && { SSH_AGENT_SOCKETS_DIR=${SSH_AGENT_SOCKETS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENT_SOCKETS_DIR; }
 [ -z "${SSH_AGENT_OPTIONS+x}" ] && { SSH_AGENT_OPTIONS=${SSH_AGENT_DEFAULT_OPTIONS--t 7200 }; export SSH_AGENT_OPTIONS; }
-logdebug "SSH_AGENTS_DIR: $SSH_AGENTS_DIR"
-logdebug "SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR"
-logdebug "SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR"
-logdebug "ssh-identität: ${ssh_identity}" 
+logtrace "SSH_AGENTS_DIR: $SSH_AGENTS_DIR"
+logtrace "SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR"
+logtrace "SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR"
 [ -z "${SSH_AGENTS_DIR-x}" ]                || mkdir -vp "$SSH_AGENTS_DIR"
 [ -z "${SSH_AGENT_SOCKETS_DIR-x}" ]         || mkdir -vp "$SSH_AGENT_SOCKETS_DIR"
 [ -z "${SSH_IDENTITIES_DIR-x}" ]            || mkdir -vp "$SSH_IDENTITIES_DIR"
@@ -137,11 +136,10 @@ agent-start-or-restart () {
             [ -e "${identitydir}/config" ] && . "${identitydir}/config"
             agentfile="${SSH_AGENTS_DIR}/agent-${ssh_identity}-$(hostname)"
             agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-${ssh_identity}-$(hostname)"
-            logtrace "agentfile: $agentfile"
-            logtrace "agentsocket: $agentsocket"
-            logdebug "SSH_AGENT_OPTIONS: $SSH_AGENT_OPTIONS"
+            logtrace "agentfile for ${ssh_identity}: $agentfile"
+            logtrace "agentsocket for ${ssh_identity}: $agentsocket"
             if (! $keyonly && ! $tokenonly ) && $remove ; then
-                logdebug "delete keys and tokens in ssh-agent $agentsocket"
+                logdebug "delete keys and tokens in this ssh-agent"
                 logdebug "$(ssh-runinagent $agentfile ssh-add -D 2>&1)"
                 createonly=true
 
@@ -152,7 +150,7 @@ agent-start-or-restart () {
                     # TODO make in runinagent
                     msg="$(/bin/sh -c "unset SSH_AUTH_SOCK SSH_AGENT_PID; . $agentfile >/dev/null 2>&1; ssh-add -l 2>&1")"
                     local ret=$?
-                    logtrace "$msg"
+                    logtrace "Output from check for running: $msg"
                     case $ret in
                         0)
                             logdebug "agent is running" 
@@ -163,6 +161,7 @@ agent-start-or-restart () {
                             ;;
                         2)
                             logdebug "former agent is not running -> start it" 
+                            logdebug "SSH_AGENT_OPTIONS: $SSH_AGENT_OPTIONS"
                             [ -e $agentsocket ] && { logdebug -n "remove socketfile: $( rm -v "$agentsocket" )"; }
                             logtrace "$(ssh-agent -a $agentsocket ${SSH_AGENT_OPTIONS} > $agentfile )"
                             logdebug "agent started" 
@@ -176,7 +175,7 @@ agent-start-or-restart () {
                 fi
             fi
 
-            logdebug "ssh-agent for identity »$ssh_identity«: $agentfile"
+            #logdebug "ssh-agent for identity »$ssh_identity«: $agentfile"
             $createonly && logtrace "current loaded keys after action:
 $(ssh-runinagent $agentfile ssh-add -l)"
             echo $agentfile
