@@ -141,8 +141,8 @@ agent-start-or-restart () {
             logtrace "agentsocket: $agentsocket"
             logdebug "SSH_AGENT_OPTIONS: $SSH_AGENT_OPTIONS"
             if (! $keyonly && ! $tokenonly ) && $remove ; then
-                loginfo "delete keys and tokens in ssh-agent $agentsocket"
-                loginfo "$(ssh-runinagent $agentfile ssh-add -D 2>&1)"
+                logdebug "delete keys and tokens in ssh-agent $agentsocket"
+                logdebug "$(ssh-runinagent $agentfile ssh-add -D 2>&1)"
                 createonly=true
 
             else
@@ -155,29 +155,29 @@ agent-start-or-restart () {
                     logtrace "$msg"
                     case $ret in
                         0)
-                            loginfo "agent is running" 
+                            logdebug "agent is running" 
                             ;;
                         1)
-                            loginfo "agent is running, but:" 
+                            logdebug "agent is running, but:" 
                             logwarn "$msg"
                             ;;
                         2)
-                            loginfo "former agent is not running -> start it" 
+                            logdebug "former agent is not running -> start it" 
                             [ -e $agentsocket ] && { logdebug -n "remove socketfile: $( rm -v "$agentsocket" )"; }
-                            logdebug "$(ssh-agent -a $agentsocket ${SSH_AGENT_OPTIONS} > $agentfile )"
-                            loginfo "agent started" 
+                            logtrace "$(ssh-agent -a $agentsocket ${SSH_AGENT_OPTIONS} > $agentfile )"
+                            logdebug "agent started" 
                             ;;
                     esac
                 else
-                    loginfo "agent did not exist -> create it" 
-                    logdebug "ssh-agent -a $agentsocket \> $agentfile"
-                    logdebug "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
-                    loginfo "agent started" 
+                    logdebug "agent did not exist -> create it" 
+                    logtrace "ssh-agent -a $agentsocket \> $agentfile"
+                    logtrace "$(ssh-agent -a $agentsocket $SSH_AGENT_OPTIONS > $agentfile )"
+                    logdebug "agent started" 
                 fi
             fi
 
             logdebug "ssh-agent for identity »$ssh_identity«: $agentfile"
-            $createonly && logdebug "current loaded keys after action:
+            $createonly && logtrace "current loaded keys after action:
 $(ssh-runinagent $agentfile ssh-add -l)"
             echo $agentfile
             ret=0
@@ -189,7 +189,7 @@ $(ssh-runinagent $agentfile ssh-add -l)"
     else
 
         if which gnome-keyring-daemon >/dev/null 2>&1; then
-            loginfo "no identity given -> gnome-keyrings ssh-agent"
+            logdebug "no identity given -> gnome-keyrings ssh-agent"
             agentfile="${SSH_AGENTS_DIR}/agent-gnome_session-$(hostname)"
             agentsocket="${SSH_AGENT_SOCKETS_DIR}/socket-gnome-session-$(hostname)"
             gnome-keyring-daemon -s > $agentfile
@@ -245,15 +245,15 @@ agent-load-identity-keys () {
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
                         logdebug "key: $(basename $key) (with fp $fingerprint) is loaded" 
                         if  $readd || $remove ; then
-                            $readd && loginfo "re-add key $key" 
-                            $remove && loginfo "remove key $key"
-                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
-                            $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
+                            $readd && logdebug "re-add key $key" 
+                            $remove && logdebug "remove key $key"
+                            logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
+                            $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                         fi
                     else
-                        loginfo "key: $key is not loaded -> load it" 
-                        #loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
-                        $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
+                        logdebug "key: $key is not loaded -> load it" 
+                        #logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -d ${key} 2>&1)"
+                        $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} ${key} 2>&1)"
                     fi
                 done
             fi
@@ -263,15 +263,15 @@ agent-load-identity-keys () {
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                         logdebug "token: $key ($fingerprint) is loaded"
                         if  $readd || $remove ; then
-                            $readd && loginfo "re-add token $key"
-                            $remove && loginfo "remove token $key"
-                            loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
-                            $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
+                            $readd && logdebug "re-add token $key"
+                            $remove && logdebug "remove token $key"
+                            logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
+                            $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
                         fi
                     else
-                        loginfo "token: $key is not loaded -> load it" 
-                        loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
-                        $remove || loginfo "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
+                        logdebug "token: $key is not loaded -> load it" 
+                        logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
+                        $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
                     fi
                 done
             fi
