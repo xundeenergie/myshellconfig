@@ -78,7 +78,6 @@ if ! $SSHS; then
 
     # Go HOME
     #cd ${HOME}
-    echo NOSCREEN: $NOSCREEN
 
     if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
         cat << EOF
