@@ -260,7 +260,7 @@ agent-load-identity-keys () {
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
                     tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
-                        logdebug "token: $key ($fingerprint) is loaded"
+                        logdebug "token: $key ($tokenfingerprint) is loaded"
                         if  $readd || $remove ; then
                             $readd && logdebug "re-add token $key"
                             $remove && logdebug "remove token $key"
