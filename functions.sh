@@ -702,7 +702,7 @@ reachable () {
         logwarn "not resolvable -> exit"
         return 1
     else
-        logwarn $IP
+        loginfo $IP
     fi
     local PORT=${2:-22}
     local SEC=${3:-1}
@@ -710,7 +710,7 @@ reachable () {
     local i
     loginfo -n "Try to connect to ${SERVER} (${IP}):${PORT} " >&2
     for i in $(seq 1 $SEC); do
-        loginfo -n "." >&2
+        logdebug -n "." >&2
         if reachable-default ${IP} ${PORT} 2>/dev/null; then
             res=0
             break
@@ -720,7 +720,7 @@ reachable () {
         [ ${SEC} -gt 1 -a $i -lt ${SEC} ] && sleep 1
     done
 
-    [ ${res} -gt 0 ] && loginfo -n " not reachable" >&2 || loginfo -n " success" >&2; 
+    [ ${res} -gt 0 ] && loginfo " not reachable" >&2 || loginfo " success" >&2; 
 
     EXIT
     return $res
