@@ -678,7 +678,7 @@ reachable-default () {
     local SERVER=$1
     local PORT=${2:-22}
     local res=3
-    if nc -z $SERVER $PORT 2>/dev/null; then
+    if nc -w 2 -z $SERVER $PORT 2>/dev/null; then
         res=0
     fi
     return $res
