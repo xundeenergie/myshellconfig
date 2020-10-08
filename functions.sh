@@ -807,8 +807,8 @@ setloglevel () {
     local oldloglevel=${LOGLEVEL-$LOGLEVEL_DEFAULT}
     declare -a loglevels
     loglevels=("ERROR" "WARN" "INFO" "DEBUG" "TRACE")
-    if [[ ${loglevels[*]} =~ "$1" ]]; then
-        export LOGLEVEL=$1
+    if [[ ${loglevels[*]} =~ "${1^^}" ]]; then
+        export LOGLEVEL=${1^^}
     else
         logerror "LOGLEVEL must be one of ERROR, WARN, INFO, DEBUG or TRACE"
     fi
@@ -831,4 +831,15 @@ setfileloglevel () {
     EXIT
 }
 
+getloglevels () {
+    ENTRY
+    cat << EOF
+    LOGLEVEL: ${LOGLEVEL-${LOGLEVEL_DEFAULT}}
+    FILELOGLEVEL: ${FILELOGLEVEL-${FILELOGLEVEL_DEFAULT}}
+
+    change LOGLEVEL: \$ setloglevel [ERROR|WARN|INFO|DEBUG|TRACE]
+    change FILELOGLEVEL: \$ setfileloglevel [ERROR|WARN|INFO|DEBUG|TRACE]
+EOF
+
+}
 #EOF
