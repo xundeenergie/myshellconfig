@@ -1,33 +1,42 @@
 #!/bin/bash
 
-#LANG=C
-###type -t logerror >/dev/null || logerror() {echo blubb; }
-#for f in logerror logwarn loginfo logdebug logtrace ENTRY EXIT SCRIPTENTRY SCRIPTEXIT; do
-#    if  LANG=C type -t $f 2> /dev/null| grep -q 'function'; then
-#        :
-#    else
-#      fx=${f//log/}
-#      echo create function for $fx
-#      eval "$f () { \
-#          local loglevels; \
-#          declare -a loglevels; \
-#          loglevels=( \"ERROR\" \"WARN\" \"INFO\" ); \
-#          if [[ ! \${loglevels[*]} =~ \"\${LOGLEVEL-\${LOGLEVEL_DEFAULT}}\" ]];then \
-#              output='/dev/null'; \
-#          else \
-#              output='>&2'; \
-#          fi; \
-#          echo "\$LOGLEVEL output \$output"
-#          echo ${fx^^}: \$@ > \$output; }"
-#      unset fx
-#    fi
-#done
-#unset f
-#
-#export LOGLEVEL="ERROR"
-#logwarn blubb
-#export LOGLEVEL="DEBUG"
-#logwarn blubb
+# loggerfactory
+LANG=C
+for f in logerror logwarn loginfo logdebug logtrace ENTRY EXIT SCRIPTENTRY SCRIPTEXIT; do
+    if  LANG=C type -t $f 2> /dev/null| grep -q 'function'; then
+        :
+    else
+      fx=${f//log/}
+      #echo create function $f for $fx
+      eval "$f () { \
+          local loglevels; \
+          declare -a loglevels; \
+          case $fx in
+              error)
+                  loglevels=()
+                  ;;
+              warn)
+                  loglevels=(\"ERROR\")
+                  ;;
+              info)
+                  loglevels=(\"ERROR\" \"WARN\" )
+                  ;;
+              debug)
+                  loglevels=( \"ERROR\" \"WARN\" \"INFO\" )
+                  ;;
+              trace|ENTRY|EXIT|SCRIPTENTRY|SCRIPTEXIT)
+                  loglevels=( \"ERROR\" \"WARN\" \"INFO\" \"DEBUG\" )
+                  ;;
+          esac
+          if [[ ! \${loglevels[*]} =~ \"\${LOGLEVEL-\${LOGLEVEL_DEFAULT}}\" ]];then \
+              echo "\$@" >&2
+          fi; \
+      }"
+      unset fx
+    fi
+done
+unset f
+
 usage(){
     cat << EOF
 
