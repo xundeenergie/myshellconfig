@@ -833,7 +833,7 @@ setfileloglevel () {
 
 getloglevels () {
     ENTRY
-    cat << EOF
+    cat << EOF |tee -a $SCRIPT_LOG
     LOGLEVEL: ${LOGLEVEL-${LOGLEVEL_DEFAULT}}
     FILELOGLEVEL: ${FILELOGLEVEL-${FILELOGLEVEL_DEFAULT}}
 
