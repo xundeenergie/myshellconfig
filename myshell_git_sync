@@ -110,7 +110,7 @@ if ! $SSHS; then
                     create_symlinks "$MYSHELLCONFIG_BASE"
                 else 
                     loginfo "${MYSHELLCONFIG_GIT_SERVER}" not reachable >&2;
-                    loginfo profile not syncing >&2;
+                    loginfo "profile not syncing" >&2;
                 fi
 
             else
