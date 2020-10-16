@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd ${HOME}/git/bmi/at.gv.bmi.pvp.settings && scp "$(ls target/at.gv.bmi.pvp.settings*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+case $1 in
+    cnf*)
+        cd ${HOME}/git/bmi/at.gv.bmi.confluence.pvp-authenticator && scp "$(ls target/at.gv.bmi.confluence.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+        ;;
+    jra*)
+        cd ${HOME}/git/bmi/pvp-authenticator && scp "$(ls target/at.gv.bmi.jira.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+        ;;
+esac

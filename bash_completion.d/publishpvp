@@ -1,0 +1,3 @@
+[ -e /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
+[ -e /usr/share/bash-completion/completions/ssh ] && . /usr/share/bash-completion/completions/ssh
+shopt -u hostcomplete && complete -F _ssh publishpvp
