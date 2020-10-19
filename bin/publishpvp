@@ -1,15 +1,58 @@
 #!/bin/bash
 
-echo "copy files to ${1}"
-#cd ${HOME}/git/bmi/at.gv.bmi.pvp.settings && echo scp "$(ls target/at.gv.bmi.pvp.settings*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
-cd ${HOME}/git/bmi/at.gv.bmi.pvp.settings && scp "$(ls target/at.gv.bmi.pvp.settings*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+file="$(find ${HOME}/.local/$(basename $0)/ -name $1)"
 case $1 in
-    cnf*)
-#        cd ${HOME}/git/bmi/at.gv.bmi.confluence.pvp-authenticator && echo scp "$(ls target/at.gv.bmi.confluence.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
-        cd ${HOME}/git/bmi/at.gv.bmi.confluence.pvp-authenticator && scp "$(ls target/at.gv.bmi.confluence.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+    *cnf*|*conf*)
+        [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/confluence"
+        libdir=/var/atlassian/confluence/confluence/WEB-INF/lib
+        app=confluence
         ;;
-    jra*)
-#        cd ${HOME}/git/bmi/pvp-authenticator && echo scp "$(ls target/at.gv.bmi.jira.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
-        cd ${HOME}/git/bmi/pvp-authenticator && scp "$(ls target/at.gv.bmi.jira.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+    *jra*|*jira*)
+        [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/jira"
+        libdir=/var/atlassian/atlassian-jira/jira/WEB-INF/lib
+        app=jira
+        ;;
+    *)
+        echo "host ${1} not found -> exit"
+        exit
         ;;
 esac
+
+echo "Using configfile $file"
+
+if stat "${file}" >/dev/null 2>/dev/null ; then
+    cat ${file}|sort -r |while read cmd pkg version ; do
+        case $cmd in
+            install)
+                package=$(find ~/.m2 -name "*${pkg}-${version}.jar")
+                if [ -n "${package-x}" ]; then
+                    echo "$(basename ${package}) --> ${1}:/tmp"
+                    scp ${package} ${1}:/tmp
+                    echo " done"
+                else
+                    echo "$pkg in version $version not found"
+                fi
+                ;;
+            remove)
+                echo remove $pkg in all versions from server
+                echo ssh ${1} find $libdir -name "*${pkg}*"
+                ssh ${1} find $libdir -name $pkg
+                ;;
+        esac
+
+        #scp $file ${1}:/tmp
+    done
+else
+    echo "Configfile ${file} not found"
+fi
+
+#echo "copy files to ${1}"
+#cd ${HOME}/git/bmi/at.gv.bmi.pvp.settings && scp "$(ls target/at.gv.bmi.pvp.settings*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+#case $1 in
+#    cnf*)
+#        cd ${HOME}/git/bmi/at.gv.bmi.confluence.pvp-authenticator && scp "$(ls target/at.gv.bmi.confluence.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+#        ;;
+#    jra*)
+#        cd ${HOME}/git/bmi/pvp-authenticator && scp "$(ls target/at.gv.bmi.jira.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
+#        ;;
+#esac
