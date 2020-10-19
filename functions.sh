@@ -678,8 +678,12 @@ reachable-default () {
     local SERVER=$1
     local PORT=${2:-22}
     local res=3
-    if nc -w 2 -z $SERVER $PORT 2>/dev/null; then
-        res=0
+    if which nc >/dev/null; then
+        if nc -w 2 -z $SERVER $PORT 2>/dev/null; then
+            res=0
+        fi
+    else
+        res=2
     fi
     return $res
 }
@@ -688,6 +692,7 @@ reachable () {
     ENTRY
     # returncodes:
     #   1: servername not resolveable
+    #   2: command nc not found
     #   3: server:port not reachable
     #   999999: something went wrong
     #   0: server was resolve- and reachable
