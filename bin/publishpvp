@@ -4,13 +4,15 @@ file="$(find ${HOME}/.local/$(basename $0)/ -name $1)"
 case $1 in
     *cnf*|*conf*)
         [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/confluence"
-        libdir=/var/atlassian/confluence/confluence/WEB-INF/lib
+        libdir=/opt/atlassian/confluence/confluence/WEB-INF/lib
         app=confluence
+        appuser=confluence
         ;;
     *jra*|*jira*)
         [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/jira"
-        libdir=/var/atlassian/atlassian-jira/jira/WEB-INF/lib
+        libdir=/opt/atlassian/jira/atlassian-jira/WEB-INF/lib
         app=jira
+        appuser=jira
         ;;
     *)
         echo "host ${1} not found -> exit"
@@ -19,40 +21,58 @@ case $1 in
 esac
 
 echo "Using configfile $file"
+runtime=$(date "+%x-%X")
+UNINSTALLDIR="${HOME}/UNINSTALL/${runtime}/"
 
 if stat "${file}" >/dev/null 2>/dev/null ; then
+    echo "Stop $app on ${1}"
+    ssh ${1} systemctl stop ${app}.service
     cat ${file}|sort -r |while read cmd pkg version ; do
         case $cmd in
             install)
-                package=$(find ~/.m2 -name "*${pkg}-${version}.jar")
+                echo install $cmd $pkg $version 
+                if [ -z "${version}" ]; then
+                    package=$(find ~/.m2 -name "*${pkg}*.jar"|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)
+                else
+                    package=$(find ~/.m2 -name "*${pkg}-${version}.jar")
+                fi
                 if [ -n "${package-x}" ]; then
-                    echo "$(basename ${package}) --> ${1}:/tmp"
-                    scp ${package} ${1}:/tmp
-                    echo " done"
+                    scp ${package} ${1}:${libdir}
+                    ssh ${1} chown $appuser:${appusergrp-root} "${libdir}/$(basename ${package})" </dev/null
+                    ssh ${1} chmod ${fileperm-0755} "${libdir}/$(basename ${package})" </dev/null
                 else
                     echo "$pkg in version $version not found"
                 fi
                 ;;
             remove)
-                echo remove $pkg in all versions from server
-                echo ssh ${1} find $libdir -name "*${pkg}*"
-                ssh ${1} find $libdir -name $pkg
+                if [ -n "${pkg}" ]; then
+                    if [ -n "${version}" ]; then
+                        echo remove $pkg in version ${version} from ${1}
+                        ssh -T ${1} /bin/bash <<EOF
+                        mkdir -p "${UNINSTALLDIR}" </dev/null
+                        [ \$(find ${libdir} -name "*${pkg}-${version}.jar" </dev/null |wc -l) -gt 0 ] && \
+                        mv \$(find ${libdir} -name "*${pkg}-${version}.jar") "${UNINSTALLDIR}". </dev/null
+EOF
+                    else
+                        echo remove $pkg in all versions from ${1}
+                        ssh -T ${1} /bin/bash <<EOF
+                        mkdir -p "${UNINSTALLDIR}" </dev/null
+                        [ \$(find ${libdir} -name "*${pkg}-*.jar" </dev/null |wc -l) -gt 0 ] && \
+                        mv \$(find ${libdir} -name "*${pkg}-*.jar") "${UNINSTALLDIR}"/. </dev/null
+EOF
+                    fi
+                else
+                    echo pkg not set ignore line »${cmd} ${pkg} ${version}« from configfile
+                fi
+                ;;
+            *)
+                echo "line not correct: $cmd $pkg $version"
                 ;;
         esac
-
-        #scp $file ${1}:/tmp
+        unset cmd pkg version
     done
+    echo "Start $app on ${1}"
+    ssh ${1} systemctl start ${app}.service </dev/null
 else
     echo "Configfile ${file} not found"
 fi
-
-#echo "copy files to ${1}"
-#cd ${HOME}/git/bmi/at.gv.bmi.pvp.settings && scp "$(ls target/at.gv.bmi.pvp.settings*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
-#case $1 in
-#    cnf*)
-#        cd ${HOME}/git/bmi/at.gv.bmi.confluence.pvp-authenticator && scp "$(ls target/at.gv.bmi.confluence.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
-#        ;;
-#    jra*)
-#        cd ${HOME}/git/bmi/pvp-authenticator && scp "$(ls target/at.gv.bmi.jira.pvp*|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)" ${1}:/tmp
-#        ;;
-#esac
