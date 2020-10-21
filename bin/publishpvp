@@ -1,78 +1,111 @@
 #!/bin/bash
 
-file="$(find ${HOME}/.local/$(basename $0)/ -name $1)"
-case $1 in
-    *cnf*|*conf*)
-        [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/confluence"
-        libdir=/opt/atlassian/confluence/confluence/WEB-INF/lib
-        app=confluence
-        appuser=confluence
-        ;;
-    *jra*|*jira*)
-        [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/jira"
-        libdir=/opt/atlassian/jira/atlassian-jira/WEB-INF/lib
-        app=jira
-        appuser=jira
-        ;;
-    *)
-        echo "host ${1} not found -> exit"
-        exit
-        ;;
-esac
+RESTART=true
 
-echo "Using configfile $file"
-runtime=$(date "+%x-%X")
-UNINSTALLDIR="${HOME}/UNINSTALL/${runtime}/"
+set -- $(getopt -u -o n  --long no-restart -- "$@" )
 
-if stat "${file}" >/dev/null 2>/dev/null ; then
-    echo "Stop $app on ${1}"
-    ssh ${1} systemctl stop ${app}.service
-    cat ${file}|sort -r |while read cmd pkg version ; do
-        case $cmd in
-            install)
-                echo install $cmd $pkg $version 
-                if [ -z "${version}" ]; then
-                    package=$(find ~/.m2 -name "*${pkg}*.jar"|sort -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)
-                else
-                    package=$(find ~/.m2 -name "*${pkg}-${version}.jar")
-                fi
-                if [ -n "${package-x}" ]; then
-                    scp ${package} ${1}:${libdir}
-                    ssh ${1} chown $appuser:${appusergrp-root} "${libdir}/$(basename ${package})" </dev/null
-                    ssh ${1} chmod ${fileperm-0755} "${libdir}/$(basename ${package})" </dev/null
-                else
-                    echo "$pkg in version $version not found"
-                fi
-                ;;
-            remove)
-                if [ -n "${pkg}" ]; then
-                    if [ -n "${version}" ]; then
-                        echo remove $pkg in version ${version} from ${1}
-                        ssh -T ${1} /bin/bash <<EOF
-                        mkdir -p "${UNINSTALLDIR}" </dev/null
-                        [ \$(find ${libdir} -name "*${pkg}-${version}.jar" </dev/null |wc -l) -gt 0 ] && \
-                        mv \$(find ${libdir} -name "*${pkg}-${version}.jar") "${UNINSTALLDIR}". </dev/null
-EOF
+while [ $# -gt 0 ];
+do
+
+    case $1 in
+        -n|--no-restart)
+            RESTART=false
+            shift
+            continue
+            ;;
+        --)
+            shift
+            DESTS=($@)
+            break
+            ;;
+        *)
+            usage
+    esac
+done
+
+for DEST in ${DESTS[*]}
+do
+    file="$(find ${HOME}/.local/$(basename $0)/ -name ${DEST})"
+    case ${DEST} in
+        *cnf*|*conf*)
+            [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/confluence"
+            libdir=/opt/atlassian/confluence/confluence/WEB-INF/lib
+            app=confluence
+            appuser=confluence
+            ;;
+        *jra*|*jira*)
+            [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/jira"
+            libdir=/opt/atlassian/jira/atlassian-jira/WEB-INF/lib
+            app=jira
+            appuser=jira
+            ;;
+        *)
+            echo "host ${DEST} not found -> exit"
+            exit
+            ;;
+    esac
+
+    echo "Using configfile $file"
+    runtime=$(date "+%x-%X")
+    UNINSTALLDIR="${HOME}/UNINSTALL/${runtime}/"
+
+    if stat "${file}" >/dev/null 2>/dev/null ; then
+        echo "Stop $app on ${DEST}"
+        ssh ${DEST} systemctl stop ${app}.service
+        cat ${file}|sort -r |while read cmd pkg version ; do
+            case $cmd in
+                install)
+                    if [ -z "${version}" ]; then
+                        dir=$( find ~/.m2 -type d -name "*${pkg}*"|grep -v '\$' )
+                        loginfo "dir: $dir"
+                        pkgdir=$(find ${dir} -maxdepth 1 -mindepth 1 -type d  -exec basename  '{}' \;  |sort -n -t"." -k 1,1 -k 2,2 -k 3,3|tail -n1)
+                        loginfo "pkgdir: $pkgdir"
+                        loginfo "${dir}/${pkgdir}"
+                        package=$(find ${dir}/${pkgdir} -name "*${pkg}*.jar")
+                        loginfo "package: $package"
                     else
-                        echo remove $pkg in all versions from ${1}
-                        ssh -T ${1} /bin/bash <<EOF
-                        mkdir -p "${UNINSTALLDIR}" </dev/null
-                        [ \$(find ${libdir} -name "*${pkg}-*.jar" </dev/null |wc -l) -gt 0 ] && \
-                        mv \$(find ${libdir} -name "*${pkg}-*.jar") "${UNINSTALLDIR}"/. </dev/null
-EOF
+                        package=$(find ~/.m2 -name "*${pkg}-${version}.jar")
                     fi
-                else
-                    echo pkg not set ignore line »${cmd} ${pkg} ${version}« from configfile
-                fi
-                ;;
-            *)
-                echo "line not correct: $cmd $pkg $version"
-                ;;
-        esac
-        unset cmd pkg version
-    done
-    echo "Start $app on ${1}"
-    ssh ${1} systemctl start ${app}.service </dev/null
-else
-    echo "Configfile ${file} not found"
-fi
+                    if [ -n "${package-x}" ]; then
+                        loginfo "$cmd $pkg $version"
+                        logdebug "install $package"
+                        scp ${package} ${DEST}:${libdir}
+                        ssh ${DEST} chown $appuser:${appusergrp-root} "${libdir}/$(basename ${package})" </dev/null
+                        ssh ${DEST} chmod ${fileperm-0644} "${libdir}/$(basename ${package})" </dev/null
+                    else
+                        echo "$pkg in version $version not found"
+                    fi
+                    ;;
+                remove)
+                    if [ -n "${pkg}" ]; then
+                        if [ -n "${version}" ]; then
+                            echo remove $pkg in version ${version} from ${DEST}
+                            ssh -T ${DEST} /bin/bash <<EOF
+                            mkdir -p "${UNINSTALLDIR}" </dev/null
+                            [ \$(find ${libdir} -name "*${pkg}-${version}.jar" </dev/null |wc -l) -gt 0 ] && \
+                            mv \$(find ${libdir} -name "*${pkg}-${version}.jar") "${UNINSTALLDIR}". </dev/null
+EOF
+                        else
+                            echo remove $pkg in all versions from ${DEST}
+                            ssh -T ${DEST} /bin/bash <<EOF
+                            mkdir -p "${UNINSTALLDIR}" </dev/null
+                            [ \$(find ${libdir} -name "*${pkg}-*.jar" </dev/null |wc -l) -gt 0 ] && \
+                            mv \$(find ${libdir} -name "*${pkg}-*.jar") "${UNINSTALLDIR}"/. </dev/null
+EOF
+                        fi
+                    else
+                        echo pkg not set ignore line »${cmd} ${pkg} ${version}« from configfile
+                    fi
+                    ;;
+                *)
+                    echo "line not correct: $cmd $pkg $version"
+                    ;;
+            esac
+            unset cmd pkg version
+        done
+        echo "Start $app on ${DEST}"
+        ssh ${DEST} systemctl start ${app}.service </dev/null
+    else
+        echo "Configfile ${file} not found"
+    fi
+done
