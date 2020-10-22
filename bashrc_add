@@ -107,6 +107,28 @@ EOF
             logwarn "Not syncing profile in case of configuration"
         fi
     }
+
+
+    pathmunge () {
+        ENTRY
+        case ":${PATH}:" in
+            *:"$1":*)
+                ;;
+            *)
+                if [ "$2" = "after" ] ; then
+                    PATH=$PATH:$1
+                else
+                    PATH=$1:$PATH
+                fi
+        esac
+        EXIT
+    }
+
+    if [ -d "${MYSHELLCONFIG_BASE}/bin" ] ; then
+        pathmunge "${MYSHELLCONFIG_BASE}/bin"
+        export PATH
+    fi
+
     # Check for interactive bash and that we haven't already been sourced.
     if [ -n "${BASH_VERSION-}" -a -n "${PS1-}" -a -z "${BASH_COMPLETION_VERSINFO-}" ]; then
 
@@ -124,7 +146,7 @@ EOF
 
     fi
 
-
+    . "${MYSHELLCONFIG_BASE}/functions.sh
     # source git-sync part of myshellconfig
     . "${MYSHELLCONFIG_BASE}/myshell_git_sync"
 
