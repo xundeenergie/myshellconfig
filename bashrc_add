@@ -162,5 +162,5 @@ EOF
 EOF
 #else
 #    echo "non-interactive shell" >&2
+    SCRIPTEXIT
 fi
-SCRIPTEXIT
