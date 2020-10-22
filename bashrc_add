@@ -63,7 +63,7 @@ if [[ $- = *i* ]] ; then
     . ${MYSHELLCONFIG_BASE}/logging
 
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
-    ------- start configure new shell -------------- $(date) ---------------8<--
+==8<=== start configure new shell ============== $(date) ===============8<==
 
 EOF
 
@@ -157,7 +157,7 @@ EOF
 
   
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
-    --8<--- finished configure new shell ---------------- $(date) ---------------8<--
+==8<=== finished configure new shell ================ $(date) ===============8<==
 
 EOF
 #else
