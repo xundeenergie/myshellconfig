@@ -146,7 +146,6 @@ EOF
 
     fi
 
-    . "${MYSHELLCONFIG_BASE}/functions.sh
     # source git-sync part of myshellconfig
     . "${MYSHELLCONFIG_BASE}/myshell_git_sync"
 
