@@ -137,10 +137,10 @@ EOF
   
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     --8<--- finished configure new shell ---------------- $(date) ---------------8<--
-    SCRIPTEXIT
 
 EOF
 #else
 #    echo "non-interactive shell" >&2
 fi
-
+SCRIPTEXIT
+exit 0
