@@ -143,4 +143,3 @@ EOF
 #    echo "non-interactive shell" >&2
 fi
 SCRIPTEXIT
-exit 0
