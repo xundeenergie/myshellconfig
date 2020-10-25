@@ -91,7 +91,8 @@ logdebug "update submodules"
         awk -F "=" -v srv="${MYSHElLCONFIG_GIT_SUBMODULE_SERVER-${MYSHElLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT}}" \
         '{print $1" "gensub(/^.*github.com/,srv,$2)}' | \
         while read a b; do
-            echo git config --file=.gitmodules "${a}" "${b}"
+            logdebug "git config --file=.gitmodules ${a} ${b}"
+            git config --file=.gitmodules "${a}" "${b}"
         done
 
     # Submodules always have origin and master as repo and branch to track
