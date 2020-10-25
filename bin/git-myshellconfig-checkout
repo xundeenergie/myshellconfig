@@ -85,7 +85,6 @@ if ${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES-${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_D
 logdebug "update submodules"
     rc=0
 
-    logdebug "update submodules" >&2
     git config --file=.gitmodules -l | \
         grep url= | \
         awk -F "=" -v srv="${MYSHElLCONFIG_GIT_SUBMODULE_SERVER-${MYSHElLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT}}" \
@@ -101,9 +100,8 @@ logdebug "update submodules"
     #$SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1               || { logwarn "checkout master submodules failed on set upstream"; rc=7;  }
     #$SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "set-upstream submodules failed on set upstream"; rc=8;  }
     $SGIT submodule update --init --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
-    logdebug "submodules updated" >&2
+    logdebug "submodules updated successfully" >&2
 
-logdebug "update submodules ENDE"
 else
     logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES-${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_DEFAULT-true}}"
 fi
