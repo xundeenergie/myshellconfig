@@ -95,6 +95,9 @@ logdebug "update submodules"
     logdebug "submodules updated" >&2
 
 logdebug "update submodules ENDE"
+else
+    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_UPDATE_SUBMODLUES-${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_DEFAULT-true}}"
+fi
 
 EXIT
 exit $rc
