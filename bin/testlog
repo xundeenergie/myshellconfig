@@ -1,0 +1,47 @@
+#!/bin/bash
+
+LANG=C
+for f in logerror logwarn loginfo logdebug logtrace ENTRY EXIT SCRIPTENTRY SCRIPTEXIT; do
+    if  LANG=C type -t $f 2> /dev/null| grep -q 'function'; then
+        :
+    else
+      fx=${f//log/}
+      #echo "create function $f for $fx"
+      eval "$f () { \
+          local loglevels; \
+          declare -a loglevels; \
+          case $fx in
+              error)
+                  loglevels=()
+                  ;;
+              warn)
+                  loglevels=(\"ERROR\")
+                  ;;
+              info)
+                  loglevels=(\"ERROR\" \"WARN\" )
+                  ;;
+              debug)
+                  loglevels=( \"ERROR\" \"WARN\" \"INFO\" )
+                  ;;
+              trace|ENTRY|EXIT|SCRIPTENTRY|SCRIPTEXIT)
+                  loglevels=( \"ERROR\" \"WARN\" \"INFO\" \"DEBUG\" )
+                  ;;
+          esac
+          if [[ ! \${loglevels[*]} =~ \"\${LOGLEVEL-\${LOGLEVEL_DEFAULT}}\" ]];then \
+              echo "\$@" >&2
+          fi; \
+      }"
+      unset fx
+    fi
+done
+unset f
+
+logerror "ich bin ein error"
+logwarn "ich bin eine warnung"
+loginfo "ich bin eine info"
+logdebug "ich bin eine debuginfo"
+logtrace "ich rede zuviel"
+ENTRY "ich starte eine function"
+EXIT "ich beende eine function"
+SCRIPTENTRY "ich starte ein script"
+SCRIPTEXIT "ich beende ein script"
