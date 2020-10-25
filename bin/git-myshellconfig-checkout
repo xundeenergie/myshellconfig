@@ -89,7 +89,7 @@ logdebug "update submodules"
     git config --file=.gitmodules -l | \
         grep url= | \
         awk -F "=" -v srv="${MYSHElLCONFIG_GIT_SUBMODULE_SERVER-${MYSHElLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT}}" \
-        '{print $1" "gensub(/^.*github.com/,srv,$2)}' | \
+        '{gsub(/^.*github.com/,srv,$2); print $1" "$2}' | \
         while read a b; do
             logdebug "git config --file=.gitmodules ${a} ${b}"
             git config --file=.gitmodules "${a}" "${b}"
