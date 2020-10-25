@@ -86,12 +86,20 @@ logdebug "update submodules"
     rc=0
 
     logdebug "update submodules" >&2
+    git config --file=.gitmodules -l | \
+        grep url= | \
+        awk -F "=" -v srv="${MYSHElLCONFIG_GIT_SUBMODULE_SERVER-${MYSHElLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT}" \
+        '{print $1" "gensub(/^.*github.com/,srv,$2)}' | \
+        while read a b; do
+            echo git config --file=.gitmodules "${a}" "${b}"
+        done
+
     # Submodules always have origin and master as repo and branch to track
-    $SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "update submodules failed on ini"; rc=5; }
+    #$SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "update submodules failed on ini"; rc=5; }
     $SGIT submodule sync 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "sync submodules failed on sync"; rc=6;  }
-    $SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1               || { logwarn "checkout master submodules failed on set upstream"; rc=7;  }
-    $SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "set-upstream submodules failed on set upstream"; rc=8;  }
-    $SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
+    #$SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1               || { logwarn "checkout master submodules failed on set upstream"; rc=7;  }
+    #$SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "set-upstream submodules failed on set upstream"; rc=8;  }
+    $SGIT submodule update --init --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
     logdebug "submodules updated" >&2
 
 logdebug "update submodules ENDE"
