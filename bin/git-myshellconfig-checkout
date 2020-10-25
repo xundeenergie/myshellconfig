@@ -81,11 +81,13 @@ EOF
 
 fi
 
-cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 
-+-----update submodules $(date) ---------------------------------+
- 
-EOF
+loginfo "+-----update submodules $(date) ---------------------------------+"
+#cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+#
+#+-----update submodules $(date) ---------------------------------+
+# 
+#EOF
 rc=0
 
 logdebug "update submodules" >&2
@@ -97,7 +99,7 @@ $SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFI
 $SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
 logdebug "submodules updated" >&2
 
-cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+loginfo << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 
 +-----ENDE $(date) ---------------------------------+
  

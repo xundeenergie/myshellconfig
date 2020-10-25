@@ -1,12 +1,12 @@
 [submodule "tmux/plugins/tpm"]
 	path = tmux/plugins/tpm
-	url = http://git.schuerz.at/public/tmux-plugins/tpm.git
+	url = http://github.com/gtmux-plugins/tpm.git
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
-	url = http://git.schuerz.at/public/tmux-plugins/tmux-themepack.git
+	url = http://github.com/gtmux-plugins/tmux-themepack.git
 [submodule "tmux/plugins/tmux-sensible"]
 	path = tmux/plugins/tmux-sensible
-	url = http://git.schuerz.at/public/tmux-plugins/tmux-sensible.git
+	url = http://github.com/gtmux-plugins/tmux-sensible.git
 [submodule "vim/bundle/Vundle.vim"]
 	path = vim/bundle/Vundle.vim
-	url = https://git.schuerz.at/public/Vim/gmarik/Vundle.vim.git
+	url = https://github.com/gVim/gmarik/Vundle.vim.git
