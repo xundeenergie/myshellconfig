@@ -81,27 +81,21 @@ EOF
 
 fi
 
-cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+if ${MYSHELLCONFIG_GIT_UPDATE_SUBMODLUES-${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_DEFAULT-true}}; then
+logdebug "update submodules"
+    rc=0
 
-+-----update submodules $(date) ---------------------------------+
- 
-EOF
-rc=0
+    logdebug "update submodules" >&2
+    # Submodules always have origin and master as repo and branch to track
+    $SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "update submodules failed on ini"; rc=5; }
+    $SGIT submodule sync 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "sync submodules failed on sync"; rc=6;  }
+    $SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1               || { logwarn "checkout master submodules failed on set upstream"; rc=7;  }
+    $SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "set-upstream submodules failed on set upstream"; rc=8;  }
+    $SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
+    logdebug "submodules updated" >&2
 
-logdebug "update submodules" >&2
-# Submodules always have origin and master as repo and branch to track
-$SGIT submodule init 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "update submodules failed on ini"; rc=5; }
-$SGIT submodule sync 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "sync submodules failed on sync"; rc=6;  }
-$SGIT submodule foreach "git checkout master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1               || { logwarn "checkout master submodules failed on set upstream"; rc=7;  }
-$SGIT submodule foreach "git branch -u origin/master master"  1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1|| { logwarn "set-upstream submodules failed on set upstream"; rc=8;  }
-$SGIT submodule update --recursive --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
-logdebug "submodules updated" >&2
+logdebug "update submodules ENDE"
 
-cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
-
-+-----ENDE $(date) ---------------------------------+
- 
-EOF
 EXIT
 exit $rc
 
