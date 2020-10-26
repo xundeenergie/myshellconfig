@@ -81,13 +81,13 @@ EOF
 
 fi
 
-if ${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES-${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_DEFAULT-true}}; then
+if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
 logdebug "update submodules"
     rc=0
 
     $SGIT config --file=.gitmodules -l | \
         grep url= | \
-        awk -F "=" -v srv="${MYSHELLCONFIG_GIT_SUBMODULE_SERVER-${MYSHELLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT}}" \
+        awk -F "=" -v srv="${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}}" \
         '{gsub(/^.*github.com/,srv,$2); print $1" "$2}' | \
         while read a b; do
             logdebug "$SGIT config --file=.gitmodules ${a} ${b}"
@@ -103,7 +103,7 @@ logdebug "update submodules"
     logdebug "submodules updated successfully" >&2
 
 else
-    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES-${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_DEFAULT-true}}"
+    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
 fi
 
 EXIT

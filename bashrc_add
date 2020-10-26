@@ -39,8 +39,8 @@ if [[ $- = *i* ]] ; then
     [ -z "${MYSHELLCONFIG_GIT_TIMEOUT+x}" ]                     && export MYSHELLCONFIG_GIT_TIMEOUT=5s
     [ -z "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT+x}" ]            && export MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT=20s
     [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ]                        && export MYSHELLCONFIG_GIT_SYNC=true
-    [ -z "${MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_DEFAULT+x}" ]   && export MYSHELLCONFIG_GIT_UPDATE_SUBMODULES_DEFAULT=true
-    [ -z "${MYSHELLCONFIG_GIT_SUBMODULE_SERVER_DEFUALt+x}" ]    && export MYSHELLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT="git://git.schuerz.at/github.com"
+    [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT+x}" ]   && export MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT=true
+    [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT+x}" ]   && export MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT="git://git.schuerz.at/github.com"
     # hardcoded git
     export SGIT="git -C ${MYSHELLCONFIG_BASE}" 
 
