@@ -87,7 +87,7 @@ logdebug "update submodules"
 
     $SGIT config --file=.gitmodules -l | \
         grep url= | \
-        awk -F "=" -v srv="${MYSHElLCONFIG_GIT_SUBMODULE_SERVER-${MYSHElLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT}}" \
+        awk -F "=" -v srv="${MYSHELLCONFIG_GIT_SUBMODULE_SERVER-${MYSHELLCONFIG_GIT_SUBMODULE_SERVER_DEFAULT}}" \
         '{gsub(/^.*github.com/,srv,$2); print $1" "$2}' | \
         while read a b; do
             logdebug "$SGIT config --file=.gitmodules ${a} ${b}"
