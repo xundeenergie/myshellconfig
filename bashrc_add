@@ -64,6 +64,9 @@ if [[ $- = *i* ]] ; then
     # load logging functions
     . ${MYSHELLCONFIG_BASE}/logging
 
+    # PKCS11_MODULE for etoken/smartcard authentification
+    [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && PKCS11_MODULE=$(whereis p11-kit-proxy.so|awk '{print $2}')
+
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 ==8<=== start configure new shell ============== $(date) ===============8<==
 
