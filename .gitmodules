@@ -9,4 +9,4 @@
 	url = https://github.com/tmux-plugins/tmux-sensible.git
 [submodule "vim/bundle/Vundle.vim"]
 	path = vim/bundle/Vundle.vim
-	url = git://git.schuerz.at/github.com/gmarik/Vundle.vim.git
+	url = https://github.com/gmarik/Vundle.vim.git
