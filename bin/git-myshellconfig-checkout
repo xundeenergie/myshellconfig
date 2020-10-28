@@ -81,7 +81,7 @@ EOF
 
 fi
 
-loginfo -n ", repo synced"
+loginfo -n "repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
 logdebug "update submodules"
