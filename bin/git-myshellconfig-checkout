@@ -85,10 +85,11 @@ if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_D
 logdebug "update submodules"
     rc=0
     srv="${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}}" 
+    logwarn "srv $srv"
     $SGIT config --file=.gitmodules -l | \
         grep url= | \
         awk -F "=" -v srv="${srv%/}${srv:+/}" \
-        '{gsub(/^.*github.com/,srv,$2); print $1" "$2}' | \
+        '{gsub(/^.*github.com\//,srv,$2); print $1" "$2}' | \
         while read a b; do
             logdebug "$SGIT config --file=.gitmodules ${a} ${b}"
             $SGIT config --file=.gitmodules "${a}" "${b}"
