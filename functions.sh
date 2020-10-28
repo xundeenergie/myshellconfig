@@ -418,7 +418,8 @@ vim-repair-vundle () {
         cd $MYSHELLCONFIG_BASE
         cd vim/bundle
         rm -rf Vundle.vim
-        git clone  "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER}gmarik/Vundle.vim.git"
+        echo git clone  "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-$MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
+        git clone  "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-$MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
         cd ~-
     fi
     EXIT
