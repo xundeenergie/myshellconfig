@@ -117,7 +117,7 @@ else
     loginfo -n ", submodules not synced"
     logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
 fi
-loginfo -m ": "
+loginfo -n ": "
 
 EXIT
 exit $rc
