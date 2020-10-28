@@ -81,7 +81,7 @@ EOF
 
 fi
 
-loginfo "repo synced"
+loginfo -n "repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
 logdebug "update submodules"
@@ -111,7 +111,7 @@ logdebug "update submodules"
     #$SGIT submodule update --init --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
     #$SGIT checkout .gitmodules
     logdebug "submodules updated successfully"
-    loginfo "submodules synced"
+    loginfo -n "submodules synced"
 
 else
     logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
