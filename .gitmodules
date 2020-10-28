@@ -7,6 +7,3 @@
 [submodule "tmux/plugins/tmux-sensible"]
 	path = tmux/plugins/tmux-sensible
 	url = https://github.com/tmux-plugins/tmux-sensible.git
-[submodule "vim/autoload/vim-pathogene"]
-	path = vim/autoload/vim-pathogene
-	url = https://github.com/tpope/vim-pathogen.git
