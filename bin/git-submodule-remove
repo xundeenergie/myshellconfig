@@ -1,22 +1,32 @@
 #!/bin/bash
 
 SUBMODULE=$1
+logdebug "Check if entry for submodule exist in .git/config and .gitmodules"
 [[ $(git config --file=.gitmodules --get submodule.${SUBMODULE}.url >/dev/null 2>&1; echo $?) -eq 0 \
     || $(git config --file=.gitmodules --get submodule.${SUBMODULE}.path >/dev/null 2>&1; echo $?) -eq 0 \
     || $(git config --get submodule.${SUBMODULE}.url >/dev/null 2>&1; echo $?) -eq 0 \
     || $(git config --get submodule.${SUBMODULE}.path >/dev/null 2>&1; echo $?) -eq 0 ]] || exit $?
+#
+logdebug "Remove entry for submodule from .gitmodules, if exist"
 [[ $(git config --file=.gitmodules --get submodule.${SUBMODULE}.url >/dev/null 2>&1; echo $?) -eq 0 \
     || $(git config --file=.gitmodules --get submodule.${SUBMODULE}.path >/dev/null 2>&1; echo $?) -eq 0 ]] && \
     loginfo "$(git config --file=.gitmodules --remove-section submodule.${SUBMODULE})"
 
-#git commit .gitmodules -m "remove submodule $SUBMODULE from .gitconfig"
+loginfo "$(git commit .gitmodules -m 'remove submodule-entry for '"$SUBMODULE"' from .gitconfig')"
+logdebug "Remove entry for submodule from .git/confi, if exist"
 [[ $(git config --get submodule.${SUBMODULE}.url >/dev/null 2>&1; echo $?) -eq 0 \
     || $(git config --get submodule.${SUBMODULE}.path >/dev/null 2>&1; echo $?) -eq 0 ]] && \
     loginfo "$(git config --remove-section submodule.${SUBMODULE})"
 
+logdebug "Remove submodule from stage"
 loginfo "$(git rm --cached "${SUBMODULE}")"
+
+logdebug "Remove submodule from unstaged .git/modules/*"
 [ -d ".git/modules/${SUBMODULE}" ] && loginfo "$(rm -rf .git/modules/"${SUBMODULE}")"
+
 loginfo "$(git commit -m "remove submodule ${SUBMODULE}" )"
+
+logdebug "remove submodule from repo"
 [ -d "${SUBMODULE}" ] && loginfo "$(rm -rf ${SUBMODULE} )"
 loginfo "submodule $SUBMODULE completely removed"
 
