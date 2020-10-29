@@ -11,87 +11,87 @@ filetype off                  " required
 
 let g:NERDTreeDirArrows = 1
 
-if !empty($MYSHELLCONFIG_VIM_PLUGINS)
-  let pluginrepopath=$MYSHELLCONFIG_VIM_PLUGINS . '/'
-  let pluginextension='.git'
-else
-  let pluginrepopath=''
-  let pluginextension=''
-endif
-
-if !empty(glob("~/.vim/bundle/Vundle.vim"))
-  " set the runtime path to include Vundle and initialize
-  set rtp+=~/.vim/bundle/Vundle.vim
-  call vundle#begin()
-
-  " alternatively, pass a path where Vundle should install plugins
-  "call vundle#begin('~/some/path/here')
-
-  " let Vundle manage Vundle, required
-  
-  Plugin pluginrepopath . 'gmarik/Vundle.vim' . pluginextension
-  Plugin pluginrepopath . 'vim-scripts/Zenburn' . pluginextension
-  Plugin pluginrepopath . 'Solarized' . pluginextension
-  Plugin pluginrepopath . 'altercation/vim-colors-solarized' . pluginextension
-  Plugin pluginrepopath . 'vim-scripts/indentpython.vim' . pluginextension
-  Plugin pluginrepopath . 'tmhedberg/SimpylFold' . pluginextension
-  Plugin pluginrepopath . 'vim-syntastic/syntastic' . pluginextension
-  Plugin pluginrepopath . 'ctrlpvim/ctrlp.vim' . pluginextension
-  Plugin pluginrepopath . 'preservim/nerdtree' . pluginextension
-  Plugin pluginrepopath . 'Xuyuanp/nerdtree-git-plugin' . pluginextension
-  Plugin pluginrepopath . 'jistr/vim-nerdtree-tabs' . pluginextension
-  Plugin pluginrepopath . 'tpope/vim-fugitive' . pluginextension
-  Plugin pluginrepopath . 'Lokaltog/powerline' . pluginextension, {'rtp': 'powerline/bindings/vim/'}
-  Plugin pluginrepopath . 'rakr/vim-togglebg' . pluginextension
-  Plugin pluginrepopath . 'ConradIrwin/vim-bracketed-paste' . pluginextension
-"  Plugin pluginrepopath . 'ryanpcmcquen/fix-vim-pasting' . pluginextension
-"  Plugin pluginrepopath . 'Valloric/YouCompleteMe' . pluginextension
-  
-  
-   
-  "Plugin 'gmarik/Vundle.vim'
-  "Plugin 'Zenburn'
-  "Plugin 'Solarized'
-  "Plugin 'altercation/vim-colors-solarized.git'
-  "Plugin 'vim-scripts/indentpython.vim'
-  "Plugin 'tmhedberg/SimpylFold'
-  "Plugin 'vim-syntastic/syntastic'
-  "Plugin 'ctrlpvim/ctrlp.vim'
-  "Plugin 'scrooloose/nerdtree'
-  "Plugin 'Xuyuanp/nerdtree-git-plugin'
-  "Plugin 'jistr/vim-nerdtree-tabs'
-  "Plugin 'tpope/vim-fugitive'
-  "Plugin 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
-  "Plugin 'rakr/vim-togglebg'
-  "Plugin 'ConradIrwin/vim-bracketed-paste'
-  "Plugin 'ryanpcmcquen/fix-vim-pasting'
-  "Plugin 'Valloric/YouCompleteMe'
-
-"  Plugin 'https://git.schuerz.at/public/Vim/Vundle.vim.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/Zenburn.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/vim-colors-solarized.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/indentpython.vim.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/SimpylFold.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/syntastic.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/ctrlp.vim.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/scrooloose/nerdtree'
-"  Plugin 'https://git.schuerz.at/public/Vim/Xuyuanp/nerdtree-git-plugin'
-"  Plugin 'https://git.schuerz.at/public/Vim/vim-nerdtree-tabs.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/vim-fugitive.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/powerline.git', {'rtp': 'powerline/bindings/vim/'}
-"  Plugin 'https://git.schuerz.at/public/Vim/vim-togglebg.git'
-"  Plugin 'https://git.schuerz.at/public/Vim/vim-bracketed-paste.git'
-"  "Plugin 'https://git.schuerz.at/public/Vim/ryanpcmcquen/fix-vim-pasting'
-"  "Plugin 'https://git.schuerz.at/public/Vim/Valloric/YouCompleteMe'
-
-  " add all your plugins here (note older versions of Vundle
-  " used Bundle instead of Plugin)
-
-  " ...
-
-  " All of your Plugins must be added before the following line
-  call vundle#end()            " required
-endif
+"if !empty($MYSHELLCONFIG_VIM_PLUGINS)
+"  let pluginrepopath=$MYSHELLCONFIG_VIM_PLUGINS . '/'
+"  let pluginextension='.git'
+"else
+"  let pluginrepopath=''
+"  let pluginextension=''
+"endif
+"
+"if !empty(glob("~/.vim/bundle/Vundle.vim"))
+"  " set the runtime path to include Vundle and initialize
+"  set rtp+=~/.vim/bundle/Vundle.vim
+"  call vundle#begin()
+"
+"  " alternatively, pass a path where Vundle should install plugins
+"  "call vundle#begin('~/some/path/here')
+"
+"  " let Vundle manage Vundle, required
+"  
+"  Plugin pluginrepopath . 'gmarik/Vundle.vim' . pluginextension
+"  Plugin pluginrepopath . 'vim-scripts/Zenburn' . pluginextension
+"  Plugin pluginrepopath . 'Solarized' . pluginextension
+"  Plugin pluginrepopath . 'altercation/vim-colors-solarized' . pluginextension
+"  Plugin pluginrepopath . 'vim-scripts/indentpython.vim' . pluginextension
+"  Plugin pluginrepopath . 'tmhedberg/SimpylFold' . pluginextension
+"  Plugin pluginrepopath . 'vim-syntastic/syntastic' . pluginextension
+"  Plugin pluginrepopath . 'ctrlpvim/ctrlp.vim' . pluginextension
+"  Plugin pluginrepopath . 'preservim/nerdtree' . pluginextension
+"  Plugin pluginrepopath . 'Xuyuanp/nerdtree-git-plugin' . pluginextension
+"  Plugin pluginrepopath . 'jistr/vim-nerdtree-tabs' . pluginextension
+"  Plugin pluginrepopath . 'tpope/vim-fugitive' . pluginextension
+"  Plugin pluginrepopath . 'Lokaltog/powerline' . pluginextension, {'rtp': 'powerline/bindings/vim/'}
+"  Plugin pluginrepopath . 'rakr/vim-togglebg' . pluginextension
+"  Plugin pluginrepopath . 'ConradIrwin/vim-bracketed-paste' . pluginextension
+""  Plugin pluginrepopath . 'ryanpcmcquen/fix-vim-pasting' . pluginextension
+""  Plugin pluginrepopath . 'Valloric/YouCompleteMe' . pluginextension
+"  
+"  
+"   
+"  "Plugin 'gmarik/Vundle.vim'
+"  "Plugin 'Zenburn'
+"  "Plugin 'Solarized'
+"  "Plugin 'altercation/vim-colors-solarized.git'
+"  "Plugin 'vim-scripts/indentpython.vim'
+"  "Plugin 'tmhedberg/SimpylFold'
+"  "Plugin 'vim-syntastic/syntastic'
+"  "Plugin 'ctrlpvim/ctrlp.vim'
+"  "Plugin 'scrooloose/nerdtree'
+"  "Plugin 'Xuyuanp/nerdtree-git-plugin'
+"  "Plugin 'jistr/vim-nerdtree-tabs'
+"  "Plugin 'tpope/vim-fugitive'
+"  "Plugin 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+"  "Plugin 'rakr/vim-togglebg'
+"  "Plugin 'ConradIrwin/vim-bracketed-paste'
+"  "Plugin 'ryanpcmcquen/fix-vim-pasting'
+"  "Plugin 'Valloric/YouCompleteMe'
+"
+""  Plugin 'https://git.schuerz.at/public/Vim/Vundle.vim.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/Zenburn.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/vim-colors-solarized.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/indentpython.vim.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/SimpylFold.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/syntastic.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/ctrlp.vim.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/scrooloose/nerdtree'
+""  Plugin 'https://git.schuerz.at/public/Vim/Xuyuanp/nerdtree-git-plugin'
+""  Plugin 'https://git.schuerz.at/public/Vim/vim-nerdtree-tabs.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/vim-fugitive.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/powerline.git', {'rtp': 'powerline/bindings/vim/'}
+""  Plugin 'https://git.schuerz.at/public/Vim/vim-togglebg.git'
+""  Plugin 'https://git.schuerz.at/public/Vim/vim-bracketed-paste.git'
+""  "Plugin 'https://git.schuerz.at/public/Vim/ryanpcmcquen/fix-vim-pasting'
+""  "Plugin 'https://git.schuerz.at/public/Vim/Valloric/YouCompleteMe'
+"
+"  " add all your plugins here (note older versions of Vundle
+"  " used Bundle instead of Plugin)
+"
+"  " ...
+"
+"  " All of your Plugins must be added before the following line
+"  call vundle#end()            " required
+"endif
 filetype plugin indent on    " required
 "------------------------------------------------------------
 set encoding=utf-8
