@@ -1,0 +1,17 @@
+#!/bin/bash
+
+SUBMODULE=$1
+git config --file=.gitmodules --remove-section submodule.${SUBMODULE} || \
+    { logerror "error on removing section from .gitmodules"; exit 1; }
+git commit .gitmodules -m "remove submodule $SUBMODULE from .gitconfig"
+git config --remove-section submodule.${SUBMODULE} || \
+    { logerror "error on removing section from .git/config"; exit 2; }
+git rm --cached "${SUBMODULE}" || \
+    { logerror "remove submodule from stage error"; exit 3; }
+[ -d ".git/modules/${SUBMODULE}" ] && rm -rf .git/modules/"${SUBMODULE}" || \
+    { logerror "error on removing submodule from unversioned .git/modules/*"; exit 4; }
+git commit -m "remove submodule ${SUBMODULE}" 
+[ -d "${SUBMODULE}" ] && rm -rf "${SUBMODULE}" || \
+    { logerror "error on removing submodule from repo"; exit 5; }
+loginfo "submodule $SUBMODULE completely removed"
+
