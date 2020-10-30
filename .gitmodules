@@ -7,9 +7,6 @@
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
 	url = git://git.schuerz.at/github.com/jimeh/tmux-themepack.git
-[submodule "vim/pack/plugins/SimpylFold"]
-	path = vim/pack/plugins/SimpylFold
-	url = https://github.com/tmhedberg/SimpylFold.git
 [submodule "vim/pack/plugins/syntastic"]
 	path = vim/pack/plugins/syntastic
 	url = https://github.com/vim-syntastic/syntastic.git
