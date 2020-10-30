@@ -7,9 +7,6 @@
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
 	url = git://git.schuerz.at/github.com/jimeh/tmux-themepack.git
-[submodule "vim/pack/syntax/indentpython.vim"]
-	path = vim/pack/syntax/indentpython.vim
-	url = https://github.com/vim-scripts/indentpython.vim.git
 [submodule "vim/pack/plugins/nerdtree"]
 	path = vim/pack/plugins/nerdtree
 	url = https://github.com/preservim/nerdtree.git
