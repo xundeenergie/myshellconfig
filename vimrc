@@ -393,16 +393,19 @@ autocmd BufRead,BufNewFile *.conf setf dosini
 
 if has('gui_running')
   set background=dark
-  colorscheme solarized
+"  colorscheme solarized
+  colorscheme default
 else
-  if !empty(glob("~/vim/pack/color/start/Zenburn"))
-    colorscheme zenburn
+  if !empty(glob("~/.vim/pack/color/start/Zenburn"))
+"    colorscheme zenburn
+    colorscheme default
   else
-    colorscheme desert
+    colorscheme default
   endif
 endif
 
 "if !empty(glob("~/.vim/bundle/vim-togglebg"))
+"if !empty(glob("~/.vim/pack/color/start/vim-colors-solarized"))
 "  call togglebg#map("<F5>")
 "endif
 
