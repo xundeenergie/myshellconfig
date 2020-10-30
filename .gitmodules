@@ -7,9 +7,6 @@
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
 	url = git://git.schuerz.at/github.com/jimeh/tmux-themepack.git
-[submodule "vim/pack/plugins/vim-togglebg"]
-	path = vim/pack/plugins/vim-togglebg
-	url = https://github.com/rakr/vim-togglebg.git
 [submodule "vim/pack/plugins/vim-bracketed-paste"]
 	path = vim/pack/plugins/vim-bracketed-paste
 	url = https://github.com/ConradIrwin/vim-bracketed-paste.git
