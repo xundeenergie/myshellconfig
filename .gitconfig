@@ -13,6 +13,7 @@
 	default = simple
 [core]
 	editor = vim
+	excludesFile = ~/.gitignore_global
 [diff]
 	submodule = log
 [alias]

@@ -52,6 +52,7 @@ create_symlinks() {
     ln -sf "${MYSHELLCONFIG_BASE}/vimrc" ~/.vimrc
     ln -sf "${MYSHELLCONFIG_BASE}/vim" ~/.vim
     ln -sf "${MYSHELLCONFIG_BASE}/.gitconfig" ~/.gitconfig
+    ln -sf "${MYSHELLCONFIG_BASE}/.gitignore_global" ~/.gitignore_global
     #ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
     ln -sf "${MYSHELLCONFIG_BASE}/tmux" ~/.tmux
     ln -sf "${MYSHELLCONFIG_BASE}/tmux/tmux.conf" ~/.tmux.conf
