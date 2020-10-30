@@ -7,9 +7,6 @@
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
 	url = git://git.schuerz.at/github.com/jimeh/tmux-themepack.git
-[submodule "vim/pack/plugins/ctrlp.vim"]
-	path = vim/pack/plugins/ctrlp.vim
-	url = https://github.com/ctrlpvim/ctrlp.vim.git
 [submodule "vim/pack/plugins/vim-airline"]
 	path = vim/pack/plugins/vim-airline
 	url = https://github.com/vim-airline/vim-airline.git
