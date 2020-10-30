@@ -10,3 +10,4 @@ serverconfig.local.conf
 bashrc_local
 .local_scripts
 .git-token
+.last_udate_submodules
