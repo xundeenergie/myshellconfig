@@ -84,7 +84,7 @@ fi
 loginfo -n "repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
-logdebug "update submodules"
+    logdebug "update submodules"
     rc=0
 #    srv="${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}}" 
 #    logwarn "srv $srv"
