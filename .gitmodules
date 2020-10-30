@@ -25,9 +25,6 @@
 [submodule "vim/pack/plugins/start/vim-fugitive"]
 	path = vim/pack/plugins/start/vim-fugitive
 	url = https://github.com/tpope/vim-fugitive.git
-[submodule "vim/pack/plugins/start/vim-togglebg"]
-	path = vim/pack/plugins/start/vim-togglebg
-	url = https://github.com/rakr/vim-togglebg.git
 [submodule "vim/pack/plugins/start/vim-bracketed-paste"]
 	path = vim/pack/plugins/start/vim-bracketed-paste
 	url = https://github.com/ConradIrwin/vim-bracketed-paste.git
