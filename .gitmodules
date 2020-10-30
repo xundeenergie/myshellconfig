@@ -7,9 +7,6 @@
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
 	url = git://git.schuerz.at/github.com/jimeh/tmux-themepack.git
-[submodule "vim/pack/plugins/vim-nerdtree-tabs"]
-	path = vim/pack/plugins/vim-nerdtree-tabs
-	url = https://github.com/jistr/vim-nerdtree-tabs.git
 [submodule "vim/pack/plugins/vim-fugitive"]
 	path = vim/pack/plugins/vim-fugitive
 	url = https://github.com/tpope/vim-fugitive.git
