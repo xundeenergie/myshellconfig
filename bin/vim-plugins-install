@@ -4,8 +4,8 @@ grep -v "^\"" vimplugins |while read cmd type url;do
     case $cmd in 
         install)
             git submodule add $url vim/pack/${type}/start/$(basename ${url%.git})
-            vim -es -c ":helptags vim/pack/${type}/start/$(basename ${url%.git})" -c ":q!" -
-            git -C vim/pack/${type}/start/$(basename ${url%.git}) commit . -m "add helptags"
+            #vim -es -c ":helptags vim/pack/${type}/start/$(basename ${url%.git})" -c ":q!" -
+            #git -C vim/pack/${type}/start/$(basename ${url%.git}) commit . -m "add helptags"
             ;;
         remove)
             git submodule-remove vim/pack/${type}/start/$(basename ${url%.git})
