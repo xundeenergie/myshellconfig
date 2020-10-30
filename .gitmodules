@@ -7,3 +7,42 @@
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
 	url = git://git.schuerz.at/github.com/jimeh/tmux-themepack.git
+[submodule "vim/pack/color/Zenburn"]
+	path = vim/pack/color/Zenburn
+	url = https://github.com/vim-scripts/Zenburn.git
+[submodule "vim/pack/color/vim-colors-solarized"]
+	path = vim/pack/color/vim-colors-solarized
+	url = https://github.com/altercation/vim-colors-solarized.git
+[submodule "vim/pack/syntax/indentpython.vim"]
+	path = vim/pack/syntax/indentpython.vim
+	url = https://github.com/vim-scripts/indentpython.vim.git
+[submodule "vim/pack/plugins/nerdtree"]
+	path = vim/pack/plugins/nerdtree
+	url = https://github.com/preservim/nerdtree.git
+[submodule "vim/pack/plugins/nerdtree-git-plugin"]
+	path = vim/pack/plugins/nerdtree-git-plugin
+	url = https://github.com/Xuyuanp/nerdtree-git-plugin.git
+[submodule "vim/pack/plugins/vim-nerdtree-tabs"]
+	path = vim/pack/plugins/vim-nerdtree-tabs
+	url = https://github.com/jistr/vim-nerdtree-tabs.git
+[submodule "vim/pack/plugins/vim-fugitive"]
+	path = vim/pack/plugins/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive.git
+[submodule "vim/pack/plugins/vim-togglebg"]
+	path = vim/pack/plugins/vim-togglebg
+	url = https://github.com/rakr/vim-togglebg.git
+[submodule "vim/pack/plugins/vim-bracketed-paste"]
+	path = vim/pack/plugins/vim-bracketed-paste
+	url = https://github.com/ConradIrwin/vim-bracketed-paste.git
+[submodule "vim/pack/plugins/SimpylFold"]
+	path = vim/pack/plugins/SimpylFold
+	url = https://github.com/tmhedberg/SimpylFold.git
+[submodule "vim/pack/plugins/syntastic"]
+	path = vim/pack/plugins/syntastic
+	url = https://github.com/vim-syntastic/syntastic.git
+[submodule "vim/pack/plugins/ctrlp.vim"]
+	path = vim/pack/plugins/ctrlp.vim
+	url = https://github.com/ctrlpvim/ctrlp.vim.git
+[submodule "vim/pack/plugins/vim-airline"]
+	path = vim/pack/plugins/vim-airline
+	url = https://github.com/vim-airline/vim-airline.git
