@@ -12,5 +12,7 @@ install plugins https://github.com/vim-syntastic/syntastic.git
 install plugins https://github.com/ctrlpvim/ctrlp.vim.git
 install plugins https://github.com/vim-airline/vim-airline.git
 install plugins https://github.com/vim-airline/vim-airline-themes.git
+install plugins https://github.com/junegunn/fzf.git
 install plugins https://github.com/junegunn/fzf.vim.git
+install plugins https://github.com/airblade/vim-gitgutter.git
 remove plugins https://github.com/Lokaltog/powerline.git
