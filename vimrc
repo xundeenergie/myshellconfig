@@ -389,20 +389,22 @@ autocmd FileType human set formatoptions-=t textwidth=0 "disable wrapping in txt
 autocmd BufRead,BufNewFile *.conf setf dosini
 
 " to make comments better visible on dark backgrounds
-:color desert
+":color desert
 
 if has('gui_running')
   set background=dark
   colorscheme solarized
 else
-  if !empty(glob("~/vim//bundle/Zenburn/colors/zenburn.vim"))
+  if !empty(glob("~/vim/pack/color/start/Zenburn"))
     colorscheme zenburn
+  else
+    colorscheme desert
   endif
 endif
 
-if !empty(glob("~/.vim/bundle/vim-togglebg"))
-  call togglebg#map("<F5>")
-endif
+"if !empty(glob("~/.vim/bundle/vim-togglebg"))
+"  call togglebg#map("<F5>")
+"endif
 
 
 
@@ -513,7 +515,6 @@ noremap <C-Tab> :tabnext<CR>
 noremap <silent> <C-A-S-Tab> :execute 'silent! tabmove' . (tabpagenr()-2)<CR>
 noremap <silent> <C-A-Tab> :execute 'silent! tabmove' . (tabpagenr()+1)<CR>
 
-
 " Configure Plugin airline
 let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#enabled = 1
@@ -522,3 +523,7 @@ let g:airline_theme='angr'
 " Configure fzf - fuzzy finder
 let g:fzf_preview_window = 'right:50%'
 let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6  }  }
+
+" Configure Gitgutter
+nmap <Leader>hn <Plug>(GitGutterNextHunk)
+nmap <Leader>hp <Plug>(GitGutterPrevHunk)

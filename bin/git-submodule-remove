@@ -13,7 +13,7 @@ logdebug "Remove entry for submodule from .gitmodules, if exist"
     loginfo "$(git config --file=.gitmodules --remove-section submodule.${SUBMODULE})"
 
 loginfo "$(git commit .gitmodules -m 'remove submodule-entry for '"$SUBMODULE"' from .gitconfig')"
-logdebug "Remove entry for submodule from .git/confi, if exist"
+logdebug "Remove entry for submodule from .git/config, if exist"
 [[ $(git config --get submodule.${SUBMODULE}.url >/dev/null 2>&1; echo $?) -eq 0 \
     || $(git config --get submodule.${SUBMODULE}.path >/dev/null 2>&1; echo $?) -eq 0 ]] && \
     loginfo "$(git config --remove-section submodule.${SUBMODULE})"
