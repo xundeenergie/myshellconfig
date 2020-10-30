@@ -3,10 +3,10 @@
 grep -v "^\"" vimplugins |while read cmd type url;do
     case $cmd in 
         install)
-            git submodule add $url vim/pack/${type}/$(basename ${url%.git})
+            git submodule add $url vim/pack/${type}/start/$(basename ${url%.git})
             ;;
         remove)
-            git submodule-remove vim/pack/${type}/$(basename ${url%.git})
+            git submodule-remove vim/pack/${type}/start/$(basename ${url%.git})
             ;;
     esac
 done
