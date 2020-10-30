@@ -85,7 +85,7 @@ loginfo -n "repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
     updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_udate_submodules 2>/dev/null || echo 0 )
-    if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
+    if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
         logdebug "update submodules"
         rc=0
     #    srv="${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}}" 
