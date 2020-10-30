@@ -56,9 +56,9 @@ if [[ $- = *i* ]] ; then
     [ -z "${MYSHELLCONFIG_LOGFILE+x}" ]                 && export MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/myshellconfig.log"
     [ -z "${MYHSELLCONFIG_LOGLEVEL_DEFAULT+x}" ]        && export MYHSELLCONFIG_LOGLEVEL_DEFAULT="INFO"
     [ -z "${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT+x}" ]    && export MYHSELLCONFIG_FILELOGLEVEL_DEFAULT="INFO"
-    [ -z "${SCRIPT_LOG+x}" ]                            && { SCRIPT_LOG="${MYSHELLCONFIG_LOGFILE}"; export SCRIPT_LOG; }
-    [ -z "${LOGLEVEL_DEFAULT+x}" ]                      && { LOGLEVEL_DEFAULT="${MYHSELLCONFIG_LOGLEVEL_DEFAULT-INFO}"; export LOGLEVEL_DEFAULT; }
-    [ -z "${FILELOGLEVEL_DEFAULT+x}" ]                  && { FILELOGLEVEL_DEFAULT=${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT-INFO}; export FILELOGLEVEL_DEFAULT; }
+    [ -z "${SCRIPT_LOG+x}" ]                            && export SCRIPT_LOG="${MYSHELLCONFIG_LOGFILE}"
+    [ -z "${LOGLEVEL_DEFAULT+x}" ]                      && export LOGLEVEL_DEFAULT="${MYHSELLCONFIG_LOGLEVEL_DEFAULT-INFO}"
+    [ -z "${FILELOGLEVEL_DEFAULT+x}" ]                  && export FILELOGLEVEL_DEFAULT="${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT-INFO}"
     # Create necessary directories for logging
     [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
     # load logging functions
@@ -66,6 +66,10 @@ if [[ $- = *i* ]] ; then
 
     # PKCS11_MODULE for etoken/smartcard authentification
     [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && PKCS11_MODULE=$(whereis p11-kit-proxy.so|awk '{print $2}')
+
+    # Basics
+    [ -z "${VISUAL+x}" ]    && export VISUAL=vim
+    [ -z "${EDITOR+x}" ]    && export EDITOR=vim
 
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 ==8<=== start configure new shell ============== $(date) ===============8<==
