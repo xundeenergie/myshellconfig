@@ -7,6 +7,3 @@
 [submodule "tmux/plugins/tmux-themepack"]
 	path = tmux/plugins/tmux-themepack
 	url = git://git.schuerz.at/github.com/jimeh/tmux-themepack.git
-[submodule "vim/pack/color/Zenburn"]
-	path = vim/pack/color/Zenburn
-	url = https://github.com/vim-scripts/Zenburn.git
