@@ -9,7 +9,6 @@
 set nocompatible              " required
 filetype off                  " required
 
-let g:NERDTreeDirArrows = 1
 
 "if !empty($MYSHELLCONFIG_VIM_PLUGINS)
 "  let pluginrepopath=$MYSHELLCONFIG_VIM_PLUGINS . '/'
@@ -416,6 +415,7 @@ command W :execute ':silent w !sudo tee % > /dev/null' | :edit!
 let python_highlight_all=1
 syntax on
 
+let g:NERDTreeDirArrows = 1
 let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
 
 
@@ -512,3 +512,9 @@ noremap <C-S-Tab> :tabprevious<CR>
 noremap <C-Tab> :tabnext<CR>
 noremap <silent> <C-A-S-Tab> :execute 'silent! tabmove' . (tabpagenr()-2)<CR>
 noremap <silent> <C-A-Tab> :execute 'silent! tabmove' . (tabpagenr()+1)<CR>
+
+
+" Configure Plugin airline
+let g:airline_powerline_fonts=1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline_theme='angr'

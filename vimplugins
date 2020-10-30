@@ -5,10 +5,12 @@ install plugins https://github.com/preservim/nerdtree.git
 install plugins https://github.com/Xuyuanp/nerdtree-git-plugin.git
 install plugins https://github.com/jistr/vim-nerdtree-tabs.git
 install plugins https://github.com/tpope/vim-fugitive.git
-remove plugins https://github.com/Lokaltog/powerline.git
 install plugins https://github.com/rakr/vim-togglebg.git
 install plugins https://github.com/ConradIrwin/vim-bracketed-paste.git
 install plugins https://github.com/tmhedberg/SimpylFold.git
 install plugins https://github.com/vim-syntastic/syntastic.git
 install plugins https://github.com/ctrlpvim/ctrlp.vim.git
 install plugins https://github.com/vim-airline/vim-airline.git
+install plugins https://github.com/vim-airline/vim-airline-themes.git
+install plugins https://github.com/junegunn/fzf.vim.git
+remove plugins https://github.com/Lokaltog/powerline.git
