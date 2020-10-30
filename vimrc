@@ -518,3 +518,7 @@ noremap <silent> <C-A-Tab> :execute 'silent! tabmove' . (tabpagenr()+1)<CR>
 let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_theme='angr'
+
+" Configure fzf - fuzzy finder
+let g:fzf_preview_window = 'right:50%'
+let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6  }  }
