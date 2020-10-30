@@ -395,19 +395,19 @@ svi () {
     EXIT
 }
 
-vim-plugins-update () {
-    ENTRY
-    vim -c "PluginUpdate" -c ":qa!"
-    EXIT
-    
-}
-
-vim-plugins-install () {
-    ENTRY
-    vim -c "PluginInstall" -c ":qa!"
-    EXIT
-    
-}
+#vim-plugins-update () {
+#    ENTRY
+#    vim -c "PluginUpdate" -c ":qa!"
+#    EXIT
+#    
+#}
+#
+#vim-plugins-install () {
+#    ENTRY
+#    vim -c "PluginInstall" -c ":qa!"
+#    EXIT
+#    
+#}
 
 vim-repair-vundle () {
     ENTRY
