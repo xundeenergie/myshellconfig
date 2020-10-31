@@ -91,8 +91,8 @@ fi
 loginfo -n "repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
-    updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_udate_submodules 2>/dev/null || echo 0 )
-    if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
+#    updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_udate_submodules 2>/dev/null || echo 0 )
+#    if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
         logdebug "update submodules"
         rc=0
     #    srv="${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}}" 
@@ -127,10 +127,10 @@ if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_D
         logdebug "submodules not updated. last update is less then ${MYSHELLCONFIG_GIT_SUBMODULE_UPDATE_INTERVALL} hours ago"
     fi
 
-else
-    loginfo -n ", submodules not synced"
-    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
-fi
+#else
+#    loginfo -n ", submodules not synced"
+#    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
+#fi
 loginfo -n ": "
 
 EXIT
