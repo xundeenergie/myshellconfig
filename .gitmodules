@@ -55,6 +55,3 @@
 [submodule "vim/pack/color/start/vim-colors-solarized"]
 	path = vim/pack/color/start/vim-colors-solarized
 	url = https://github.com/altercation/vim-colors-solarized.git
-[submodule "testrepo"]
-	path = testrepo
-	url = /home/jakobus.schuerz/git/testrepo.git
