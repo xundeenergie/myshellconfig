@@ -95,9 +95,11 @@ fi
 loginfo -n "repo ${GIT_FETCH_OPTIONS:+ and submodules} synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
+    if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
         logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT commit -a -m 'update submodules')"
         date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_udate_submodules
+    fi
 else
     loginfo -n ", submodules not synced"
     logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
