@@ -117,7 +117,8 @@ if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_D
         # logdebug "$($SGIT submodule sync)" || { logwarn "sync submodules failed on sync"; rc=6;  }
         logdebug "$($SGIT submodule update --remote)"
         #logdebug "$($SGIT submodule update --init --recursive)"
-        logdebug "$($SGIT commit .gitmodules -a -m 'update submodules')"
+        #logdebug "$($SGIT commit .gitmodules -m 'update submodules')"
+        logdebug "$($SGIT commit -a -m 'update submodules')"
         #$SGIT submodule update --init --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
         #$SGIT checkout .gitmodules
         logdebug "submodules updated successfully"
