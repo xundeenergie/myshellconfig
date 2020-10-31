@@ -22,13 +22,16 @@
 
 ENTRY
 cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
-+-----BEGINN $(date) -------------------------------+
++-----BEGINN git update repo $(date) -------------------------------+
 EOF
 
 case $1 in
     -h)
         # Headless repo local
         PRE="${MYSHELLCONFIG_GIT_REMOTE_NAME}"
+        ;;
+    -s)
+        GIT_FETCH_OPTIONS="--recurse-submodules"
         ;;
     *)
         PRE=""
@@ -40,22 +43,27 @@ esac
 # Output
 #echo -n " remote: ${MYSHELLCONFIG_GIT_REMOTE_NAME}, branch: ${MYSHELLCONFIG_GIT_BRANCH}: "
 
+# Check for updates in submodules only if last check was INTERVALL hours in the past
+updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_udate_submodules 2>/dev/null || echo 0 )
+if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
+    GIT_FETCH_OPTIONS="--recurse-submodules"
+fi
+    
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
-$SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; exit 1; }
+$SGIT fetch ${GIT_FETCH_OPTIONS} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; exit 1; }
 
+ech "Check for local changes:" >> "${MYSHELLCONFIG_LOGFILE}"
 if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MYSHELLCONFIG_LOGFILE}" ; then
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
-Check for local changes:
     no changes in local repo
     $SGIT checkout repo ${PRE}${PRE:+/}${MYSHELLCONFIG_GIT_BRANCH}
 EOF
-    #echo "checkout origin/master as detached HEAD"
     $SGIT checkout ${PRE}${PRE:+/}${MYSHELLCONFIG_GIT_BRANCH} 1>>"${MYSHELLCONFIG_LOGFILE}" 2>>"${MYSHELLCONFIG_LOGFILE}"|| exit 2
     $SGIT merge FETCH_HEAD 1>>"${MYSHELLCONFIG_LOGFILE}" 2>>"${MYSHELLCONFIG_LOGFILE}"|| exit 3
 else
+    logwarn -n "    Lokale Änderungen festgestellt:"
+    echo "    Siehe Logfile ${MYSHELLCONFIG_LOGFILE}" >&2
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
-Check for local changes:
-    Ich habe lokale Änderungen festgestellt
     um die Änderung zurückzusetzen bitte
 
       $SGIT checkout \$FILENAME
@@ -67,14 +75,13 @@ Check for local changes:
     ausführen
 
     Die Änderungen sind:
+    $($SGIT diff-index HEAD --|awk '{print $5, $6}')
+    $($SGIT diff-index -p HEAD --)
 EOF
-    $SGIT diff-index HEAD --|awk '{print $5, $6}' >>  "${MYSHELLCONFIG_LOGFILE}"
-    $SGIT diff-index -p HEAD -- >> "${MYSHELLCONFIG_LOGFILE}"
 
-    logwarn "Lokale Änderungen festgestellt: Siehe Logfile ${MYSHELLCONFIG_LOGFILE}" >&2
 cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 
-+-----ENDE $(date) ---------------------------------+
++-----ENDE git update repo $(date) ---------------------------------+
  
 EOF
     exit 4
@@ -108,7 +115,7 @@ if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_D
         # run git submodule sync only ich local repo should use submodule urls from main-project
         # so don't use it here
         # logdebug "$($SGIT submodule sync)" || { logwarn "sync submodules failed on sync"; rc=6;  }
-        logdebug "$($SGIT submodule update --remote)"
+        #logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT submodule update --init --recursive)"
         logdebug "$($SGIT commit .gitmodules -m 'update submodules')"
         #$SGIT submodule update --init --remote --merge 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1          || { logwarn " update submodules failed on update"; rc=9;  }
