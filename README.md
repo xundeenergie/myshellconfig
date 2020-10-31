@@ -54,10 +54,14 @@ MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=
 Mögliche Optionen:
 
     * -h
+    * -s
     * ''
 
 Verwendung: Damit kann man angeben, ob ein headless Repo erzeugt wird. Ohne -h folgt das Repo origin/master
 Default ist die Option "-h". Soll ein normales Repo (nicht headless) verwendet werden, so MUSS die Variable so gesetzt werden
+
+Mit der Option -s kann ein Update der Submodules (tmux-, vim-plugins) erzwungen werden
+
 
 ```
 MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=""
