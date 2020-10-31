@@ -52,7 +52,7 @@ fi
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
 $SGIT fetch ${GIT_FETCH_OPTIONS} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; exit 1; }
 
-ech "Check for local changes:" >> "${MYSHELLCONFIG_LOGFILE}"
+echo "Check for local changes:" >> "${MYSHELLCONFIG_LOGFILE}"
 if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MYSHELLCONFIG_LOGFILE}" ; then
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
     no changes in local repo
