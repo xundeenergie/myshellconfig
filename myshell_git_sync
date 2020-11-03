@@ -116,12 +116,14 @@ if ! $SSHS; then
             else
                 loginfo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
 
-                if $( timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" ); then
+                if $( timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" \
+                    git -C ${HOME} clone --recurse-submodules "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" ); then
                     :
                 else
                     MYSHELLCONFIG_GIT_REMOTE="${MYSHELLCONFIG_GIT_REMOTE_PUBLIC_HTTP}${MYSHELLCONFIG_GIT_REPO_NAME}"
-                    loginfo "Clone ${MYSHELLCONFIG_GIT_REMOTE} and configure git" >&2
-                    timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" git -C ${HOME} clone "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" || return 1 2>/dev/null || exit 1
+                    loginfo "Clone ${MYSHELLCONFIG_GIT_REMOTE} (http, because other protocol is not reachable) and configure git" >&2
+                    timeout --foreground "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT}" \
+                        git -C ${HOME} clone --recurse-submodules "${MYSHELLCONFIG_GIT_REMOTE}" "${MYSHELLCONFIG_BASE}" || return 1 2>/dev/null || exit 1
                 fi
 
 
@@ -142,19 +144,20 @@ if ! $SSHS; then
                 create_symlinks "$MYSHELLCONFIG_BASE"
 
                 # Install vim Plugins
-                #echo "Run Vim, and in Vim run :PluginInstall to install all Plugins"
-                vim -c "PluginInstall" -c ":qa!"
+                # echo "Run Vim, and in Vim run :PluginInstall to install all Plugins"
+                # not necessary any more. Vim plugins are updated through git submodules
+                #vim -c "PluginInstall" -c ":qa!"
             fi
             [ -z ${MYSHELLCONFIG_GIT_REMOTE_PUSH+x} ] || $SGIT remote set-url --push ${MYSHELLCONFIG_GIT_REMOTE_NAME} "${MYSHELLCONFIG_GIT_REMOTE_PUSH}" 
             ;;
         *screen*)
-            loginfo "I'm in sceen/tmux now" >&2
+            loginfo "I'm in sceen/tmux now - no profily syncing" >&2
             ;;
         *dumb*)
-            loginfo "Run with dumb terminal" 1>&2
+            loginfo "Run with dumb terminal - no profily syncing" 1>&2
             ;;
         *)
-            loginfo "Run with $TERM" >&2
+            loginfo "Run with $TERM - no profily syncing" >&2
             ;;
     esac
 fi
