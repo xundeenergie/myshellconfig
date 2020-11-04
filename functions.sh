@@ -849,4 +849,8 @@ getloglevels () {
 EOF
 
 }
+
+rescan_scsi () {
+    echo "- - -" > /sys/class/scsi_host/host0/scan
+}
 #EOF
