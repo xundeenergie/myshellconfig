@@ -95,14 +95,16 @@ EOF
 
 fi
 
-logwarn "   repo synced"
+logwarn "
+repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
     if ${dosubmodupdate:-false}; then 
         logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT commit -a -m 'update submodules')"
         date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
-        logwarn "   submodules synced"
+        logwarn "
+submodules synced"
     fi
 else
     loginfo -n ", submodules not synced"
