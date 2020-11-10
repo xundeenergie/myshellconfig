@@ -53,10 +53,11 @@ esac
 
 # Check for updates in submodules only if last check was INTERVALL hours in the past
 updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 )
-if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
-    dosubmodupdate="true"
+echo dosubud1: $dosubmodupdate
+if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") -a ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
+    [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
 fi
-[ -z "${dosubmodupdate+x}" ] && dosubmodupdate=${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}
+echo dosubud2: $dosubmodupdate
     
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
 loginfo "fetch repo${dosubmodupdate:+ and submodules}"
