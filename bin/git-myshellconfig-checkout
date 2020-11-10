@@ -39,7 +39,7 @@ case $1 in
         PRE="${MYSHELLCONFIG_GIT_REMOTE_NAME}"
         ;;
     -s)
-        GIT_FETCH_OPTIONS="--recurse-submodules"
+        dosubmodupdate="true"
         ;;
     *)
         PRE=""
@@ -54,11 +54,14 @@ esac
 # Check for updates in submodules only if last check was INTERVALL hours in the past
 updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 )
 if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
-    GIT_FETCH_OPTIONS="--recurse-submodules"
+    dosubmodupdate="true"
 fi
     
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
-$SGIT fetch ${GIT_FETCH_OPTIONS} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
+$SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
+if ${dosubmodupdate:-false}; then 
+    date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+fi
 
 echo "Check for local changes:" >> "${MYSHELLCONFIG_LOGFILE}"
 if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MYSHELLCONFIG_LOGFILE}" ; then
@@ -92,12 +95,16 @@ EOF
 
 fi
 
+logwarn "
+repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
-    if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
+    if ${dosubmodupdate:-false}; then 
         logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT commit -a -m 'update submodules')"
-        date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_udate_submodules
+        date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+        logwarn "
+submodules synced"
     fi
 else
     loginfo -n ", submodules not synced"

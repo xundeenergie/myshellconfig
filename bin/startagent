@@ -283,8 +283,8 @@ agent-load-identity-keys () {
                     fi
                 done
             fi
-            logdebug "currently loaded keys after action: 
-$(ssh-runinagent $agentfile ssh-add -l)"
+            loginfo "currently loaded keys after action: $(ssh-runinagent $agentfile ssh-add -l|wc -l)"
+            logdebug "$(ssh-runinagent $agentfile ssh-add -l)"
         else
             logwarn "ssh-identity $ssh_identity is not configured. Please create $identitydir and add keys"
         fi
