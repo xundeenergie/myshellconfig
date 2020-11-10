@@ -58,6 +58,7 @@ if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL
 fi
     
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
+loginfo "update repo ${dosubmodupdate:+and submodules}"
 $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
 if ${dosubmodupdate:-false}; then 
     date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
@@ -95,16 +96,15 @@ EOF
 
 fi
 
-logwarn "
-repo synced"
+loginfo "repo synced"
 
 if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
     if ${dosubmodupdate:-false}; then 
+        loginfo "update and commit submodules"
         logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT commit -a -m 'update submodules')"
         date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
-        logwarn "
-submodules synced"
+        logwarn "submodules synced"
     fi
 else
     loginfo -n ", submodules not synced"
