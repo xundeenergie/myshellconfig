@@ -56,9 +56,10 @@ updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submod
 if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
     dosubmodupdate="true"
 fi
+[ -z "${dosubmodupdate+x}" ] && dosubmodupdate=${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}
     
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
-loginfo "update repo ${dosubmodupdate:+and submodules}"
+loginfo "fetch repo${dosubmodupdate:+ and submodules}"
 $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
 if ${dosubmodupdate:-false}; then 
     date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
@@ -96,9 +97,9 @@ EOF
 
 fi
 
-loginfo "repo synced"
+loginfo "repo${dosubmodupdate:+ and submodules} synced"
 
-if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
+#if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
     if ${dosubmodupdate:-false}; then 
         loginfo "update and commit submodules"
         logdebug "$($SGIT submodule update --remote)"
@@ -106,10 +107,10 @@ if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_D
         date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
         logwarn "submodules synced"
     fi
-else
-    loginfo -n ", submodules not synced"
-    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
-fi
+#else
+#    loginfo -n ", submodules not synced"
+#    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
+#fi
 
 EXIT
 exit $rc
