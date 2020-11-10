@@ -52,7 +52,7 @@ do
     if stat "${file}" >/dev/null 2>/dev/null ; then
         echo "Stop $app on ${DEST}"
         ssh ${DEST} systemctl stop ${app}.service
-        cat ${file}|sort -r |while read cmd pkg version ; do
+        cat ${file}|sort -r |grep -v " *#"|while read cmd pkg version ; do
             case $cmd in
                 install)
                     if [ -z "${version}" ]; then
