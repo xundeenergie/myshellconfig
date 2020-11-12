@@ -53,11 +53,14 @@ esac
 
 # Check for updates in submodules only if last check was INTERVALL hours in the past
 updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 )
-if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") ]; then
-    dosubmodupdate="true"
+logtrace "dosubmodupdate before: $dosubmodupdate"
+if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") -a ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
+    [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
 fi
+logtrace "dosubmodupdate after: $dosubmodupdate"
     
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
+loginfo "fetch repo${dosubmodupdate:+ and submodules}"
 $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
 if ${dosubmodupdate:-false}; then 
     date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
@@ -95,21 +98,20 @@ EOF
 
 fi
 
-logwarn "
-repo synced"
+loginfo "repo${dosubmodupdate:+ and submodules} synced"
 
-if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
+#if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
     if ${dosubmodupdate:-false}; then 
+        loginfo "update and commit submodules"
         logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT commit -a -m 'update submodules')"
         date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
-        logwarn "
-submodules synced"
+        logwarn "submodules synced"
     fi
-else
-    loginfo -n ", submodules not synced"
-    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
-fi
+#else
+#    loginfo -n ", submodules not synced"
+#    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
+#fi
 
 EXIT
 exit $rc
