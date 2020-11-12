@@ -1,4 +1,7 @@
 #!/bin/bash
+
+[ -z "${move+x}" ] && move=false
+
 export FILELOGLEVEL=WARN
 export SCRIPT_LOG=~/logs/exif.log 
 
@@ -47,7 +50,11 @@ fix_datetime () {
                 ;;
         esac
     fi
+    [ $move == true ] || echo nomove
     loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
+    [ $move == true ]  && echo move
+    [ $move == true ]  && loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/Bilder/Tina_und_Jakob/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
+
     logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
     loginfo "----------------"
     loginfo ""
