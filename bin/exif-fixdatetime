@@ -1,5 +1,6 @@
 #!/bin/bash
-export FILELOGLEVEL=ERROR
+export FILELOGLEVEL=WARN
+export SCRIPT_LOG=~/logs/exif.log 
 
 parsedatetime() {
     filename="$(basename "${@}")"
@@ -16,6 +17,11 @@ parsedatetime() {
         result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[4]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}" "00")"
     fi
     
+    # eYe20130323123316.jpg
+    if [[ $filename =~ ^(eYe)([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2}).*$ ]]; then
+        result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[4]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}")"
+    fi
+
     echo "$result"
     return 0
 }
@@ -25,12 +31,24 @@ fix_datetime () {
     loginfo "file: $file "
     newDateTimeOriginal="$(parsedatetime "$file")"
     loginfo "newDateTimeOriginal: $newDateTimeOriginal"
+    mime="$(file --mime-type "$file" | awk '{print $NF}')"
 
     if [ -n "$newDateTimeOriginal" ]; then
-        exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
-        exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
+        case $mime in 
+            image/png)
+                exiftool "-creationtime=$newDateTimeOriginal" -if '(not $creationtime)' "$file"
+                ;;
+            image/jpeg)
+                exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+                exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
+                ;;
+            *)
+                logwarn "unsupportet mimetype $mime for $file"
+                ;;
+        esac
     fi
     loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
+    logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
     loginfo "----------------"
     loginfo ""
 
@@ -38,11 +56,11 @@ fix_datetime () {
 
 if [ $# -gt 0 ]; then
     loginfo "Progress only one file from cmdline ${@}"
-    fix_datetime ${@}
+    fix_datetime "${@}"
 
 else
     loginfo "Progress all *.jpg files in pwd $(pwd)"
-    ls *.jpg|while read i; do
+    find -iname "*.jp*g"|while read i; do
         fix_datetime "$i"
     done
 fi
