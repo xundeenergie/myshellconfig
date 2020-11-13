@@ -1,25 +1,44 @@
 #!/bin/bash
+
+[ -z "${move+x}" ] && move=false
+[ -z "${overwrite+x}" ] && overwrite=false
+
 export FILELOGLEVEL=WARN
 export SCRIPT_LOG=~/logs/exif.log 
 
 parsedatetime() {
     filename="$(basename "${@}")"
-    if [[ $filename =~ ^([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})( |_)([0-9]{2})(\.|-)([0-9]{2})(\.|-)([0-9]{2}).*$ ]]; then
+    # 2015-09-11_17:41:53-1.jpg
+    if [[ $filename =~ ^([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})( |_)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-).*$ ]]; then
         result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[7]#0}" "${BASH_REMATCH[9]#0}" "${BASH_REMATCH[11]#0}")"
     fi
     
-    if [[ $filename =~ ^([0-9]{4})([0-9]{2})([0-9]{2})(_)([0-9]{2})([0-9]{2})([0-9]{2}).*$ ]]; then
-        result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}")"
+    if [ -z "${result}" ]; then
+        if [[ $filename =~ ^([0-9]{4})([0-9]{2})([0-9]{2})(_)([0-9]{2})([0-9]{2})([0-9]{2}).*$ ]]; then
+            result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}")"
+        fi
     fi
 
-    # Whatsapp-Bilder
-    if [[ $filename =~ ^(IMG-)([0-9]{4})([0-9]{2})([0-9]{2})(-WA)([0-9]{2})([0-9]{2}).*$ ]]; then
-        result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[4]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}" "00")"
+    if [ -z "${result}" ]; then
+        # Whatsapp-Bilder
+        if [[ $filename =~ ^(IMG-)([0-9]{4})([0-9]{2})([0-9]{2})(-WA)([0-9]{2})([0-9]{2}).*$ ]]; then
+            result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[4]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}" "00")"
+        fi
     fi
-    
-    # eYe20130323123316.jpg
-    if [[ $filename =~ ^(eYe)([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2}).*$ ]]; then
-        result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[4]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}")"
+
+    if [ -z "${result}" ]; then
+        # eYe20130323123316.jpg
+        if [[ $filename =~ ^(eYe)([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2}).*$ ]]; then
+            result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[4]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}")"
+        fi
+
+    fi
+
+    if [ -z "${result}" ]; then
+        # ./2016-01-22/IMG_4225.jpg
+        if [[ "$(dirname ${@})" =~ ^.*/([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})$ ]]; then
+            result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "00" "00" "00")"
+        fi
     fi
 
     echo "$result"
@@ -37,18 +56,53 @@ fix_datetime () {
         case $mime in 
             image/png)
                 exiftool "-creationtime=$newDateTimeOriginal" -if '(not $creationtime)' "$file"
-                ;;
-            image/jpeg)
                 exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
                 exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
+                DEST="Bilder/Tina_und_Jakob"
+                ;;
+            image/jpeg)
+                if $overwrite; then
+                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
+                    exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+                else
+                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+                    exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
+                fi
+                DEST="Bilder/Tina_und_Jakob"
+                ;;
+            video/mp4|video/m4a)
+                if $overwrite; then
+                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
+                    exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+                else
+                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+                    exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
+                fi
+                DEST="Videos/Tina_und_Jakob"
                 ;;
             *)
                 logwarn "unsupportet mimetype $mime for $file"
                 ;;
         esac
     fi
+
     loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
-    logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
+
+
+    case $move in
+        true)
+            echo move
+            loginfo "$(exiftool '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/${DEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a dest_exists)"
+            ;;
+        copy)
+            echo copy
+            loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/${DEST}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
+            logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
+            ;;
+        *)
+            logwarn "value for move is neither »true« nor »copy«"
+    esac
+
     loginfo "----------------"
     loginfo ""
 
