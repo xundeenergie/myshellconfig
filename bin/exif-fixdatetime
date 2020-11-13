@@ -50,12 +50,22 @@ fix_datetime () {
                 ;;
         esac
     fi
-    [ $move == true ] || echo nomove
-    loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
-    [ $move == true ]  && echo move
-    [ $move == true ]  && loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/Bilder/Tina_und_Jakob/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
 
-    logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
+    [ -n "${move+x}" ] && echo move || echo nomove
+    loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
+
+    case $move in
+        true)
+            loginfo "$(exiftool '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/Bilder/Tina_und_Jakob/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
+            ;;
+        copy)
+            loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/Bilder/Tina_und_Jakob/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
+            logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
+            ;;
+        *)
+            logwarn "value for move is neither »true« nor »copy«"
+    esac
+
     loginfo "----------------"
     loginfo ""
 
