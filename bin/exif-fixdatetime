@@ -1,7 +1,68 @@
 #!/bin/bash
 
+export SCRIPT_LOG=./$(basename $0).log
 [ -z "${move+x}" ] && move=false
-[ -z "${overwrite+x}" ] && overwrite=false
+[ -z "${forcedate+x}" ] && forcedate=false
+[ -z "${setdate+x}" ] && setdate=true
+[ -z "${dest+x}" ] && dest=/srv/nfs/data/userdata/SHARED && dest=${dest%/}
+[ -z "${mimedestpicdefault+x}" ] && mimedestpicdefault="Bilder"
+[ -z "${mimedestviddefault+x}" ] && mimedestviddefault="Videos"
+[ -z "${subdestdefault+x}" ] && subdestdefault="Tina_und_Jakob"
+
+[ -z "${mimedestpic+x}" ] && mimedestpic="${mimedestpicdefault}"
+[ -z "${mimedestvid+x}" ] && mimedestvid="${mimedestviddefault}"
+[ -z "${subdestpic+x}" ] && subdestpic="${subdestdefault}"
+[ -z "${subdestvid+x}" ] && subdestvid="${subdestdefault}"
+
+
+help () {
+    cat << EOF
+    Usage: $(basename $0) [move=[true|copy]] [setdate=[true|false]] [forcedate=[true|false]] [<file>]
+
+
+    Defaults:
+    # commands
+    move=$move              [false|true|copy]   false: file is not moved to destination; true: file is moved; copy: copy file to destination
+    forcedate=$forcedate    [fase|true]         false: datetimeoriginal and createdate is only updated from filename, if not set; true: tags are always updated
+    setdate=$setdate        [false|true]        false: do not set date-tags, only if you are sure, tags are ok, and you want move or copy files; 
+
+    # destination
+    dest=$dest
+    mimedestpic=$mimedestpic
+    mimedestvid=$mimedestvid
+    subdestpic=$subdestpic
+    subdestvid=$subdestvid
+
+    # final destinationpath
+    ${dest}/${mimedestpic}/${subdestpic}/%Y/%Y_%m"
+    ${dest}/${mimedestvid}/${subdestvid}/%Y/%Y_%m"
+
+    Supported Filet-extensions
+    *.jpg, *.jpeg, *.png, *.mp4 
+
+    Examples:
+    
+    # Scan current directory for all jpg|jpeg|mp4|png files, set datetimeoriginal and createdate
+    $(basename $0)
+
+    # set datetimeoriginal and createdate from given file (only one is possible)
+    # only if tags are not set
+    $(basename $0) <filename>
+
+    # set datetimeoriginal and createdate from given file (only one is possible)
+    # overwrite existing tags
+    forcedate=true $(basename $0) <filename>
+
+    # set datetimeoriginal and createdate from given file (only one is possible)
+    # overwrite existing tags
+    # move file to destination dir (${dest}/${mimedestpicdefault}|${mimedestviddefault}) in subdirectories %Y/%Y_%m/.
+    move=true forcedate=true $(basename $0) <filename>
+
+
+EOF
+
+
+}
 
 export FILELOGLEVEL=WARN
 export SCRIPT_LOG=~/logs/exif.log 
@@ -9,19 +70,20 @@ export SCRIPT_LOG=~/logs/exif.log
 parsedatetime() {
     filename="$(basename "${@}")"
     # 2015-09-11_17:41:53-1.jpg
-    if [[ $filename =~ ^([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})( |_)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-).*$ ]]; then
+    if [[ $filename =~ ^.*([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})( |_)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-).*$ ]]; then
         result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[7]#0}" "${BASH_REMATCH[9]#0}" "${BASH_REMATCH[11]#0}")"
     fi
     
     if [ -z "${result}" ]; then
-        if [[ $filename =~ ^([0-9]{4})([0-9]{2})([0-9]{2})(_)([0-9]{2})([0-9]{2})([0-9]{2}).*$ ]]; then
+        if [[ $filename =~ ^.*([0-9]{4})([0-9]{2})([0-9]{2})(_|-)([0-9]{2})([0-9]{2})([0-9]{2}).*$ ]]; then
             result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}")"
         fi
     fi
 
     if [ -z "${result}" ]; then
         # Whatsapp-Bilder
-        if [[ $filename =~ ^(IMG-)([0-9]{4})([0-9]{2})([0-9]{2})(-WA)([0-9]{2})([0-9]{2}).*$ ]]; then
+        # Whatsapp-Videos
+        if [[ $filename =~ ^(IMG-|VID-)([0-9]{4})([0-9]{2})([0-9]{2})(-WA)([0-9]{2})([0-9]{2}).*$ ]]; then
             result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[2]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[4]#0}" "${BASH_REMATCH[6]#0}" "${BASH_REMATCH[7]#0}" "00")"
         fi
     fi
@@ -36,7 +98,8 @@ parsedatetime() {
 
     if [ -z "${result}" ]; then
         # ./2016-01-22/IMG_4225.jpg
-        if [[ "$(dirname ${@})" =~ ^.*/([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})$ ]]; then
+        echo "FILENAME: $@" >&2
+        if [[ "$(dirname ${@})" =~ ^.*/([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2}).*$ ]]; then
             result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "00" "00" "00")"
         fi
     fi
@@ -47,41 +110,39 @@ parsedatetime() {
 
 fix_datetime () {
     file="${@}"
-    loginfo "file: $file "
+    if $forcedate; then
+        exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
+        exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+    else
+        exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+        exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
+    fi
+}
+
+run_fix () {
+    file="${@}"
+    mime="$(file --mime-type "$file" | awk '{print $NF}')"
+    loginfo "file: $file : mime-type: $mime"
+
     newDateTimeOriginal="$(parsedatetime "$file")"
     loginfo "newDateTimeOriginal: $newDateTimeOriginal"
-    mime="$(file --mime-type "$file" | awk '{print $NF}')"
-
     if [ -n "$newDateTimeOriginal" ]; then
         case $mime in 
             image/png)
-                exiftool "-creationtime=$newDateTimeOriginal" -if '(not $creationtime)' "$file"
-                exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
-                exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
-                DEST="Bilder/Tina_und_Jakob"
+                $setdate && exiftool "-creationtime=$newDateTimeOriginal" -if '(not $creationtime)' "$file"
+                $setdate && fix_datetime "$file"
+                MIMEDEST="${mimedestpic}/${subdestpic}"
                 ;;
             image/jpeg)
-                if $overwrite; then
-                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
-                    exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
-                else
-                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
-                    exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
-                fi
-                DEST="Bilder/Tina_und_Jakob"
+                $setdate && fix_datetime "$file"
+                MIMEDEST="${mimedestpic}/${subdestpic}"
                 ;;
             video/mp4|video/m4a)
-                if $overwrite; then
-                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
-                    exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
-                else
-                    exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
-                    exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
-                fi
-                DEST="Videos/Tina_und_Jakob"
+                $setdate && fix_datetime "$file"
+                MIMEDEST="${mimedestvid}/${subdestvid}"
                 ;;
             *)
-                logwarn "unsupportet mimetype $mime for $file"
+                logwarn "unsupportet mimetype »${mime}« for »${file}«"
                 ;;
         esac
     fi
@@ -91,12 +152,12 @@ fix_datetime () {
 
     case $move in
         true)
-            echo move
-            loginfo "$(exiftool '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/${DEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a dest_exists)"
+            echo move to ${dest}/${MIMEDEST}/%Y/%Y_%m
+            loginfo "$(exiftool '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a dest_exists)"
             ;;
         copy)
-            echo copy
-            loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d /srv/nfs/data/userdata/SHARED/${DEST}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
+            echo copy to ${dest}/${MIMEDEST}/%Y/%Y_%m
+            loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
             logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
             ;;
         *)
@@ -109,12 +170,22 @@ fix_datetime () {
 }
 
 if [ $# -gt 0 ]; then
-    loginfo "Progress only one file from cmdline ${@}"
-    fix_datetime "${@}"
+    case $1 in
+        -h|help|--help)
+            help
+            ;;
+        *)
+            loginfo "Progress only one file from cmdline ${@}"
+            run_fix "${@}"
+            ;;
+    esac
 
 else
-    loginfo "Progress all *.jpg files in pwd $(pwd)"
-    find -iname "*.jp*g"|while read i; do
-        fix_datetime "$i"
+    loginfo "Progress all *.jpg, *.jpeg, *.png and mp4 files in pwd $(pwd)"
+    all=$(find -maxdepth ${maxdepth-1} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|wc -l)
+    find -maxdepth ${maxdepth-1} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|while read file; do
+        let "i=i+1"
+        loginfo "$i/$all"
+        run_fix "$file"
     done
 fi
