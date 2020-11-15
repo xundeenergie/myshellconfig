@@ -56,7 +56,7 @@ if [[ $- = *i* ]] ; then
     [ -z "${MYSHELLCONFIG_LOGDIR+x}" ]                  && export MYSHELLCONFIG_LOGDIR="${HOME}/logs"
     [ -z "${MYSHELLCONFIG_LOGFILE+x}" ]                 && export MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/myshellconfig.log"
     [ -z "${MYHSELLCONFIG_LOGLEVEL_DEFAULT+x}" ]        && export MYHSELLCONFIG_LOGLEVEL_DEFAULT="INFO"
-    [ -z "${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT+x}" ]    && export MYHSELLCONFIG_FILELOGLEVEL_DEFAULT="INFO"
+    [ -z "${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT+x}" ]    && export MYHSELLCONFIG_FILELOGLEVEL_DEFAULT="DEBUG"
     [ -z "${SCRIPT_LOG+x}" ]                            && export SCRIPT_LOG="${MYSHELLCONFIG_LOGFILE}"
     [ -z "${LOGLEVEL_DEFAULT+x}" ]                      && export LOGLEVEL_DEFAULT="${MYHSELLCONFIG_LOGLEVEL_DEFAULT-INFO}"
     [ -z "${FILELOGLEVEL_DEFAULT+x}" ]                  && export FILELOGLEVEL_DEFAULT="${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT-INFO}"
@@ -99,7 +99,7 @@ EOF
             local nok=""
             local gco=""
             if which git >/dev/null; then
-                echo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 1>&2
+                loginfo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 
                 # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
                 if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
                     gco="-h"
@@ -107,7 +107,7 @@ EOF
                     gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
                 fi
                 ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
-                printf '%s\n' "${nok}synced" 1>&2
+                loginfo "$(printf '%s\n' "${nok}synced" )"
                 [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
 
             else
