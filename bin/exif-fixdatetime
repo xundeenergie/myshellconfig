@@ -4,11 +4,15 @@ export SCRIPT_LOG=./$(basename $0).log
 [ -z "${move+x}" ] && move=false
 [ -z "${forcedate+x}" ] && forcedate=false
 [ -z "${setdate+x}" ] && setdate=true
+
+
+# Pathdefinitions Default
 [ -z "${dest+x}" ] && dest=/srv/nfs/data/userdata/SHARED && dest=${dest%/}
 [ -z "${mimedestpicdefault+x}" ] && mimedestpicdefault="Bilder"
 [ -z "${mimedestviddefault+x}" ] && mimedestviddefault="Videos"
-[ -z "${subdestdefault+x}" ] && subdestdefault="Tina_und_Jakob"
+[ -z "${subdestdefault+x}" ] && subdestdefault="Familie"
 
+# Pathdefinitions Runtime
 [ -z "${mimedestpic+x}" ] && mimedestpic="${mimedestpicdefault}"
 [ -z "${mimedestvid+x}" ] && mimedestvid="${mimedestviddefault}"
 [ -z "${subdestpic+x}" ] && subdestpic="${subdestdefault}"
@@ -55,7 +59,7 @@ help () {
 
     # set datetimeoriginal and createdate from given file (only one is possible)
     # overwrite existing tags
-    # move file to destination dir (${dest}/${mimedestpicdefault}|${mimedestviddefault}) in subdirectories %Y/%Y_%m/.
+    # move file to destination dir (${dest}/${mimedestpicdefault}/${subdestpic} or ${dest}/${mimedestviddefault}/${subdestvid}) in subdirectories %Y/%Y_%m/.
     move=true forcedate=true $(basename $0) <filename>
 
 
@@ -126,43 +130,42 @@ run_fix () {
 
     newDateTimeOriginal="$(parsedatetime "$file")"
     loginfo "newDateTimeOriginal: $newDateTimeOriginal"
-    if [ -n "$newDateTimeOriginal" ]; then
-        case $mime in 
-            image/png)
-                $setdate && exiftool "-creationtime=$newDateTimeOriginal" -if '(not $creationtime)' "$file"
-                $setdate && fix_datetime "$file"
-                MIMEDEST="${mimedestpic}/${subdestpic}"
-                ;;
-            image/jpeg)
-                $setdate && fix_datetime "$file"
-                MIMEDEST="${mimedestpic}/${subdestpic}"
-                ;;
-            video/mp4|video/m4a)
-                $setdate && fix_datetime "$file"
-                MIMEDEST="${mimedestvid}/${subdestvid}"
-                ;;
-            *)
-                logwarn "unsupportet mimetype »${mime}« for »${file}«"
-                ;;
-        esac
-    fi
-
-    loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
-
-
-    case $move in
-        true)
-            echo move to ${dest}/${MIMEDEST}/%Y/%Y_%m
-            loginfo "$(exiftool '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a dest_exists)"
+    case $mime in 
+        image/png)
+            MIMEDEST="${mimedestpic}/${subdestpic}"
             ;;
-        copy)
-            echo copy to ${dest}/${MIMEDEST}/%Y/%Y_%m
-            loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
-            logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
+        image/jpeg)
+            MIMEDEST="${mimedestpic}/${subdestpic}"
+            ;;
+        video/mp4|video/m4a)
+            MIMEDEST="${mimedestvid}/${subdestvid}"
             ;;
         *)
-            logwarn "value for move is neither »true« nor »copy«"
+            logwarn "unsupportet mimetype »${mime}« for »${file}«"
+            ;;
     esac
+    if [ -n "${MIMEDEST+x}" ] ; then
+        if [ -n "$newDateTimeOriginal" ]; then
+            $setdate && fix_datetime "$file"
+        fi
+
+        loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
+
+
+        case $move in
+            true)
+                echo move to ${dest}/${MIMEDEST}/%Y/%Y_%m
+                loginfo "$(exiftool '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a dest_exists)"
+                ;;
+            copy)
+                echo copy to ${dest}/${MIMEDEST}/%Y/%Y_%m
+                loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
+                logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
+                ;;
+            *)
+                logwarn "value for move is neither »true« nor »copy«"
+        esac
+    fi
 
     loginfo "----------------"
     loginfo ""
@@ -182,8 +185,8 @@ if [ $# -gt 0 ]; then
 
 else
     loginfo "Progress all *.jpg, *.jpeg, *.png and mp4 files in pwd $(pwd)"
-    all=$(find -maxdepth ${maxdepth-1} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|wc -l)
-    find -maxdepth ${maxdepth-1} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|while read file; do
+    all=$(find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|wc -l)
+    find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|while read file; do
         let "i=i+1"
         loginfo "$i/$all"
         run_fix "$file"
