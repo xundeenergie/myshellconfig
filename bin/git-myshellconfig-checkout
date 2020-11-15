@@ -33,18 +33,25 @@ cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 +-----BEGINN git update repo $(date) -------------------------------+
 EOF
 
-case $1 in
-    -h)
-        # Headless repo local
-        PRE="${MYSHELLCONFIG_GIT_REMOTE_NAME}"
-        ;;
-    -s)
-        dosubmodupdate="true"
-        ;;
-    *)
-        PRE=""
-        ;;
-esac
+set -- $(getopt -u -o hs  --long headless,submodules-update -- "$@" )
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        -h|--headless)
+            # Headless repo local
+            PRE="${MYSHELLCONFIG_GIT_REMOTE_NAME}"
+            shift
+            ;;
+        -s|--submodules-update)
+            dosubmodupdate="true"
+            shift
+            ;;
+        *)
+            PRE=""
+            shift
+            ;;
+    esac
+done
 # If TAG is set, checkout is always headless. 
 [ -z "${MYSHELLCONFIG_GIT_TAG:+x}" ] || { export MYSHELLCONFIG_GIT_BRANCH=${MYSHELLCONFIG_GIT_TAG}; export PRE=""; }
 
