@@ -560,7 +560,6 @@ function checkbkp-full() {
         $CMD /bin/bash << EOF
         sudo find /srv/nfs/backup -mindepth 1 -maxdepth 1|grep -v -e "git$\|git-backup-repos"|while read i;do printf "%-30s%s\\n" "\$i" \$(ls \$i|tail -n1);done|sort -k 2.1 -r
 EOF
-        #which pdsh 1>/dev/null 2>&1 && pdsh -g hetzner-servers sudo systemctl status backup.service
         which pdsh 1>/dev/null 2>&1 && pdsh -g vpn sudo systemctl status backup.service
 
     else
@@ -799,7 +798,6 @@ loadagent() {
     loginfo "Load agent from $af"
     unset SSH_AUTH_SOCKET SSH_AGENT_PID
     eval $(<$af)
-#    . $af
     logdebug "SSH_AUTH_SOCK: ${SSH_AUTH_SOCK-not set}"
     logdebug "SSH_AGENT_PID: ${SSH_AGENT_PID-not set}"
     loginfo "currently loaded keys in agent:
