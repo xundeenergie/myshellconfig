@@ -1,8 +1,9 @@
 #!/bin/bash
 
 RESTART=true
-
-set -- $(getopt -u -o n  --long no-restart -- "$@" )
+CONFDIR="${HOME}/.local/$(basename $0)"
+TIMESTAMP=$(date "+%x-%X")
+set -- $(getopt -u -o ng:  --long no-restart,gvapplid: -- "$@" )
 
 while [ $# -gt 0 ];
 do
@@ -12,6 +13,10 @@ do
             RESTART=false
             shift
             continue
+            ;;
+        -g|--gvapplid)
+            GVAPPLID=$2
+            shift; shift;
             ;;
         --)
             shift
@@ -25,17 +30,24 @@ done
 
 for DEST in ${DESTS[*]}
 do
-    file="$(find ${HOME}/.local/$(basename $0)/ -name ${DEST})"
+    file="$(find ${CONFDIR%/}/ -name ${DEST})"
+    gvapplid=$(awk -v hostname="$(ssh ${DEST} hostname)" '$0 ~ hostname {print $1}' ${CONFDIR%/}/gvapplid)
     case ${DEST} in
         *cnf*|*conf*)
-            [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/confluence"
-            libdir=/opt/atlassian/confluence/confluence/WEB-INF/lib
+            [ -z "${file-x}" ] && file="${CONFDIR%/}/confluence"
+            homedir=/var/atlassian/application-data/confluence
+            installdir=/opt/atlassian/confluence
+            libdir=${installdir%/}${installdir:+/}confluence/WEB-INF/lib
+            classesdir=${installdir%/}${installdir:+/}confluence/WEB-INF/classes
             app=confluence
             appuser=confluence
             ;;
         *jra*|*jira*)
-            [ -z "${file-x}" ] && file="${HOME}/.local/$(basename $0)/jira"
-            libdir=/opt/atlassian/jira/atlassian-jira/WEB-INF/lib
+            [ -z "${file-x}" ] && file="${CONFDIR%/}/jira"
+            homedir=/var/atlassian/application-data/jira
+            installdir=/opt/atlassian/jira
+            libdir=${installdir%/}${installdir:+/}atlassian-jira/WEB-INF/lib
+            classesdir=${installdir%/}${installdir:+/}atlassian-jira/WEB-INF/classes
             app=jira
             appuser=jira
             ;;
@@ -46,8 +58,7 @@ do
     esac
 
     echo "Using configfile $file"
-    runtime=$(date "+%x-%X")
-    UNINSTALLDIR="${HOME}/UNINSTALL/${runtime}/"
+    UNINSTALLDIR="\${HOME}/UNINSTALL/${TIMESTAMP}/"
 
     if stat "${file}" >/dev/null 2>/dev/null ; then
         echo "Stop $app on ${DEST}"
@@ -103,8 +114,9 @@ EOF
             esac
             unset cmd pkg version
         done
-        echo "Start $app on ${DEST}"
-        ssh ${DEST} systemctl start ${app}.service </dev/null
+
+        $RESTART && echo "Start ${app} on ${DEST}" || echo "Do not restart ${app} on ${DEST}"
+        $RESTART && ssh ${DEST} systemctl start ${app}.service </dev/null
     else
         echo "Configfile ${file} not found"
     fi
