@@ -62,6 +62,10 @@ help () {
     # move file to destination dir (${dest}/${mimedestpicdefault}/${subdestpic} or ${dest}/${mimedestviddefault}/${subdestvid}) in subdirectories %Y/%Y_%m/.
     move=true forcedate=true $(basename $0) <filename>
 
+    # Final command to move File
+    exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${mimedestpic}/${subdestpic}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '(\$datetimeoriginal)' <file>
+    exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${mimedestvid}/${subdestvid}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '(\$datetimeoriginal)' <file>
+
 
 EOF
 
@@ -74,7 +78,11 @@ export SCRIPT_LOG=~/logs/exif.log
 parsedatetime() {
     filename="$(basename "${@}")"
     # 2015-09-11_17:41:53-1.jpg
-    if [[ $filename =~ ^.*([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})( |_)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-).*$ ]]; then
+    # 2020.04.02_15-32-20+02:00.jpg
+    # 2020.04.13_10-59-14+02:00.jpg
+    # WhatsApp Image 2019-07-29 at 12.45.02.jpeg
+    echo fn: $filename >&2
+    if [[ $filename =~ ^.*([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2})( |_|-|" at ")([0-9]{2})(\.|-|:)([0-9]{2})(\.|-|:)([0-9]{2})(\.|-|\+|\(| ).*$ ]]; then
         result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "${BASH_REMATCH[7]#0}" "${BASH_REMATCH[9]#0}" "${BASH_REMATCH[11]#0}")"
     fi
     
@@ -102,7 +110,6 @@ parsedatetime() {
 
     if [ -z "${result}" ]; then
         # ./2016-01-22/IMG_4225.jpg
-        echo "FILENAME: $@" >&2
         if [[ "$(dirname ${@})" =~ ^.*/([0-9]{4})(\.|-)([0-9]{2})(\.|-)([0-9]{2}).*$ ]]; then
             result="$(printf "%04d:%02d:%02d %02d:%02d:%02d"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[3]#0}" "${BASH_REMATCH[5]#0}" "00" "00" "00")"
         fi
@@ -110,17 +117,6 @@ parsedatetime() {
 
     echo "$result"
     return 0
-}
-
-fix_datetime () {
-    file="${@}"
-    if $forcedate; then
-        exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
-        exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
-    else
-        exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
-        exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
-    fi
 }
 
 run_fix () {
@@ -145,8 +141,15 @@ run_fix () {
             ;;
     esac
     if [ -n "${MIMEDEST+x}" ] ; then
-        if [ -n "$newDateTimeOriginal" ]; then
-            $setdate && fix_datetime "$file"
+
+        if $forcedate; then
+            [ -n "$newDateTimeOriginal" ] && exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
+            exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+            exiftool '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
+        else
+            [ -n "$newDateTimeOriginal" ] && exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+            exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
+            exiftool '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
         fi
 
         loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
