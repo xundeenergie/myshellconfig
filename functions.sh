@@ -130,6 +130,7 @@ mencfs () {
     [ -z ${PKEY+x} ] && { EXIT; return 3; }
     [ -z ${ENCDIR+x} ] && { EXIT; return 4; }
     [ -z ${DESTDIR+x} ] && DESTDIR="$(dirname $ENCDIR)/$(basename $ENCDIR| tr '[:lower:]' '[:upper:]'| sed -e 's/^\.//')"
+    [ -d "$DESTDIR" ] || mkdir -p "$DESTDIR"
     $PASS "${PKEY}" 1>/dev/null 2>&1 || { logerror "entry $PKEY does not exist in passwordsotre"; return 5; }
     local ENCFS_PASSWORD=$($PASS "${PKEY}" | head -n1)
 
