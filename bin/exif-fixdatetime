@@ -1,9 +1,12 @@
 #!/bin/bash
 
 export SCRIPT_LOG=./$(basename $0).log
+export LOGFILE=./$(basename $0).move.log
 [ -z "${move+x}" ] && move=false
 [ -z "${forcedate+x}" ] && forcedate=false
 [ -z "${setdate+x}" ] && setdate=true
+[ -z "${setoriginalfilename+x}" ] && setoriginalfilename=false
+
 
 
 # Pathdefinitions Default
@@ -21,7 +24,7 @@ export SCRIPT_LOG=./$(basename $0).log
 
 help () {
     cat << EOF
-    Usage: $(basename $0) [move=[true|copy]] [setdate=[true|false]] [forcedate=[true|false]] [<file>]
+    Usage: $(basename $0) [move=[true|copy]] [setdate=[true|false]] [forcedate=[true|false]] [setoriginalfilename=[false|true|force]] [<file>]
 
 
     Defaults:
@@ -29,6 +32,7 @@ help () {
     move=$move              [false|true|copy]   false: file is not moved to destination; true: file is moved; copy: copy file to destination
     forcedate=$forcedate    [fase|true]         false: datetimeoriginal and createdate is only updated from filename, if not set; true: tags are always updated
     setdate=$setdate        [false|true]        false: do not set date-tags, only if you are sure, tags are ok, and you want move or copy files; 
+    setoriginalfilenamee=$setoriginalfilename   [false|true|force]        false: do not set originalfilename from filname (default); true: set it, if not set; force: set it, also if exists; 
 
     # destination
     dest=$dest
@@ -142,27 +146,38 @@ run_fix () {
     esac
     if [ -n "${MIMEDEST+x}" ] ; then
 
+        case $setoriginalfilename in
+            true)
+                $setoriginalfilename && exiftool "-originalfilename<filename" -if '(not $originalfilename)' "$file"
+                ;;
+            force)
+                $setoriginalfilename && exiftool "-originalfilename<filename" "$file"
+                ;;
+            *)
+                logwarn "do not set original filname in case of setoriginalfilename=$setoriginalfilename"
+                ;;
+        esac
         if $forcedate; then
-            $setdate && [ -n "$newDateTimeOriginal" ] && exiftool "-DateTimeOriginal=$newDateTimeOriginal" "$file"
-            $setdate && exiftool '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
-            $setdate && exiftool '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
+            $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" "$file"
+            $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+            $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
         else
-            $setdate && [ -n "$newDateTimeOriginal" ] && exiftool "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
-            $setdate && exiftool '-createdate<datetimeoriginal' -if '(not $createdate and $datetimeoriginal)' "$file"
-            $setdate && exiftool '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
+            $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+            $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '(($createdate =~ "0000:00:00*" or not $createdate) and $datetimeoriginal)' "$file"
+            $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
         fi
 
-        loginfo "$(exiftool -filename -createdate -datetimeoriginal "$file")"
+        loginfo "$(exiftool -filename -createdate -datetimeoriginal -originalfilename "$file")"
 
 
         case $move in
             true)
                 echo move to ${dest}/${MIMEDEST}/%Y/%Y_%m
-                loginfo "$(exiftool '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a dest_exists)"
+                loginfo "$(exiftool '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a ${LOGFILE})"
                 ;;
             copy)
                 echo copy to ${dest}/${MIMEDEST}/%Y/%Y_%m
-                loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -filename -createdate -datetimeoriginal  -if '($datetimeoriginal)' "$file")"
+                loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a ${LOGFILE})"
                 logwarn "$(readlink -f "$file"): $(exiftool -filename -if '(not ($datetimeoriginal or $createdate))' "$file")"
                 ;;
             *)
