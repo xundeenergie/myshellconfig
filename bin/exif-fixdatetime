@@ -133,7 +133,7 @@ run_fix () {
         image/jpeg)
             MIMEDEST="${mimedestpic}/${subdestpic}"
             ;;
-        video/mp4|video/m4a)
+        video/mp4|video/m4a|video/3gpp)
             MIMEDEST="${mimedestvid}/${subdestvid}"
             ;;
         *)
@@ -187,9 +187,9 @@ if [ $# -gt 0 ]; then
     esac
 
 else
-    loginfo "Progress all *.jpg, *.jpeg, *.png and mp4 files in pwd $(pwd)"
-    all=$(find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|wc -l)
-    find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$"|while read file; do
+    loginfo "Progress all *.jpg, *.jpeg, *.png and mp4, *.3gp files in pwd $(pwd)"
+    all=$(find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$\|.3gp$"|wc -l)
+    find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$\|.3gp$"|while read file; do
         let "i=i+1"
         loginfo "$i/$all"
         run_fix "$file"
