@@ -148,26 +148,34 @@ run_fix () {
 
         case $setoriginalfilename in
             true)
-                $setoriginalfilename && exiftool "-originalfilename<filename" -if '(not $originalfilename)' "$file"
+                loginfo -n "set original filename: "
+                $setoriginalfilename && exiftool -overwrite_original "-originalfilename<filename" -if '(not $originalfilename)' "$file"
                 ;;
             force)
-                $setoriginalfilename && exiftool "-originalfilename<filename" "$file"
+                loginfo -n "set original filename: "
+                $setoriginalfilename && exiftool -overwrite_original "-originalfilename<filename" "$file"
                 ;;
             *)
                 logwarn "do not set original filname in case of setoriginalfilename=$setoriginalfilename"
                 ;;
         esac
         if $forcedate; then
+            loginfo -n "set datetimeoriginal to $newDateTimeOriginal"
             $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" "$file"
+            loginfo -n "set createdate to datetimeoriginal: "
             $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+            loginfo -n "set datetimeoriginal to createuate: "
             $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
         else
+            loginfo -n "set datetimeoriginal to $newDateTimeOriginal"
             $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+            loginfo -n "set createdate to datetimeoriginal: "
             $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '(($createdate =~ "0000:00:00*" or not $createdate) and $datetimeoriginal)' "$file"
+            loginfo -n "set datetimeoriginal to createuate: "
             $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
         fi
 
-        loginfo "$(exiftool -filename -createdate -datetimeoriginal -originalfilename "$file")"
+        loginfo "fileinfos from modified file: $(exiftool -filename -createdate -datetimeoriginal -originalfilename "$file")"
 
 
         case $move in
