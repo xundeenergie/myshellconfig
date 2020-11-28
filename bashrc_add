@@ -170,6 +170,9 @@ EOF
     # source loading workaround for x2go to forward local etoken to remote machine with forwardagent
     . "${MYSHELLCONFIG_BASE}/myshell_load_x2go_tokenforward"
 
+    promptcommandmunge "_tmux_hook"
+    promptcommandmunge "_umask_hook"
+    which direnv >/dev/null && eval "$(direnv hook bash)"
   
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 ==8<=== finished configure new shell ================ $(date) ===============8<==

@@ -6,9 +6,23 @@
 
 export TMUX_SESSION_DIRS SETPROXY_CREDS_DIRS KERBEROS_CONFIG_DIRS
 
+promptcommandmunge () {
+    ENTRY
+    case ";${PROMPT_COMMAND};" in
+        "*;$1;*")
+            ;;
+        *)
+            if [ "$2" = "after" ] ; then
+                PROMPT_COMMAND="${PROMPT_COMMAND};$1"
+            else
+                PROMPT_COMMAND="$1;${PROMPT_COMMAND}"
+            fi
+    esac
+    EXIT
+}
 ## this function updates in combination with PROMPT_COMMAND the shell-environment-variables in tmus-sessions,
 #  every time prompt is called. It does it only, when called from tmux (Environment TMUX is set)
-function prompt_command() {
+function _tmux_hook() {
 #    [ -z "${TMUX+x}" ] || eval "$(tmux show-environment -s)"
 
     if [ -n "${TMUX}" ]; then
@@ -16,8 +30,25 @@ function prompt_command() {
     fi
 
 }
-PROMPT_COMMAND=prompt_command
 
+# Append `;` if PROMPT_COMMAND is not empty
+#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_tmux_hook"
+
+
+# To make the code more reliable on detecting the default umask
+function _umask_hook {
+  # Record the default umask value on the 1st run
+  [[ -z $DEFAULT_UMASK ]] && export DEFAULT_UMASK="$(builtin umask)"
+
+  if [[ -n $UMASK ]]; then
+    umask "$UMASK"
+  else
+    umask "$DEFAULT_UMASK"
+  fi
+}
+
+# Append `;` if PROMPT_COMMAND is not empty
+#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_umask_hook"
 
 cpb() {
     scp "$1" ${SSH_CLIENT%% *}:~/Work
@@ -127,9 +158,12 @@ mencfs () {
         return 2
     fi
 
+    logdebug "ENCDIR:   $ENCDIR"
     [ -z ${PKEY+x} ] && { EXIT; return 3; }
     [ -z ${ENCDIR+x} ] && { EXIT; return 4; }
+    [ -z "${DESTDIR+x}" ] && [ -n "${XDG_RUNTIME_DIR}" ] && DESTDIR="${XDG_RUNTIME_DIR}/decrypted/$(basename $ENCDIR| tr '[:lower:]' '[:upper:]'| sed -e 's/^\.//')"
     [ -z ${DESTDIR+x} ] && DESTDIR="$(dirname $ENCDIR)/$(basename $ENCDIR| tr '[:lower:]' '[:upper:]'| sed -e 's/^\.//')"
+    logdebug "DESTDIR:  $DESTDIR"
     [ -d "$DESTDIR" ] || mkdir -p "$DESTDIR"
     $PASS "${PKEY}" 1>/dev/null 2>&1 || { logerror "entry $PKEY does not exist in passwordsotre"; return 5; }
     local ENCFS_PASSWORD=$($PASS "${PKEY}" | head -n1)
@@ -165,14 +199,14 @@ uencfs () {
         else
             loginfo "umount encrypted directory" $1 >&2
             sync
-            $FUSERMOUNT -u "$1"
+            $FUSERMOUNT -z -u "$1"
         fi
     else
         loginfo "no arguments given. Umount all mounted encfs-dirs" >&2
         for i in $(mount|grep encfs|sed -e 's/^encfs on \(.*\)\ type.*$/\1/');do
             loginfo "$FUSERMOUNT -u $i"
             sync
-            $FUSERMOUNT -u "$i"
+            $FUSERMOUNT -z -u "$i"
         done
         EXIT
         return 1
