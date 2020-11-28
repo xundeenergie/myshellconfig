@@ -8,21 +8,21 @@ export TMUX_SESSION_DIRS SETPROXY_CREDS_DIRS KERBEROS_CONFIG_DIRS
 
 promptcommandmunge () {
     ENTRY
-    case ":${PROMPT_COMMAND}:" in
-        *:"$1":*)
+    case ";${PROMPT_COMMAND};" in
+        "*;$1;*")
             ;;
         *)
             if [ "$2" = "after" ] ; then
-                PROMPT_COMMAND=$PROMPT_COMMAND:$1
+                PROMPT_COMMAND="${PROMPT_COMMAND};$1"
             else
-                PROMPT_COMMAND=$1:$PROMPT_COMMAND
+                PROMPT_COMMAND="$1;${PROMPT_COMMAND}"
             fi
     esac
     EXIT
 }
 ## this function updates in combination with PROMPT_COMMAND the shell-environment-variables in tmus-sessions,
 #  every time prompt is called. It does it only, when called from tmux (Environment TMUX is set)
-function _prompt_command() {
+function _tmux_hook() {
 #    [ -z "${TMUX+x}" ] || eval "$(tmux show-environment -s)"
 
     if [ -n "${TMUX}" ]; then
@@ -32,7 +32,7 @@ function _prompt_command() {
 }
 
 # Append `;` if PROMPT_COMMAND is not empty
-#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_prompt_command"
+#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_tmux_hook"
 
 
 # To make the code more reliable on detecting the default umask
