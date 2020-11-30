@@ -177,7 +177,19 @@ EOF
     promptcommandmunge "_umask_hook"
     which direnv >/dev/null && eval "$(direnv hook bash)"
   
-    ${STARTTMUX-$STARTTMUXDEFAULT} && tmux attach-session
+    if ${STARTTMUX-$STARTTMUXDEFAULT} ; then
+        cat << EOF
+
+"User: $USER - $UID"
+
+Starting or resuming screen session
+Press CTRL+C to cancel screen startup
+
+EOF
+        sleep 1
+        #screen -UxR
+        tmux attach-session
+    fi
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 ==8<=== finished configure new shell ================ $(date) ===============8<==
 
