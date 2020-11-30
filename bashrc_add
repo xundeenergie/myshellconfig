@@ -9,8 +9,9 @@
 #trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
 
 
-# set SSHS to false, if not set
+# set some variables to defaults, if not set in .bashrc
 [ -z ${SSHS+x} ] && export SSHS=false
+[ -z ${STARTTMUX+x} ] && export STARTTMUX=false
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
@@ -181,4 +182,23 @@ EOF
 #else
 #    echo "non-interactive shell" >&2
     SCRIPTEXIT
+
+    # Start tmux if not defined as STARTTMUX in bashrc
+    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
+    if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
+        cat << EOF
+
+"User: $USER - $UID"
+
+Starting or resuming screen session
+Press CTRL+C to cancel screen startup
+
+EOF
+        sleep 1
+        #screen -UxR
+        tmux attach-session
+        logdebug "started tmux"
+    fi
+    logdebug "after"
+
 fi
