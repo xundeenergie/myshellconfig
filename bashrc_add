@@ -9,11 +9,9 @@
 #trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
 
 
-# set SSHS to false, if not set
+# set some variables to defaults, if not set in .bashrc
 [ -z ${SSHS+x} ] && export SSHS=false
-
-# set STARTTMUX to false, if not set
-[ -z ${STARTTMUXDEFAULT+x} ] && export STARTTMUXDEFAULT=false
+[ -z ${STARTTMUX+x} ] && export STARTTMUX=false
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
@@ -177,7 +175,8 @@ EOF
     promptcommandmunge "_umask_hook"
     which direnv >/dev/null && eval "$(direnv hook bash)"
   
-    if ${STARTTMUX-$STARTTMUXDEFAULT} ; then
+    # Start tmux if not defined as STARTTMUX in bashrc
+    if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
         cat << EOF
 
 "User: $USER - $UID"
