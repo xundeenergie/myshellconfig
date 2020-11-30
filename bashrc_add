@@ -176,7 +176,7 @@ EOF
     which direnv >/dev/null && eval "$(direnv hook bash)"
   
     # Start tmux if not defined as STARTTMUX in bashrc
-    logwarn "start tmux ${STARTTMUXDEFAULT-$STARTTMUX}"
+    logwarn "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
     if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
         cat << EOF
 
