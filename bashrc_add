@@ -175,8 +175,16 @@ EOF
     promptcommandmunge "_umask_hook"
     which direnv >/dev/null && eval "$(direnv hook bash)"
   
+    cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+==8<=== finished configure new shell ================ $(date) ===============8<==
+
+EOF
+#else
+#    echo "non-interactive shell" >&2
+    SCRIPTEXIT
+
     # Start tmux if not defined as STARTTMUX in bashrc
-    logwarn "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
+    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
     if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
         cat << EOF
 
@@ -189,14 +197,8 @@ EOF
         sleep 1
         #screen -UxR
         tmux attach-session
-        logwarn "started tmux"
+        logdebug "started tmux"
     fi
-    logwarn "after"
-    cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
-==8<=== finished configure new shell ================ $(date) ===============8<==
+    logdebug "after"
 
-EOF
-#else
-#    echo "non-interactive shell" >&2
-    SCRIPTEXIT
 fi
