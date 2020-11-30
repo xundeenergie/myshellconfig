@@ -12,6 +12,9 @@
 # set SSHS to false, if not set
 [ -z ${SSHS+x} ] && export SSHS=false
 
+# set STARTTMUX to false, if not set
+[ -z ${STARTTMUXDEFAULT+x} ] && export STARTTMUXDEFAULT=false
+
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
 # https://www.tldp.org/LDP/abs/html/refcards.html#AEN22473
@@ -174,6 +177,7 @@ EOF
     promptcommandmunge "_umask_hook"
     which direnv >/dev/null && eval "$(direnv hook bash)"
   
+    ${STARTTMUX-$STARTTMUXDEFAULT} && tmux attach-session
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 ==8<=== finished configure new shell ================ $(date) ===============8<==
 
