@@ -1,1 +1,145 @@
-        # Start tmux if not defined as STARTTMUX in bashrc - set variable
+#!/bin/bash
+
+# if we are root, exit after 5 Minutes
+case $(tty) in 
+    /dev/tty[0-9]*)
+        case $(id -u) in
+            0)
+                TMOUT=${MYSHELLCONFIG_ROOT_TMOUT:-500}
+                ;;
+            *)
+                TMOUT=${MYSHELLCONFIG_USER_TMOUT:-1000}
+                ;;
+        esac
+        loginfo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
+        ;;
+    *)
+        loginfo "Run in graphical terminal - set no autologout" >&2
+        unset TMOUT
+        ;;
+esac
+
+# Load default values, functions, aliases for myshellconfig
+if ! $SSHS; then
+    if [ -e ${MYSHELLCONFIG_BASE}/functions.sh ]; then
+        . ${MYSHELLCONFIG_BASE}/functions.sh
+    else
+        return
+    fi
+
+
+
+    ######################################################################################
+    # ls is not in color on all systems
+    export LS_OPTIONS='--color=auto'
+    eval "`dircolors`"
+
+    #######################################################################################
+    # User specific aliases and function
+
+
+    if [ -d "${MYSHELLCONFIG_BASE}/bin" ] ; then
+        pathmunge "${MYSHELLCONFIG_BASE}/bin"
+        export PATH
+    fi
+
+    if [ -d "${MYSHELLCONFIG_BASE}/git-credential-pass" ] ; then
+        pathmunge "${MYSHELLCONFIG_BASE}/git-credential-pass"
+        export PATH
+    fi
+
+    if [ -f "${MYSHELLCONFIG_BASE}/aliases" ]; then
+        . "${MYSHELLCONFIG_BASE}/aliases"
+    fi
+
+    if [ -f "${MYSHELLCONFIG_BASE}/PS1" ]; then
+        . "${MYSHELLCONFIG_BASE}/PS1"
+    fi
+
+# Fehler anfang
+#set -x
+    if [ -e "${MYSHELLCONFIG_BASH_COMPLETION}" ]; then
+        for i in $( ls "${MYSHELLCONFIG_BASH_COMPLETION}" ); do
+            . "${MYSHELLCONFIG_BASH_COMPLETION}/${i}"
+        done
+        unset i
+    fi
+
+#set +x
+# Fehler ende
+
+    if [ -f "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" ]; then
+        . "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig"
+    fi
+
+
+    #########################################################################################
+
+
+    # Go HOME
+    #cd ${HOME}
+
+    # Start tmux if not defined as STARTTMUX in bashrc
+    if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
+            STARTTMUX=true
+    fi
+
+    unset -f pathmunge
+
+else
+    # run with temporary config
+
+    case $TERM in
+        *screen*)
+            loginfo BASHRC: $BASHRC -> source it
+            #[ -e $BASHRC ] && . "$BASHRC"
+            if [ ! -z ${BASHRC+x} ]; then
+                if [ -e $BASHRC ] ; then
+                    exec bash --rcfile "$BASHRC" -i /dev/null
+                else
+                    exec bash -i
+                fi
+            else
+                exec bash -i
+            fi
+
+            ;;
+    esac
+
+fi
+
+# Disable Ctrl+s to freeze terminal
+# Source https://www.digitalocean.com/community/tutorials/how-to-use-bash-history-commands-and-expansions-on-a-linux-vps
+stty -ixon
+export HISTCONTROL=erasedups:ignorespace:ignoredups
+export HISTIGNORE="ls:l:cd:exit:pwd:date:mencfs:"
+export HISTTIMEFORMAT='%F %T  '
+export HISTSIZE=999999
+
+loginfo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
+#echo "bashrc_add sourced" >&2
+
+# Export several functions for being usable in subshells
+export -f token
+export -f sudo
+export -f reachable
+export -f reachable-default
+
+
+
+
+[ -z "${SSH_IDENTITIES_DEFAULT_DIR+x}" ]            && { SSH_IDENTITIES_DEFAULT_DIR="${HOME}/.ssh/identities"; export SSH_IDENTITIES_DEFAULT_DIR; }
+[ -z "${SSH_AGENTS_DEFAULT_DIR+x}" ]                && { SSH_AGENTS_DEFAULT_DIR="${HOME}/.ssh/agents"; export SSH_AGENTS_DEFAULT_DIR; }
+[ -z "${SSH_AGENT_SOCKETS_DEFAULT_DIR+x}" ]         && { SSH_AGENT_SOCKETS_DEFAULT_DIR="${HOME}/.ssh/agents"; export SSH_AGENT_SOCKETS_DEFAULT_DIR; }
+[ -z "${SSH_AGENT_DEFAULT_OPTIONS+x}" ]             && { SSH_AGENT_DEFAULT_OPTIONS='-t 7200'; export SSH_AGENT_DEFAULT_OPTIONS; }
+[ -z "${SSH_ADD_DEFAULT_OPTIONS+x}" ]               && { SSH_ADD_DEFAULT_OPTIONS="-t 7200"; export SSH_ADD_DEFAULT_OPTIONS; }
+[ -z "${SSH_DEFAULT_IDENTITY+x}" ]                  && { SSH_DEFAULT_IDENTITY="default"; export SSH_DEFAULT_IDENTITY; }
+
+[ -z "${SSH_AGENTS_DEFAULT_DIR+x}" ] || mkdir -p "${SSH_AGENTS_DEFAULT_DIR}"
+
+
+#cat << EOF > "${SSH_AGENTS_DEFAULT_DIR}/agent-default-$(hostname)"
+#SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
+#SSH_AGENT_PID=${SSH_AGENT_PID}; export SSH_AGENT_PID;
+#loginfo Agent pid ${SSH_AGENT_PID};
+#EOF
