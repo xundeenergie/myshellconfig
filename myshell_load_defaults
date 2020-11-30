@@ -90,7 +90,7 @@ Press CTRL+C to cancel screen startup
 EOF
             sleep 1
             #screen -UxR
-            tmux attach-session
+            tmux attach-session &
     fi
 
     unset -f pathmunge
