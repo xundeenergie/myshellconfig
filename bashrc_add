@@ -176,6 +176,7 @@ EOF
     which direnv >/dev/null && eval "$(direnv hook bash)"
   
     # Start tmux if not defined as STARTTMUX in bashrc
+    logwarn "start tmux"
     if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
         cat << EOF
 
@@ -188,7 +189,9 @@ EOF
         sleep 1
         #screen -UxR
         tmux attach-session
+        logwarn "started tmux"
     fi
+    logwarn "after"
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 ==8<=== finished configure new shell ================ $(date) ===============8<==
 
