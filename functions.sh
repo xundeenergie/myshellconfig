@@ -332,6 +332,8 @@ sshmyshellconfig() {
     echo
     loginfo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
+    loginfo git clone
+    git clone --recurse-submodules $MYSHELLCONFIG_GIT_REMOTE \${HOME}/${MYSHELLCONFIG_SUBPATH}
 
 EOF
     EXIT
@@ -385,8 +387,8 @@ EOF
     if [ $# -ge 1 ]; then
         if [ -e "${TMPBASHCONFIG}" ] ; then
            local RCMD="/bin/bash --noprofile --norc -c "
-           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
-           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
+           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
+           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
