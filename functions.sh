@@ -676,6 +676,18 @@ function gnome-shell-extensions-enable-defaults() {
     EXIT
 }
 
+gnome-shell-extensions-make-actual-permanent() {
+    ENTRY
+    file="${HOME}/.config/gnome-shell-extensions-default.list"
+    local EXTENSIONS=$(gsettings get org.gnome.shell enabled-extensions)
+    line="[org/gnome/shell]"
+    for line in ${EXTENSIONS[@]}; do
+        loginfo "add $line to $file"
+        grep -xqF -- ${line} ${file} || echo $line >> $file
+    done
+
+    EXIT
+}
 gnome-shell-extensions-make-actual-permanent-systemwide() {
     ENTRY
     # https://people.gnome.org/~pmkovar/system-admin-guide/extensions-enable.html
