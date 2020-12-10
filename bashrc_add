@@ -81,10 +81,10 @@ EOF
     SCRIPTENTRY
     # define functions
 
-    lastupdatesubmodules() {
+    lastupdatesubmodules () {
         date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
     }
-    lastupdaterepo() {
+    lastupdaterepo () {
         date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_repo
     }
 
