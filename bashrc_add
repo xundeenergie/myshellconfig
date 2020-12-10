@@ -29,7 +29,7 @@ if [[ $- = *i* ]] ; then
     export MSC_BASH_COMPLETION="${HOME}/${MSC_SUBPATH}/bash_completion.d"
 
     # Load DEFAULTS
-    [ -e ${MSC_BASE}/defaults.conf ] && . ${MSC_BASE}/defaults.conf
+    [ -e ${MSC_BASE}/defaults.conf ] && . ${MSC_BASE}/defaults.conf
 
 
     # Userdata
@@ -187,7 +187,7 @@ EOF
     SCRIPTEXIT
 
     # Start tmux if not defined as STARTTMUX in bashrc
-    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
+    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
     if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
         cat << EOF
 
