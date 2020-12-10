@@ -105,12 +105,6 @@ EOF
             if which git >/dev/null; then
                 loginfo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 
                 # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
-                if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
-                    gco="-h"
-                else
-                    gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
-                fi
-                #${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
                 ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS:=${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT}}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
                 loginfo "$(printf '%s\n' "${nok}synced" )"
                 [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
