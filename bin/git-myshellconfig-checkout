@@ -20,6 +20,13 @@
 [ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME+x}" ] && export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
 [ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
 
+lastupdatesubmodules () {
+    date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+}
+lastupdaterepo () {
+    date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_repo
+}
+
 gitupdateend() {
     cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 
@@ -62,7 +69,7 @@ done
 if [ $(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 ) \
     -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") \
     -a ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
-    [ -z "${dosubmodupdate+x}" ] && dorepoupdate="true"
+    [ -z "${dosrepoupdate+x}" ] && dorepoupdate="true"
 fi
 
 if [ $(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 ) \
@@ -72,7 +79,7 @@ if [ $(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodule
 fi
     
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
-loginfo "fetch ${dorepoupdate:+ repo}${dosubmodupdate:+ and submodules}"
+loginfo "fetch repo${dosubmodupdate:+ and submodules}"
 $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
 if ${dosubmodupdate:-false}; then 
     lastupdatesubmodules
