@@ -10,8 +10,8 @@ set nocompatible              " required
 filetype off                  " required
 
 
-"if !empty($MYSHELLCONFIG_VIM_PLUGINS)
-"  let pluginrepopath=$MYSHELLCONFIG_VIM_PLUGINS . '/'
+"if !empty($MSC_VIM_PLUGINS)
+"  let pluginrepopath=$MSC_VIM_PLUGINS . '/'
 "  let pluginextension='.git'
 "else
 "  let pluginrepopath=''
@@ -365,7 +365,7 @@ au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 " yaml syntax
 " https://www.vim.org/scripts/script.php?script_id=739
 " wget https://www.vim.org/scripts/download_script.php?src_id=2249 -O ~/.vim/yaml.vim
-"au BufNewFile,BufRead *.yaml,*.yml so $MYSHELLCONFIG_BASE/.vim/yaml.vim
+"au BufNewFile,BufRead *.yaml,*.yml so $MSC_BASE/.vim/yaml.vim
 
 autocmd BufRead,BufNewFile /etc/exim* set filetype=exim
 autocmd BufRead,BufNewFile *.yaml,*.yml  set filetype=yaml

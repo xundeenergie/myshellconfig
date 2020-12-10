@@ -5,10 +5,10 @@ case $(tty) in
     /dev/tty[0-9]*)
         case $(id -u) in
             0)
-                TMOUT=${MYSHELLCONFIG_ROOT_TMOUT:-500}
+                TMOUT=${MSC_ROOT_TMOUT:-500}
                 ;;
             *)
-                TMOUT=${MYSHELLCONFIG_USER_TMOUT:-1000}
+                TMOUT=${MSC_USER_TMOUT:-1000}
                 ;;
         esac
         loginfo "Run in TTY -> set autologout \$TMOUT=$TMOUT" >&2
@@ -21,8 +21,8 @@ esac
 
 # Load default values, functions, aliases for myshellconfig
 if ! $SSHS; then
-    if [ -e ${MYSHELLCONFIG_BASE}/functions.sh ]; then
-        . ${MYSHELLCONFIG_BASE}/functions.sh
+    if [ -e ${MSC_BASE}/functions.sh ]; then
+        . ${MSC_BASE}/functions.sh
     else
         return
     fi
@@ -38,29 +38,29 @@ if ! $SSHS; then
     # User specific aliases and function
 
 
-    if [ -d "${MYSHELLCONFIG_BASE}/bin" ] ; then
-        pathmunge "${MYSHELLCONFIG_BASE}/bin"
+    if [ -d "${MSC_BASE}/bin" ] ; then
+        pathmunge "${MSC_BASE}/bin"
         export PATH
     fi
 
-    if [ -d "${MYSHELLCONFIG_BASE}/git-credential-pass" ] ; then
-        pathmunge "${MYSHELLCONFIG_BASE}/git-credential-pass"
+    if [ -d "${MSC_BASE}/git-credential-pass" ] ; then
+        pathmunge "${MSC_BASE}/git-credential-pass"
         export PATH
     fi
 
-    if [ -f "${MYSHELLCONFIG_BASE}/aliases" ]; then
-        . "${MYSHELLCONFIG_BASE}/aliases"
+    if [ -f "${MSC_BASE}/aliases" ]; then
+        . "${MSC_BASE}/aliases"
     fi
 
-    if [ -f "${MYSHELLCONFIG_BASE}/PS1" ]; then
-        . "${MYSHELLCONFIG_BASE}/PS1"
+    if [ -f "${MSC_BASE}/PS1" ]; then
+        . "${MSC_BASE}/PS1"
     fi
 
 # Fehler anfang
 #set -x
-    if [ -e "${MYSHELLCONFIG_BASH_COMPLETION}" ]; then
-        for i in $( ls "${MYSHELLCONFIG_BASH_COMPLETION}" ); do
-            . "${MYSHELLCONFIG_BASH_COMPLETION}/${i}"
+    if [ -e "${MSC_BASH_COMPLETION}" ]; then
+        for i in $( ls "${MSC_BASH_COMPLETION}" ); do
+            . "${MSC_BASH_COMPLETION}/${i}"
         done
         unset i
     fi
@@ -68,8 +68,8 @@ if ! $SSHS; then
 #set +x
 # Fehler ende
 
-    if [ -f "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" ]; then
-        . "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig"
+    if [ -f "${MSC_BASE}/myshell_load_fortmpconfig" ]; then
+        . "${MSC_BASE}/myshell_load_fortmpconfig"
     fi
 
 
@@ -116,7 +116,7 @@ export HISTIGNORE="ls:l:cd:exit:pwd:date:mencfs:"
 export HISTTIMEFORMAT='%F %T  '
 export HISTSIZE=999999
 
-loginfo "bashrc_add sourced" 2>&1 |tee -a ${MYSHELLCONFIG_LOGFILE} >&2
+loginfo "bashrc_add sourced" 2>&1 |tee -a ${MSC_LOGFILE} >&2
 #echo "bashrc_add sourced" >&2
 
 # Export several functions for being usable in subshells
