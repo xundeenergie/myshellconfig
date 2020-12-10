@@ -24,12 +24,13 @@ if [[ $- = *i* ]] ; then
     [ -z "${MSC_SUBPATH+x}" ]                 && export MSC_SUBPATH=".local/myshellconfig"
     [ -z "${MSC_BASE+x}" ]                    && export MSC_BASE="${HOME}/${MSC_SUBPATH}"
 
-    # DEFAULTS
-    [ -e ${MSC_BASE}/defaults.conf ] && . ${MSC_BASE}/defaults.conf
-
     # hardcoded paths
     export MSC_BASE_PARENT="$(dirname $MSC_BASE)"
     export MSC_BASH_COMPLETION="${HOME}/${MSC_SUBPATH}/bash_completion.d"
+
+    # Load DEFAULTS
+    [ -e ${MSC_BASE}/defaults.conf ] && . ${MSC_BASE}/defaults.conf
+
 
     # Userdata
     [ -z "${USERNAME+x}" ]                              && export USERNAME="$USER"
