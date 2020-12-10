@@ -37,12 +37,14 @@ if [[ $- = *i* ]] ; then
     [ -z "${GIT_AUTHOR_EMAIL+x}" ]                              && export GIT_AUTHOR_EMAIL=$USEREMAIL
     [ -z "${GIT_COMMITTER_NAME+x}" ]                            && export GIT_COMMITTER_NAME=$FULLNAME
     [ -z "${GIT_COMMITTER_EMAIL+x}" ]                           && export GIT_COMMITTER_EMAIL=$USEREMAIL
+
     [ -z "${MYSHELLCONFIG_GIT_TIMEOUT+x}" ]                     && export MYSHELLCONFIG_GIT_TIMEOUT=5s
     [ -z "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT+x}" ]            && export MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT=20s
     [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ]                        && export MYSHELLCONFIG_GIT_SYNC=true
     [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT+x}" ]   && export MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT=true
     [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL+x}" ] && export MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL=48 #intervall in hours
     [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT+x}" ]   && export MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT="git://git.schuerz.at/github.com/"
+    [ -z "${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT+x}" ]  && export MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT=5s
     # hardcoded git
     export SGIT="git -C ${MYSHELLCONFIG_BASE}" 
 
@@ -108,7 +110,8 @@ EOF
                 else
                     gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
                 fi
-                ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
+                #${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
+                ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS:=${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT}}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
                 loginfo "$(printf '%s\n' "${nok}synced" )"
                 [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
 
