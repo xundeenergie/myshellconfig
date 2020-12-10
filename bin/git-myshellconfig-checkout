@@ -21,7 +21,7 @@
 [ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
 
 gitupdateend() {
-cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+    cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
 
 +-----ENDE git update repo $(date) ---------------------------------+
  
@@ -59,18 +59,23 @@ done
 #echo -n " remote: ${MYSHELLCONFIG_GIT_REMOTE_NAME}, branch: ${MYSHELLCONFIG_GIT_BRANCH}: "
 
 # Check for updates in submodules only if last check was INTERVALL hours in the past
-updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 )
-logtrace "dosubmodupdate before: $dosubmodupdate"
-if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") -a ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
+if [ $(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 ) \
+    -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") \
+    -a ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
+    [ -z "${dosubmodupdate+x}" ] && dorepoupdate="true"
+fi
+
+if [ $(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 ) \
+    -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") \
+    -a ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
     [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
 fi
-logtrace "dosubmodupdate after: $dosubmodupdate"
     
 #echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
-loginfo "fetch repo${dosubmodupdate:+ and submodules}"
+loginfo "fetch ${dorepoupdate:+ repo}${dosubmodupdate:+ and submodules}"
 $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
 if ${dosubmodupdate:-false}; then 
-    date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+    lastupdatesubmodules
 fi
 
 echo "Check for local changes:" >> "${MYSHELLCONFIG_LOGFILE}"
@@ -112,7 +117,7 @@ loginfo "repo${dosubmodupdate:+ and submodules} synced"
         loginfo "update and commit submodules"
         logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT commit -a -m 'update submodules')"
-        date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+        lastupdatesubmodules
         logwarn "submodules synced"
     fi
 #else

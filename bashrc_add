@@ -80,6 +80,15 @@ EOF
 
     SCRIPTENTRY
     # define functions
+
+    lastupdatesubmodules() {
+        date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+    }
+    lastupdaterepo() {
+        date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_repo
+    }
+
+
     ckrepo () {
         # check if remote repo is reachable
         if $MYSHELLCONFIG_GIT_SYNC; then
