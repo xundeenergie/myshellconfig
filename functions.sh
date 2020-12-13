@@ -71,22 +71,22 @@ sudo() {
 }
 create_symlinks() {
 
-    #echo MYSHELLCONFIG_BASE: $MYSHELLCONFIG_BASE
-#    MYSHELLCONFIG_BASEDIR="$1"
-#    DIR="$(basename ${MYSHELLCONFIG_BASEDIR})"
-#    cd  "${MYSHELLCONFIG_BASEDIR}"
-    cd ${MYSHELLCONFIG_BASE}
-    #echo "DIR MYSHELLCONFIG_BASEDIR $DIR $MYSHELLCONFIG_BASEDIR"
+    #echo MSC_BASE: $MSC_BASE
+#    MSC_BASEDIR="$1"
+#    DIR="$(basename ${MSC_BASEDIR})"
+#    cd  "${MSC_BASEDIR}"
+    cd ${MSC_BASE}
+    #echo "DIR MSC_BASEDIR $DIR $MSC_BASEDIR"
     git config credential.helper 'cache --timeout=300'
     #Anlegen von Symlinks
     rm -rf ~/.vimrc ~/.vim ~/bashrc_add ~/.gitconfig ~/.tmux.conf ~/.tmux
-    ln -sf "${MYSHELLCONFIG_BASE}/vimrc" ~/.vimrc
-    ln -sf "${MYSHELLCONFIG_BASE}/vim" ~/.vim
-    ln -sf "${MYSHELLCONFIG_BASE}/.gitconfig" ~/.gitconfig
-    ln -sf "${MYSHELLCONFIG_BASE}/.gitignore_global" ~/.gitignore_global
-    #ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
-    ln -sf "${MYSHELLCONFIG_BASE}/tmux" ~/.tmux
-    ln -sf "${MYSHELLCONFIG_BASE}/tmux/tmux.conf" ~/.tmux.conf
+    ln -sf "${MSC_BASE}/vimrc" ~/.vimrc
+    ln -sf "${MSC_BASE}/vim" ~/.vim
+    ln -sf "${MSC_BASE}/.gitconfig" ~/.gitconfig
+    ln -sf "${MSC_BASE}/.gitignore_global" ~/.gitignore_global
+    #ln -sf "${MSC_BASE}/bashrc_add" ~/bashrc_add
+    ln -sf "${MSC_BASE}/tmux" ~/.tmux
+    ln -sf "${MSC_BASE}/tmux/tmux.conf" ~/.tmux.conf
 
     # Configure to use githooks in .githooks, not in standardlocation .git/hooks
     $SGIT config core.hooksPath .githooks
@@ -309,15 +309,15 @@ mkcd () {
 sshmyshellconfig() {
 
     ENTRY
-    [ -z "${MYSHELLCONFIG_SUBPATH+x}" ]     && MYSHELLCONFIG_SUBPATH=".local/myshellconfig"
-    [ -z "${MYSHELLCONFIG_BASE+x}" ]        && MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"
-    MYSHELLCONFIG_BASE_PARENT="$(dirname $MYSHELLCONFIG_BASE)"
+    [ -z "${MSC_SUBPATH+x}" ]     && MSC_SUBPATH=".local/myshellconfig"
+    [ -z "${MSC_BASE+x}" ]        && MSC_BASE="${HOME}/${MSC_SUBPATH}"
+    MSC_BASE_PARENT="$(dirname $MSC_BASE)"
 
     if [ $1 == "localhost" ]; then
         CMD=""
     else
         local SSH="/usr/bin/ssh"
-        [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "mkdir -p ~/\$MYSHELLCONFIG_BASE_PARENT; cat > ~/bashrc_add" < "${MYSHELLCONFIG_BASE}/bashrc_add"
+        [ -e ${MSC_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "mkdir -p ~/\$MSC_BASE_PARENT; cat > ~/bashrc_add" < "${MSC_BASE}/bashrc_add"
         local CMD="$SSH -T $@"
     fi
     $CMD /bin/bash << EOF
@@ -327,11 +327,13 @@ sshmyshellconfig() {
     sed -i -e '/^\[ -f bashrc_add \] /d' ~/.bashrc
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
-    printf "%s\n" "#MYSHELLCONFIG-start" "[ -f \"\${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add\" ] && . \"\${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add\""  "#MYSHELLCONFIG-end"| tee -a ~/.bashrc
-    #printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
+    printf "%s\n" "#MYSHELLCONFIG-start" "[ -f \"\${HOME}/${MSC_SUBPATH}/bashrc_add\" ] && . \"\${HOME}/${MSC_SUBPATH}/bashrc_add\""  "#MYSHELLCONFIG-end"| tee -a ~/.bashrc
+    #printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MSC_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MSC_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
     loginfo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
+    loginfo git clone
+    git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
 
 EOF
     EXIT
@@ -347,7 +349,7 @@ sshs() {
 
     local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/logging" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
+    local FILELIST=( "${MSC_BASE}/functions.sh" "${MSC_BASE}/logging" "${MSC_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MSC_BASE}/aliases" "${MSC_BASE}/PS1" "${MSC_BASE}/bash_completion.d/*" )
 
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
@@ -385,8 +387,8 @@ EOF
     if [ $# -ge 1 ]; then
         if [ -e "${TMPBASHCONFIG}" ] ; then
            local RCMD="/bin/bash --noprofile --norc -c "
-           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
-           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
+           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
+           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
@@ -401,7 +403,7 @@ loginfo "This bash runs with temporary config from \$BASHRC"
 EOF
 
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
-           ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MYSHELLCONFIG_BASE}/vimrc"
+           ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MSC_BASE}/vimrc"
            RCMD="
            trap \"rm -f ${REMOTETMPBASHCONFIG} ${REMOTETMPVIMCONFIG}\" EXIT " ;
            ssh -t ${SSH_OPTS} $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
@@ -419,7 +421,7 @@ EOF
 }
 
 
-VIMRC="${MYSHELLCONFIG_BASE}/vimrc"
+VIMRC="${MSC_BASE}/vimrc"
 
 svi () { 
     ENTRY
@@ -448,14 +450,14 @@ svi () {
 vim-repair-vundle () {
     ENTRY
 
-    if [ -z ${MYSHELLCONFIG_BASE+x} ]; then   
-        echo "MYSHELLCONFIG_BASE nicht gesetzt. Eventuell noch einmal ausloggen und wieder einloggen"
+    if [ -z ${MSC_BASE+x} ]; then   
+        echo "MSC_BASE nicht gesetzt. Eventuell noch einmal ausloggen und wieder einloggen"
     else
-        cd $MYSHELLCONFIG_BASE
+        cd $MSC_BASE
         cd vim/bundle
         rm -rf Vundle.vim
-        echo git clone  "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-$MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
-        git clone  "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-$MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
+        echo git clone  "${MSC_GIT_SUBMODULES_SERVER-$MSC_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
+        git clone  "${MSC_GIT_SUBMODULES_SERVER-$MSC_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
         cd ~-
     fi
     EXIT
@@ -642,7 +644,7 @@ changebeep() {
 
 turnoffconfigsync() {
     ENTRY
-    local line='MYSHELLCONFIG_GIT_SYNC='
+    local line='MSC_GIT_SYNC='
     local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
@@ -653,7 +655,7 @@ turnoffconfigsync() {
 
 turnonconfigsync() {
     ENTRY
-    local line='MYSHELLCONFIG_GIT_SYNC='
+    local line='MSC_GIT_SYNC='
     local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
@@ -674,6 +676,18 @@ function gnome-shell-extensions-enable-defaults() {
     EXIT
 }
 
+gnome-shell-extensions-make-actual-permanent() {
+    ENTRY
+    file="${HOME}/.config/gnome-shell-extensions-default.list"
+    local EXTENSIONS=$(gsettings get org.gnome.shell enabled-extensions)
+    line="[org/gnome/shell]"
+    for line in ${EXTENSIONS[@]}; do
+        loginfo "add $line to $file"
+        grep -xqF -- ${line} ${file} || echo $line >> $file
+    done
+
+    EXIT
+}
 gnome-shell-extensions-make-actual-permanent-systemwide() {
     ENTRY
     # https://people.gnome.org/~pmkovar/system-admin-guide/extensions-enable.html
@@ -886,4 +900,14 @@ EOF
 rescan_scsi () {
     echo "- - -" > /sys/class/scsi_host/host0/scan
 }
+
+get_crtime() {
+  for target in "${@}"; do
+    inode=$(stat -c %i "${target}")
+    fs=$(df  --output=source "${target}"  | tail -1)
+    crtime=$(sudo debugfs -R 'stat <'"${inode}"'>' "${fs}" 2>/dev/null | 
+    grep -oP 'crtime.*--\s*\K.*')
+    printf "%s\t%s\n" "${target}" "${crtime}"
+  done
+    }
 #EOF

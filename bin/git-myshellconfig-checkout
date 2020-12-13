@@ -12,16 +12,23 @@
 #################################################################################################
 
 [ -z "${SGIT+x}" ] && SGIT=git
-    [ -z "${MYSHELLCONFIG_LOGDIR+x}" ]                  && export MYSHELLCONFIG_LOGDIR="${HOME}/logs"
-    [ -z "${MYSHELLCONFIG_LOGFILE+x}" ]                 && export MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/myshellconfig.log"
-#MYSHELLCONFIG_LOGDIR="./logs"
-#MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/git.log"
-[ -d "${MYSHELLCONFIG_LOGDIR}" ] || mkdir -p "${MYSHELLCONFIG_LOGDIR}"
-[ -z "${MYSHELLCONFIG_GIT_REMOTE_NAME+x}" ] && export MYSHELLCONFIG_GIT_REMOTE_NAME=origin
-[ -z "${MYSHELLCONFIG_GIT_BRANCH+x}" ] && export MYSHELLCONFIG_GIT_BRANCH=master
+    [ -z "${MSC_LOGDIR+x}" ]                  && export MSC_LOGDIR="${HOME}/logs"
+    [ -z "${MSC_LOGFILE+x}" ]                 && export MSC_LOGFILE="${MSC_LOGDIR}/myshellconfig.log"
+#MSC_LOGDIR="./logs"
+#MSC_LOGFILE="${MSC_LOGDIR}/git.log"
+[ -d "${MSC_LOGDIR}" ] || mkdir -p "${MSC_LOGDIR}"
+[ -z "${MSC_GIT_REMOTE_NAME+x}" ] && export MSC_GIT_REMOTE_NAME=origin
+[ -z "${MSC_GIT_BRANCH+x}" ] && export MSC_GIT_BRANCH=master
+
+lastupdatesubmodules () {
+    date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules
+}
+lastupdaterepo () {
+    date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_repo
+}
 
 gitupdateend() {
-cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+    cat << EOF >> "${MSC_LOGFILE}"
 
 +-----ENDE git update repo $(date) ---------------------------------+
  
@@ -29,7 +36,7 @@ EOF
 }
 
 ENTRY
-cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+cat << EOF >> "${MSC_LOGFILE}"
 +-----BEGINN git update repo $(date) -------------------------------+
 EOF
 
@@ -39,7 +46,7 @@ while [ $# -gt 0 ]; do
     case $1 in
         -h|--headless)
             # Headless repo local
-            PRE="${MYSHELLCONFIG_GIT_REMOTE_NAME}"
+            PRE="${MSC_GIT_REMOTE_NAME}"
             shift
             ;;
         -s|--submodules-update)
@@ -53,38 +60,43 @@ while [ $# -gt 0 ]; do
     esac
 done
 # If TAG is set, checkout is always headless. 
-[ -z "${MYSHELLCONFIG_GIT_TAG:+x}" ] || { export MYSHELLCONFIG_GIT_BRANCH=${MYSHELLCONFIG_GIT_TAG}; export PRE=""; }
+[ -z "${MSC_GIT_TAG:+x}" ] || { export MSC_GIT_BRANCH=${MSC_GIT_TAG}; export PRE=""; }
 
 # Output
-#echo -n " remote: ${MYSHELLCONFIG_GIT_REMOTE_NAME}, branch: ${MYSHELLCONFIG_GIT_BRANCH}: "
+#echo -n " remote: ${MSC_GIT_REMOTE_NAME}, branch: ${MSC_GIT_BRANCH}: "
 
 # Check for updates in submodules only if last check was INTERVALL hours in the past
-updated=$(cat ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 )
-logtrace "dosubmodupdate before: $dosubmodupdate"
-if [ $updated -lt $(date --date="${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") -a ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
-    [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
-fi
-logtrace "dosubmodupdate after: $dosubmodupdate"
-    
-#echo $SGIT fetch ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p 1>&2 
-loginfo "fetch repo${dosubmodupdate:+ and submodules}"
-$SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MYSHELLCONFIG_GIT_REMOTE_NAME} -p  2>>"${MYSHELLCONFIG_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
-if ${dosubmodupdate:-false}; then 
-    date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+if [ $(cat ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 ) \
+    -lt $(date --date="${MSC_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") \
+    -a ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
+    [ -z "${dosrepoupdate+x}" ] && dorepoupdate="true"
 fi
 
-echo "Check for local changes:" >> "${MYSHELLCONFIG_LOGFILE}"
-if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MYSHELLCONFIG_LOGFILE}" ; then
-    cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+if [ $(cat ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 ) \
+    -lt $(date --date="${MSC_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") \
+    -a ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
+    [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
+fi
+    
+#echo $SGIT fetch ${MSC_GIT_REMOTE_NAME} -p 1>&2 
+loginfo "fetch repo${dosubmodupdate:+ and submodules}"
+$SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MSC_GIT_REMOTE_NAME} -p  2>>"${MSC_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
+if ${dosubmodupdate:-false}; then 
+    lastupdatesubmodules
+fi
+
+echo "Check for local changes:" >> "${MSC_LOGFILE}"
+if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MSC_LOGFILE}" ; then
+    cat << EOF >> "${MSC_LOGFILE}"
     no changes in local repo
-    $SGIT checkout repo ${PRE}${PRE:+/}${MYSHELLCONFIG_GIT_BRANCH}
+    $SGIT checkout repo ${PRE}${PRE:+/}${MSC_GIT_BRANCH}
 EOF
-    $SGIT checkout ${PRE}${PRE:+/}${MYSHELLCONFIG_GIT_BRANCH} 1>>"${MYSHELLCONFIG_LOGFILE}" 2>>"${MYSHELLCONFIG_LOGFILE}"|| { gitupdateend; exit 2; }
-    $SGIT merge FETCH_HEAD 1>>"${MYSHELLCONFIG_LOGFILE}" 2>>"${MYSHELLCONFIG_LOGFILE}"|| { gitupdateend; exit 3; }
+    $SGIT checkout ${PRE}${PRE:+/}${MSC_GIT_BRANCH} 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 2; }
+    $SGIT merge FETCH_HEAD 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 3; }
 else
     logwarn -n "    Lokale Änderungen festgestellt:"
-    echo "    Siehe Logfile ${MYSHELLCONFIG_LOGFILE}" >&2
-    cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+    echo "    Siehe Logfile ${MSC_LOGFILE}" >&2
+    cat << EOF >> "${MSC_LOGFILE}"
     um die Änderung zurückzusetzen bitte
 
       $SGIT checkout \$FILENAME
@@ -107,17 +119,17 @@ fi
 
 loginfo "repo${dosubmodupdate:+ and submodules} synced"
 
-#if ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
+#if ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}}; then
     if ${dosubmodupdate:-false}; then 
         loginfo "update and commit submodules"
         logdebug "$($SGIT submodule update --remote)"
         logdebug "$($SGIT commit -a -m 'update submodules')"
-        date "+%s" > ${MYSHELLCONFIG_BASE%/}${MYSHELLCONFIG_BASE:+/}.last_update_submodules
+        lastupdatesubmodules
         logwarn "submodules synced"
     fi
 #else
 #    loginfo -n ", submodules not synced"
-#    logdebug "Do not update submodules. It's denied by environment MYSHELLCONFIG_GIT_UPDATE_SUBMODULES: ${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE-${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
+#    logdebug "Do not update submodules. It's denied by environment MSC_GIT_UPDATE_SUBMODULES: ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}}"
 #fi
 
 EXIT
