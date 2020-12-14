@@ -323,16 +323,16 @@ sshmyshellconfig() {
     $CMD /bin/bash << EOF
     [ -e /etc/bashrc ] && .  /etc/bashrc
     [ -e /etc/bash.bashrc ] && . /etc/bash.bashrc
-    loginfo "modify ~/.bashrc"
+    echo "modify ~/.bashrc"
     sed -i -e '/^\[ -f bashrc_add \] /d' ~/.bashrc
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
     printf "%s\n" "#MYSHELLCONFIG-start" "[ -f \"\${HOME}/${MSC_SUBPATH}/bashrc_add\" ] && . \"\${HOME}/${MSC_SUBPATH}/bashrc_add\""  "#MYSHELLCONFIG-end"| tee -a ~/.bashrc
     #printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MSC_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MSC_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
-    loginfo cleanup from old config
+    echo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
-    loginfo git clone
+    echo git clone
     git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_submodules
     date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
