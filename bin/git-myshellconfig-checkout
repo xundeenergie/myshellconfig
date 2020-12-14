@@ -20,12 +20,7 @@
 [ -z "${MSC_GIT_REMOTE_NAME+x}" ] && export MSC_GIT_REMOTE_NAME=origin
 [ -z "${MSC_GIT_BRANCH+x}" ] && export MSC_GIT_BRANCH=master
 
-lastupdatesubmodules () {
-    date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules
-}
-lastupdaterepo () {
-    date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_repo
-}
+
 
 gitupdateend() {
     cat << EOF >> "${MSC_LOGFILE}"

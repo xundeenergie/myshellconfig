@@ -334,6 +334,8 @@ sshmyshellconfig() {
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
     loginfo git clone
     git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
+    date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules
+    date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_repo
 
 EOF
     EXIT

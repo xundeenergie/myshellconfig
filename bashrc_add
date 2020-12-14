@@ -103,6 +103,16 @@ EOF
 
     }
 
+    lastupdatesubmodules () {
+        date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules
+    }
+    export -f lastupdatesubmodules
+
+    lastupdaterepo () {
+        date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_repo
+    }
+    export -f lastupdaterepo
+
     sync_config () {
         if $MSC_GIT_SYNC; then
             local nok=""
