@@ -356,7 +356,7 @@ sshs() {
     echo "FILELIST: $FILELIST"
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
         for f in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
-            [ -e "$f" ] && {\
+            [ -e "$f" ] && {\
                 echo "add $f to FILELIST"; \
                 FILELIST+=("$f"); } 
         done
