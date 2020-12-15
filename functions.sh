@@ -354,7 +354,7 @@ sshs() {
     local FILELIST=( "${MSC_BASE}/functions.sh" "${MSC_BASE}/logging" "${MSC_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MSC_BASE}/aliases" "${MSC_BASE}/PS1" "${MSC_BASE}/bash_completion.d/*" )
 
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
-        cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf"|while read i;do
+        for file in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
             echo "add $i to FILELIST"
             FILELIST+=("$i") 
         done
