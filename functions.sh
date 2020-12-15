@@ -919,27 +919,27 @@ get_crtime() {
     }
 
 # jira-confluence-specific is temporary in here
-function getdbcreds_jira () {
-    [ $# -eq 0 ] return 1
-
-    DB_FILE=$1
-
-    DB_URL="$(grep -oPm1 "(?<=<url>)[^<]+" ${DB_FILE})"
-    DB_USER="$(grep -oPm1 "(?<=<username>)[^<]+" ${DB_FILE})"
-    DB_PWD="$(grep -oPm1 "(?<=<password>)[^<]+" ${DB_FILE})"
-    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\1@')"
-    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\2@')"
-    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\3@')"
-
-    cat << \
-        EOF
-        DB_HOST: ${DB_HOST}
-        DB_PORT: ${DB_PORT}
-        DB_NAME: ${DB_NAME}
-        DB_USER: ${DB_USER}
-        DB_PWD:  ${DB_PWD}
-EOF
-    return 0
-}
+#function getdbcreds_jira () {
+#    [ $# -eq 0 ] return 1
+#
+#    DB_FILE=$1
+#
+#    DB_URL="$(grep -oPm1 "(?<=<url>)[^<]+" ${DB_FILE})"
+#    DB_USER="$(grep -oPm1 "(?<=<username>)[^<]+" ${DB_FILE})"
+#    DB_PWD="$(grep -oPm1 "(?<=<password>)[^<]+" ${DB_FILE})"
+#    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\1@')"
+#    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\2@')"
+#    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\3@')"
+#
+#    cat << \
+#        EOF
+#        DB_HOST: ${DB_HOST}
+#        DB_PORT: ${DB_PORT}
+#        DB_NAME: ${DB_NAME}
+#        DB_USER: ${DB_USER}
+#        DB_PWD:  ${DB_PWD}
+#EOF
+#    return 0
+#}
 
 #EOF
