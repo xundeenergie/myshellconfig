@@ -355,6 +355,7 @@ sshs() {
 
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
         cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf"|while read i;do
+            echo "add $i to FILELIST"
             FILELIST+=("$i") 
         done
     fi
@@ -386,7 +387,7 @@ EOF
 
     for f in ${FILELIST[*]}; do
         if [ -e $f ]; then
-            #echo add $f to tmpconfig
+            echo add $f to tmpconfig
             cat "$f" >> "${TMPBASHCONFIG}";
         fi
     done
