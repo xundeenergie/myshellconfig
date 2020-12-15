@@ -353,6 +353,11 @@ sshs() {
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
     local FILELIST=( "${MSC_BASE}/functions.sh" "${MSC_BASE}/logging" "${MSC_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MSC_BASE}/aliases" "${MSC_BASE}/PS1" "${MSC_BASE}/bash_completion.d/*" )
 
+    if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
+        cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf"|while read i;do
+            FILELIST+=("$i") 
+        done
+    fi
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
@@ -912,4 +917,29 @@ get_crtime() {
     printf "%s\t%s\n" "${target}" "${crtime}"
   done
     }
+
+# jira-confluence-specific is temporary in here
+function getdbcreds_jira () {
+    [ $# -eq 0 ] return 1
+
+    DB_FILE=$1
+
+    DB_URL="$(grep -oPm1 "(?<=<url>)[^<]+" ${DB_FILE})"
+    DB_USER="$(grep -oPm1 "(?<=<username>)[^<]+" ${DB_FILE})"
+    DB_PWD="$(grep -oPm1 "(?<=<password>)[^<]+" ${DB_FILE})"
+    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\1@')"
+    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\2@')"
+    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\3@')"
+
+    cat << \
+        EOF
+        DB_HOST: ${DB_HOST}
+        DB_PORT: ${DB_PORT}
+        DB_NAME: ${DB_NAME}
+        DB_USER: ${DB_USER}
+        DB_PWD:  ${DB_PWD}
+EOF
+    return 0
+}
+
 #EOF
