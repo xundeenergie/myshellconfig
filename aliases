@@ -61,9 +61,9 @@ alias goarchive='[ -e $(xdg-user-dir ARCHIVE) ] && cd $(xdg-user-dir ARCHIVE)'
 alias godebian='cd ~/debian'
 alias gofvwm='cd /home/jakob/src/fvwmverve/'
 alias gofvwmsys='cd /usr/share/fvwm-verve/'
-alias goserverconfig='cd $MYSHELLCONFIG_BASE'
-alias gomyshellconfig='cd $MYSHELLCONFIG_BASE'
-alias catmyshellconfiglog='cat $MYSHELLCONFIG_LOGFILE'
+alias goserverconfig='cd $MSC_BASE'
+alias gomyshellconfig='cd $MSC_BASE'
+alias catmyshellconfiglog='cat $MSC_LOGFILE'
 alias goxund='cd /home/jakob/xundeenergie.at/'
 
 # system-dirs

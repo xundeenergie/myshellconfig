@@ -52,7 +52,7 @@ do
             appuser=jira
             ;;
         *)
-            echo "host ${DEST} not found -> exit"
+            echo "host ${DEST} not found -> exit"
             exit
             ;;
     esac

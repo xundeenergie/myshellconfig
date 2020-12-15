@@ -6,9 +6,23 @@
 
 export TMUX_SESSION_DIRS SETPROXY_CREDS_DIRS KERBEROS_CONFIG_DIRS
 
+promptcommandmunge () {
+    ENTRY
+    case ";${PROMPT_COMMAND};" in
+        "*;$1;*")
+            ;;
+        *)
+            if [ "$2" = "after" ] ; then
+                PROMPT_COMMAND="${PROMPT_COMMAND};$1"
+            else
+                PROMPT_COMMAND="$1;${PROMPT_COMMAND}"
+            fi
+    esac
+    EXIT
+}
 ## this function updates in combination with PROMPT_COMMAND the shell-environment-variables in tmus-sessions,
 #  every time prompt is called. It does it only, when called from tmux (Environment TMUX is set)
-function prompt_command() {
+function _tmux_hook() {
 #    [ -z "${TMUX+x}" ] || eval "$(tmux show-environment -s)"
 
     if [ -n "${TMUX}" ]; then
@@ -16,8 +30,25 @@ function prompt_command() {
     fi
 
 }
-PROMPT_COMMAND=prompt_command
 
+# Append `;` if PROMPT_COMMAND is not empty
+#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_tmux_hook"
+
+
+# To make the code more reliable on detecting the default umask
+function _umask_hook {
+  # Record the default umask value on the 1st run
+  [[ -z $DEFAULT_UMASK ]] && export DEFAULT_UMASK="$(builtin umask)"
+
+  if [[ -n $UMASK ]]; then
+    umask "$UMASK"
+  else
+    umask "$DEFAULT_UMASK"
+  fi
+}
+
+# Append `;` if PROMPT_COMMAND is not empty
+#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_umask_hook"
 
 cpb() {
     scp "$1" ${SSH_CLIENT%% *}:~/Work
@@ -40,22 +71,22 @@ sudo() {
 }
 create_symlinks() {
 
-    #echo MYSHELLCONFIG_BASE: $MYSHELLCONFIG_BASE
-#    MYSHELLCONFIG_BASEDIR="$1"
-#    DIR="$(basename ${MYSHELLCONFIG_BASEDIR})"
-#    cd  "${MYSHELLCONFIG_BASEDIR}"
-    cd ${MYSHELLCONFIG_BASE}
-    #echo "DIR MYSHELLCONFIG_BASEDIR $DIR $MYSHELLCONFIG_BASEDIR"
+    #echo MSC_BASE: $MSC_BASE
+#    MSC_BASEDIR="$1"
+#    DIR="$(basename ${MSC_BASEDIR})"
+#    cd  "${MSC_BASEDIR}"
+    cd ${MSC_BASE}
+    #echo "DIR MSC_BASEDIR $DIR $MSC_BASEDIR"
     git config credential.helper 'cache --timeout=300'
     #Anlegen von Symlinks
     rm -rf ~/.vimrc ~/.vim ~/bashrc_add ~/.gitconfig ~/.tmux.conf ~/.tmux
-    ln -sf "${MYSHELLCONFIG_BASE}/vimrc" ~/.vimrc
-    ln -sf "${MYSHELLCONFIG_BASE}/vim" ~/.vim
-    ln -sf "${MYSHELLCONFIG_BASE}/.gitconfig" ~/.gitconfig
-    ln -sf "${MYSHELLCONFIG_BASE}/.gitignore_global" ~/.gitignore_global
-    #ln -sf "${MYSHELLCONFIG_BASE}/bashrc_add" ~/bashrc_add
-    ln -sf "${MYSHELLCONFIG_BASE}/tmux" ~/.tmux
-    ln -sf "${MYSHELLCONFIG_BASE}/tmux/tmux.conf" ~/.tmux.conf
+    ln -sf "${MSC_BASE}/vimrc" ~/.vimrc
+    ln -sf "${MSC_BASE}/vim" ~/.vim
+    ln -sf "${MSC_BASE}/.gitconfig" ~/.gitconfig
+    ln -sf "${MSC_BASE}/.gitignore_global" ~/.gitignore_global
+    #ln -sf "${MSC_BASE}/bashrc_add" ~/bashrc_add
+    ln -sf "${MSC_BASE}/tmux" ~/.tmux
+    ln -sf "${MSC_BASE}/tmux/tmux.conf" ~/.tmux.conf
 
     # Configure to use githooks in .githooks, not in standardlocation .git/hooks
     $SGIT config core.hooksPath .githooks
@@ -127,9 +158,13 @@ mencfs () {
         return 2
     fi
 
+    logdebug "ENCDIR:   $ENCDIR"
     [ -z ${PKEY+x} ] && { EXIT; return 3; }
     [ -z ${ENCDIR+x} ] && { EXIT; return 4; }
+    [ -z "${DESTDIR+x}" ] && [ -n "${XDG_RUNTIME_DIR}" ] && DESTDIR="${XDG_RUNTIME_DIR}/decrypted/$(basename $ENCDIR| tr '[:lower:]' '[:upper:]'| sed -e 's/^\.//')"
     [ -z ${DESTDIR+x} ] && DESTDIR="$(dirname $ENCDIR)/$(basename $ENCDIR| tr '[:lower:]' '[:upper:]'| sed -e 's/^\.//')"
+    logdebug "DESTDIR:  $DESTDIR"
+    [ -d "$DESTDIR" ] || mkdir -p "$DESTDIR"
     $PASS "${PKEY}" 1>/dev/null 2>&1 || { logerror "entry $PKEY does not exist in passwordsotre"; return 5; }
     local ENCFS_PASSWORD=$($PASS "${PKEY}" | head -n1)
 
@@ -164,14 +199,14 @@ uencfs () {
         else
             loginfo "umount encrypted directory" $1 >&2
             sync
-            $FUSERMOUNT -u "$1"
+            $FUSERMOUNT -z -u "$1"
         fi
     else
         loginfo "no arguments given. Umount all mounted encfs-dirs" >&2
         for i in $(mount|grep encfs|sed -e 's/^encfs on \(.*\)\ type.*$/\1/');do
             loginfo "$FUSERMOUNT -u $i"
             sync
-            $FUSERMOUNT -u "$i"
+            $FUSERMOUNT -z -u "$i"
         done
         EXIT
         return 1
@@ -274,29 +309,33 @@ mkcd () {
 sshmyshellconfig() {
 
     ENTRY
-    [ -z "${MYSHELLCONFIG_SUBPATH+x}" ]     && MYSHELLCONFIG_SUBPATH=".local/myshellconfig"
-    [ -z "${MYSHELLCONFIG_BASE+x}" ]        && MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"
-    MYSHELLCONFIG_BASE_PARENT="$(dirname $MYSHELLCONFIG_BASE)"
+    [ -z "${MSC_SUBPATH+x}" ]     && MSC_SUBPATH=".local/myshellconfig"
+    [ -z "${MSC_BASE+x}" ]        && MSC_BASE="${HOME}/${MSC_SUBPATH}"
+    MSC_BASE_PARENT="$(dirname $MSC_BASE)"
 
     if [ $1 == "localhost" ]; then
         CMD=""
     else
         local SSH="/usr/bin/ssh"
-        [ -e ${MYSHELLCONFIG_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "mkdir -p ~/\$MYSHELLCONFIG_BASE_PARENT; cat > ~/bashrc_add" < "${MYSHELLCONFIG_BASE}/bashrc_add"
+        [ -e ${MSC_BASE}/bashrc_add ] && $SSH -T -o VisualHostKey=no $@ "mkdir -p ~/\$MSC_BASE_PARENT; cat > ~/bashrc_add" < "${MSC_BASE}/bashrc_add"
         local CMD="$SSH -T $@"
     fi
     $CMD /bin/bash << EOF
     [ -e /etc/bashrc ] && .  /etc/bashrc
     [ -e /etc/bash.bashrc ] && . /etc/bash.bashrc
-    loginfo "modify ~/.bashrc"
+    echo "modify ~/.bashrc"
     sed -i -e '/^\[ -f bashrc_add \] /d' ~/.bashrc
     sed -i -e '/#MYSHELLCONFIG-start/,/#MYSHELLCONFIG-end/d' ~/.bashrc
     echo
-    printf "%s\n" "#MYSHELLCONFIG-start" "[ -f \"\${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add\" ] && . \"\${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add\""  "#MYSHELLCONFIG-end"| tee -a ~/.bashrc
-    #printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MYSHELLCONFIG_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
+    printf "%s\n" "#MYSHELLCONFIG-start" "[ -f \"\${HOME}/${MSC_SUBPATH}/bashrc_add\" ] && . \"\${HOME}/${MSC_SUBPATH}/bashrc_add\""  "#MYSHELLCONFIG-end"| tee -a ~/.bashrc
+    #printf "%s\n" "#MYSHELLCONFIG-start" "if [ -e \${HOME}/${MSC_SUBPATH}/bashrc_add ]; then" "  . \${HOME}/${MSC_SUBPATH}/bashrc_add;" "else" "  if [ -f ~/bashrc_add ] ;then" "    . ~/bashrc_add;" "  fi;" "fi" "#MYSHELLCONFIG-end" |tee -a ~/.bashrc
     echo
-    loginfo cleanup from old config
+    echo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
+    echo git clone
+    git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
+    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_submodules
+    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
 
 EOF
     EXIT
@@ -312,8 +351,13 @@ sshs() {
 
     local f
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
-    local FILELIST=( "${MYSHELLCONFIG_BASE}/functions.sh" "${MYSHELLCONFIG_BASE}/logging" "${MYSHELLCONFIG_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MYSHELLCONFIG_BASE}/aliases" "${MYSHELLCONFIG_BASE}/PS1" "${MYSHELLCONFIG_BASE}/bash_completion.d/*" )
+    local FILELIST=( "${MSC_BASE}/functions.sh" "${MSC_BASE}/logging" "${MSC_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MSC_BASE}/aliases" "${MSC_BASE}/PS1" "${MSC_BASE}/bash_completion.d/*" )
 
+    if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
+        cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf"|while read i;do
+            FILELIST+=("$i") 
+        done
+    fi
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
@@ -350,8 +394,8 @@ EOF
     if [ $# -ge 1 ]; then
         if [ -e "${TMPBASHCONFIG}" ] ; then
            local RCMD="/bin/bash --noprofile --norc -c "
-           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
-           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
+           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
+           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
@@ -366,7 +410,7 @@ loginfo "This bash runs with temporary config from \$BASHRC"
 EOF
 
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
-           ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MYSHELLCONFIG_BASE}/vimrc"
+           ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MSC_BASE}/vimrc"
            RCMD="
            trap \"rm -f ${REMOTETMPBASHCONFIG} ${REMOTETMPVIMCONFIG}\" EXIT " ;
            ssh -t ${SSH_OPTS} $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
@@ -384,7 +428,7 @@ EOF
 }
 
 
-VIMRC="${MYSHELLCONFIG_BASE}/vimrc"
+VIMRC="${MSC_BASE}/vimrc"
 
 svi () { 
     ENTRY
@@ -413,14 +457,14 @@ svi () {
 vim-repair-vundle () {
     ENTRY
 
-    if [ -z ${MYSHELLCONFIG_BASE+x} ]; then   
-        echo "MYSHELLCONFIG_BASE nicht gesetzt. Eventuell noch einmal ausloggen und wieder einloggen"
+    if [ -z ${MSC_BASE+x} ]; then   
+        echo "MSC_BASE nicht gesetzt. Eventuell noch einmal ausloggen und wieder einloggen"
     else
-        cd $MYSHELLCONFIG_BASE
+        cd $MSC_BASE
         cd vim/bundle
         rm -rf Vundle.vim
-        echo git clone  "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-$MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
-        git clone  "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER-$MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
+        echo git clone  "${MSC_GIT_SUBMODULES_SERVER-$MSC_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
+        git clone  "${MSC_GIT_SUBMODULES_SERVER-$MSC_GIT_SUBMODULES_SERVER_DEFAULT}gmarik/Vundle.vim.git"
         cd ~-
     fi
     EXIT
@@ -607,7 +651,7 @@ changebeep() {
 
 turnoffconfigsync() {
     ENTRY
-    local line='MYSHELLCONFIG_GIT_SYNC='
+    local line='MSC_GIT_SYNC='
     local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
@@ -618,7 +662,7 @@ turnoffconfigsync() {
 
 turnonconfigsync() {
     ENTRY
-    local line='MYSHELLCONFIG_GIT_SYNC='
+    local line='MSC_GIT_SYNC='
     local file=~/.bashrc
     if [ -e "${file}" ] ; then
         sed -i -e "/${line}/d" "${file}"
@@ -639,6 +683,18 @@ function gnome-shell-extensions-enable-defaults() {
     EXIT
 }
 
+gnome-shell-extensions-make-actual-permanent() {
+    ENTRY
+    file="${HOME}/.config/gnome-shell-extensions-default.list"
+    local EXTENSIONS=$(gsettings get org.gnome.shell enabled-extensions)
+    line="[org/gnome/shell]"
+    for line in ${EXTENSIONS[@]}; do
+        loginfo "add $line to $file"
+        grep -xqF -- ${line} ${file} || echo $line >> $file
+    done
+
+    EXIT
+}
 gnome-shell-extensions-make-actual-permanent-systemwide() {
     ENTRY
     # https://people.gnome.org/~pmkovar/system-admin-guide/extensions-enable.html
@@ -851,4 +907,39 @@ EOF
 rescan_scsi () {
     echo "- - -" > /sys/class/scsi_host/host0/scan
 }
+
+get_crtime() {
+  for target in "${@}"; do
+    inode=$(stat -c %i "${target}")
+    fs=$(df  --output=source "${target}"  | tail -1)
+    crtime=$(sudo debugfs -R 'stat <'"${inode}"'>' "${fs}" 2>/dev/null | 
+    grep -oP 'crtime.*--\s*\K.*')
+    printf "%s\t%s\n" "${target}" "${crtime}"
+  done
+    }
+
+# jira-confluence-specific is temporary in here
+function getdbcreds_jira () {
+    [ $# -eq 0 ] return 1
+
+    DB_FILE=$1
+
+    DB_URL="$(grep -oPm1 "(?<=<url>)[^<]+" ${DB_FILE})"
+    DB_USER="$(grep -oPm1 "(?<=<username>)[^<]+" ${DB_FILE})"
+    DB_PWD="$(grep -oPm1 "(?<=<password>)[^<]+" ${DB_FILE})"
+    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\1@')"
+    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\2@')"
+    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*):\(.*\)/\(.*\)$@\3@')"
+
+    cat << \
+        EOF
+        DB_HOST: ${DB_HOST}
+        DB_PORT: ${DB_PORT}
+        DB_NAME: ${DB_NAME}
+        DB_USER: ${DB_USER}
+        DB_PWD:  ${DB_PWD}
+EOF
+    return 0
+}
+
 #EOF

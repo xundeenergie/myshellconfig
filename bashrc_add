@@ -9,8 +9,9 @@
 #trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
 
 
-# set SSHS to false, if not set
+# set some variables to defaults, if not set in .bashrc
 [ -z ${SSHS+x} ] && export SSHS=false
+[ -z ${STARTTMUX+x} ] && export STARTTMUX=false
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
@@ -20,11 +21,16 @@ if [[ $- = *i* ]] ; then
 
     # define variables
     # Base Path
-    [ -z "${MYSHELLCONFIG_SUBPATH+x}" ]                 && export MYSHELLCONFIG_SUBPATH=".local/myshellconfig"
-    [ -z "${MYSHELLCONFIG_BASE+x}" ]                    && export MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"
+    [ -z "${MSC_SUBPATH+x}" ]                 && export MSC_SUBPATH=".local/myshellconfig"
+    [ -z "${MSC_BASE+x}" ]                    && export MSC_BASE="${HOME}/${MSC_SUBPATH}"
+
     # hardcoded paths
-    export MYSHELLCONFIG_BASE_PARENT="$(dirname $MYSHELLCONFIG_BASE)"
-    export MYSHELLCONFIG_BASH_COMPLETION="${HOME}/${MYSHELLCONFIG_SUBPATH}/bash_completion.d"
+    export MSC_BASE_PARENT="$(dirname $MSC_BASE)"
+    export MSC_BASH_COMPLETION="${HOME}/${MSC_SUBPATH}/bash_completion.d"
+
+    # Load DEFAULTS
+    [ -e ${MSC_BASE}/defaults.conf ] && . ${MSC_BASE}/defaults.conf
+
 
     # Userdata
     [ -z "${USERNAME+x}" ]                              && export USERNAME="$USER"
@@ -36,34 +42,36 @@ if [[ $- = *i* ]] ; then
     [ -z "${GIT_AUTHOR_EMAIL+x}" ]                              && export GIT_AUTHOR_EMAIL=$USEREMAIL
     [ -z "${GIT_COMMITTER_NAME+x}" ]                            && export GIT_COMMITTER_NAME=$FULLNAME
     [ -z "${GIT_COMMITTER_EMAIL+x}" ]                           && export GIT_COMMITTER_EMAIL=$USEREMAIL
-    [ -z "${MYSHELLCONFIG_GIT_TIMEOUT+x}" ]                     && export MYSHELLCONFIG_GIT_TIMEOUT=5s
-    [ -z "${MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT+x}" ]            && export MYSHELLCONFIG_GIT_CHECKOUT_TIMEOUT=20s
-    [ -z "${MYSHELLCONFIG_GIT_SYNC+x}" ]                        && export MYSHELLCONFIG_GIT_SYNC=true
-    [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT+x}" ]   && export MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_DEFAULT=true
-    [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL+x}" ] && export MYSHELLCONFIG_GIT_SUBMODULES_UPDATE_INTERVALL=48 #intervall in hours
-    [ -z "${MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT+x}" ]   && export MYSHELLCONFIG_GIT_SUBMODULES_SERVER_DEFAULT="git://git.schuerz.at/github.com/"
+
+    [ -z "${MSC_GIT_TIMEOUT+x}" ]                     && export MSC_GIT_TIMEOUT=5s
+    [ -z "${MSC_GIT_CHECKOUT_TIMEOUT+x}" ]            && export MSC_GIT_CHECKOUT_TIMEOUT=20s
+    [ -z "${MSC_GIT_SYNC+x}" ]                        && export MSC_GIT_SYNC=true
+    [ -z "${MSC_GIT_SUBMODULES_UPDATE_DEFAULT+x}" ]   && export MSC_GIT_SUBMODULES_UPDATE_DEFAULT=true
+    [ -z "${MSC_GIT_SUBMODULES_UPDATE_INTERVALL+x}" ] && export MSC_GIT_SUBMODULES_UPDATE_INTERVALL=48 #intervall in hours
+    [ -z "${MSC_GIT_SUBMODULES_SERVER_DEFAULT+x}" ]   && export MSC_GIT_SUBMODULES_SERVER_DEFAULT="git://git.schuerz.at/github.com/"
+    [ -z "${MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT+x}" ]  && export MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT="-h"
     # hardcoded git
-    export SGIT="git -C ${MYSHELLCONFIG_BASE}" 
+    export SGIT="git -C ${MSC_BASE}" 
 
 
     
     # git-repo-url for vim plugin
     # TODO: check how to use
-    export MYSHELLCONFIG_VIM_PLUGINS
+    export MSC_VIM_PLUGINS
 
 
     # Logging
-    [ -z "${MYSHELLCONFIG_LOGDIR+x}" ]                  && export MYSHELLCONFIG_LOGDIR="${HOME}/logs"
-    [ -z "${MYSHELLCONFIG_LOGFILE+x}" ]                 && export MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/myshellconfig.log"
-    [ -z "${MYHSELLCONFIG_LOGLEVEL_DEFAULT+x}" ]        && export MYHSELLCONFIG_LOGLEVEL_DEFAULT="INFO"
-    [ -z "${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT+x}" ]    && export MYHSELLCONFIG_FILELOGLEVEL_DEFAULT="DEBUG"
-    [ -z "${SCRIPT_LOG+x}" ]                            && export SCRIPT_LOG="${MYSHELLCONFIG_LOGFILE}"
-    [ -z "${LOGLEVEL_DEFAULT+x}" ]                      && export LOGLEVEL_DEFAULT="${MYHSELLCONFIG_LOGLEVEL_DEFAULT-INFO}"
-    [ -z "${FILELOGLEVEL_DEFAULT+x}" ]                  && export FILELOGLEVEL_DEFAULT="${MYHSELLCONFIG_FILELOGLEVEL_DEFAULT-INFO}"
+    [ -z "${MSC_LOGDIR+x}" ]                  && export MSC_LOGDIR="${HOME}/logs"
+    [ -z "${MSC_LOGFILE+x}" ]                 && export MSC_LOGFILE="${MSC_LOGDIR}/myshellconfig.log"
+    [ -z "${MSC_LOGLEVEL_DEFAULT+x}" ]        && export MSC_LOGLEVEL_DEFAULT="INFO"
+    [ -z "${MSC_FILELOGLEVEL_DEFAULT+x}" ]    && export MSC_FILELOGLEVEL_DEFAULT="DEBUG"
+    [ -z "${SCRIPT_LOG+x}" ]                            && export SCRIPT_LOG="${MSC_LOGFILE}"
+    [ -z "${LOGLEVEL_DEFAULT+x}" ]                      && export LOGLEVEL_DEFAULT="${MSC_LOGLEVEL_DEFAULT-INFO}"
+    [ -z "${FILELOGLEVEL_DEFAULT+x}" ]                  && export FILELOGLEVEL_DEFAULT="${MSC_FILELOGLEVEL_DEFAULT-INFO}"
     # Create necessary directories for logging
-    [ -n "${MYSHELLCONFIG_LOGDIR-x}" ] && mkdir -p "$MYSHELLCONFIG_LOGDIR"
+    [ -n "${MSC_LOGDIR-x}" ] && mkdir -p "$MSC_LOGDIR"
     # load logging functions
-    . ${MYSHELLCONFIG_BASE}/logging
+    . ${MSC_BASE}/logging
 
     # PKCS11_MODULE for etoken/smartcard authentification
     [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && PKCS11_MODULE=$(whereis p11-kit-proxy.so|awk '{print $2}')
@@ -72,17 +80,18 @@ if [[ $- = *i* ]] ; then
     [ -z "${VISUAL+x}" ]    && export VISUAL=vim
     [ -z "${EDITOR+x}" ]    && export EDITOR=vim
 
-    cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+    cat << EOF >> "${MSC_LOGFILE}"
 ==8<=== start configure new shell ============== $(date) ===============8<==
 
 EOF
 
     SCRIPTENTRY
     # define functions
+
     ckrepo () {
         # check if remote repo is reachable
-        if $MYSHELLCONFIG_GIT_SYNC; then
-            if $( timeout --foreground "${MYSHELLCONFIG_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
+        if $MSC_GIT_SYNC; then
+            if $( timeout --foreground "${MSC_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
                 return 0
             else 
                 return 1
@@ -94,21 +103,26 @@ EOF
 
     }
 
+    lastupdatesubmodules () {
+        date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules
+    }
+    export -f lastupdatesubmodules
+
+    lastupdaterepo () {
+        date "+%s" > ${MSC_BASE%/}${MSC_BASE:+/}.last_update_repo
+    }
+    export -f lastupdaterepo
+
     sync_config () {
-        if $MYSHELLCONFIG_GIT_SYNC; then
+        if $MSC_GIT_SYNC; then
             local nok=""
             local gco=""
             if which git >/dev/null; then
-                loginfo -n "Sync config with ${MYSHELLCONFIG_GIT_SERVER}: " 
-                # MYSHELLCONFIG_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
-                if [ -z ${MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS+x} ]; then
-                    gco="-h"
-                else
-                    gco="$MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS"
-                fi
-                ${MYSHELLCONFIG_BASE}/bin/git-myshellconfig-checkout ${gco}|| nok="not " 1>>"${MYSHELLCONFIG_LOGFILE}" 2>&1 
+                loginfo -n "Sync config with ${MSC_GIT_SERVER}: " 
+                # MSC_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
+                ${MSC_BASE}/bin/git-myshellconfig-checkout ${MSC_GIT_CHECKOUTSCRIPT_OPTIONS:=${MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT}}|| nok="not " 1>>"${MSC_LOGFILE}" 2>&1 
                 loginfo "$(printf '%s\n' "${nok}synced" )"
-                [ -z "$nok"  ] && mkdir -pv "${MYSHELLCONFIG_LOGDIR}"
+                [ -z "$nok"  ] && mkdir -pv "${MSC_LOGDIR}"
 
             else
                 logwarn "git not installed, no configuration possible, please install git" >&2
@@ -134,8 +148,8 @@ EOF
         EXIT
     }
 
-    if [ -d "${MYSHELLCONFIG_BASE}/bin" ] ; then
-        pathmunge "${MYSHELLCONFIG_BASE}/bin"
+    if [ -d "${MSC_BASE}/bin" ] ; then
+        pathmunge "${MSC_BASE}/bin"
         export PATH
     fi
 
@@ -162,20 +176,42 @@ EOF
     fi
 
     # source git-sync part of myshellconfig
-    . "${MYSHELLCONFIG_BASE}/myshell_git_sync"
+    . "${MSC_BASE}/myshell_git_sync"
 
     # source loading defaults part of myshellconfig
-    . "${MYSHELLCONFIG_BASE}/myshell_load_defaults"
+    . "${MSC_BASE}/myshell_load_defaults"
 
     # source loading workaround for x2go to forward local etoken to remote machine with forwardagent
-    . "${MYSHELLCONFIG_BASE}/myshell_load_x2go_tokenforward"
+    . "${MSC_BASE}/myshell_load_x2go_tokenforward"
 
+    promptcommandmunge "_tmux_hook"
+    promptcommandmunge "_umask_hook"
+    which direnv >/dev/null && eval "$(direnv hook bash)"
   
-    cat << EOF >> "${MYSHELLCONFIG_LOGFILE}"
+    cat << EOF >> "${MSC_LOGFILE}"
 ==8<=== finished configure new shell ================ $(date) ===============8<==
 
 EOF
 #else
 #    echo "non-interactive shell" >&2
     SCRIPTEXIT
+
+    # Start tmux if not defined as STARTTMUX in bashrc
+    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
+    if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
+        cat << EOF
+
+"User: $USER - $UID"
+
+Starting or resuming screen session
+Press CTRL+C to cancel screen startup
+
+EOF
+        sleep 1
+        #screen -UxR
+        tmux attach-session
+        logdebug "started tmux"
+    fi
+    logdebug "after"
+
 fi
