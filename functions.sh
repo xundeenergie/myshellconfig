@@ -355,8 +355,9 @@ sshs() {
 
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
         for file in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
-            echo "add $i to FILELIST"
-            FILELIST+=("$i") 
+            [ -e "$file" ] && {\
+                echo "add $file to FILELIST"; \
+                FILELIST+=("$i"); } 
         done
     fi
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
