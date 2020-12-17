@@ -49,7 +49,7 @@ Ausloggen und neu Einloggen.
 ## Lokale Configuration
 in ~/.bashrc werden vor der Zeile zum Einbinden der myshellconfig die Variablen eingefügt um damit ein hostspezifisches Verhalten zu steuern
 ```
-MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=
+MSC_GIT_CHECKOUTSCRIPT_OPTIONS=
 ```
 Mögliche Optionen:
 
@@ -64,13 +64,13 @@ Mit der Option -s kann ein Update der Submodules (tmux-, vim-plugins) erzwungen 
 
 
 ```
-MYSHELLCONFIG_GIT_CHECKOUTSCRIPT_OPTIONS=""
+MSC_GIT_CHECKOUTSCRIPT_OPTIONS=""
 ```
 
 ### Git Protokolle für push und pull
 ```
-MYSHELLCONFIG_GIT_REMOTE_PROTOCOL=git # git ist default
-MYSHELLCONFIG_GIT_REMOTE_PUSH_PROTOCOL=$MYSHELLCONFIG_GIT_REMOTE_PROTOCOL # MYSHELLCONFIG_GIT_REMOTE_PROTOCOL ist default
+MSC_GIT_REMOTE_PROTOCOL=git # git ist default
+MSC_GIT_REMOTE_PUSH_PROTOCOL=$MSC_GIT_REMOTE_PROTOCOL # MSC_GIT_REMOTE_PROTOCOL ist default
 ```
 
 Mögliche Optionen:
@@ -78,12 +78,12 @@ Mögliche Optionen:
     * git - (default) Gitprotokoll ist git (Auf manchen Umgebungen kann der dazu notwenidge Port gesperrt sein)
     * http - wenn git nicht möglich ist, kann das http/https Protokoll verwendet werden. (ist langsamer als git, jedoch ist fast überall Port 80 oder 440 freigeschaltet)
     * ssh - Wenn auch schreibend auf das Repo zugegriffen werden soll, so muss Privatekey, Pubkey (und wenn konfiguriert Certifikate mit den notwendigen Principals) vorhanden sein, dann kann das ssh-Prodokoll verwendet werden.
-    * file - Das entfernte Repository ist auf einem USB-Stick, welcher unter /media/$USER/gitstick beim Einstecken gemountet wird. Der Pfad ist anpassbar (siehe MYSHELLCONFIG_GIT_REPO_PATH)
+    * file - Das entfernte Repository ist auf einem USB-Stick, welcher unter /media/$USER/gitstick beim Einstecken gemountet wird. Der Pfad ist anpassbar (siehe MSC_GIT_REPO_PATH)
 
 Vim Plugins werden prinzipiell von github.com bezogen. Für spezielle Anwendungsfälle (github.com ist per firewall gesperrt), kann man diese auch in eigenen Repos hosten. Um diese eigenen Repos zu verwenden, muss in ~/.bashrc die Variable entsprechend gesetzt werden. Es ist ein Verzeichnis anzugeben, unter dem alle Pluginrepos als bare-Repos gecloned werden. Wichtig ist, dass die Usernamenverzeichnisse von github.com hier auch vorhanden sind, damit ohne dieser gesetzten Variable die Plugins direkt von github.com geladen werden können.
 
 ```
-MYSHELLCONFIG_VIM_PLUGINS=https://my.git.server/public/Vim
+MSC_VIM_PLUGINS=https://my.git.server/public/Vim
 ```
 
 Z.B. das Plugin Vundle.vim hat ist auf github unter dieser URL zu finden
@@ -97,17 +97,17 @@ https://my.git.server/public/Vim/gmarik/Vundle
 
 ### Über ~/.bashrc manuell festlegbare Variablen und ihre Default-Werte, wenn nicht manuell gesetzt:
 ```
-MYSHELLCONFIG_SUBPATH=.local/myshellconfig
-MYSHELLCONFIG_BASE="${HOME}/${MYSHELLCONFIG_SUBPATH}"
-MYSHELLCONFIG_LOGDIR="${MYSHELLCONFIG_BASE}/logs"
-MYSHELLCONFIG_LOGFILE="${MYSHELLCONFIG_LOGDIR}/git.log"
-MYSHELLCONFIG_GIT_TIMEOUT=5s
+MSC_SUBPATH=.local/myshellconfig
+MSC_BASE="${HOME}/${MSC_SUBPATH}"
+MSC_LOGDIR="${MSC_BASE}/logs"
+MSC_LOGFILE="${MSC_LOGDIR}/git.log"
+MSC_GIT_TIMEOUT=5s
 
-MYSHELLCONFIG_GIT_SERVER="git.schuerz.at"
-MYSHELLCONFIG_GIT_REPO_NAME="server-config.git"
-MYSHELLCONFIG_GIT_REPO_PATH_HTTP="/public/"
-MYSHELLCONFIG_GIT_REPO_PATH_SSH=":public/"
-MYSHELLCONFIG_GIT_REPO_PATH_GIT="/public/"
+MSC_GIT_SERVER="git.schuerz.at"
+MSC_GIT_REPO_NAME="server-config.git"
+MSC_GIT_REPO_PATH_HTTP="/public/"
+MSC_GIT_REPO_PATH_SSH=":public/"
+MSC_GIT_REPO_PATH_GIT="/public/"
 ```
 
 

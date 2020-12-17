@@ -7,6 +7,7 @@ export LOGFILE=./$(basename $0).move.log
 [ -z "${setdate+x}" ] && setdate=true
 [ -z "${setoriginalfilename+x}" ] && setoriginalfilename=false
 [ -z "${movecreatedate+x}" ] && movecreatedate=false
+[ -z "${setartist+x}" ] && setartist=false
 
 
 
@@ -40,6 +41,7 @@ help () {
     forcedate=$forcedate    [fase|true]         false: datetimeoriginal and createdate is only updated from filename, if not set; true: tags are always updated
     setdate=$setdate        [false|true]        false: do not set date-tags, only if you are sure, tags are ok, and you want move or copy files; 
     setoriginalfilenamee=$setoriginalfilename   [false|true|force]        false: do not set originalfilename from filname (default); true: set it, if not set; force: set it, also if exists; 
+    setartist=$setartist  [false|true|<User Name>]    true: set USERNAME from user, running the script; <User Name> set this User Name
 
     # destination
     dest=$dest
@@ -177,21 +179,51 @@ run_fix () {
                 logwarn "do not set original filname in case of setoriginalfilename=$setoriginalfilename"
                 ;;
         esac
-        if $forcedate; then
-            loginfo -n "set datetimeoriginal to $newDateTimeOriginal"
-            $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" "$file"
-            loginfo -n "set createdate to datetimeoriginal: "
-            $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
-            loginfo -n "set datetimeoriginal to createdate: "
-            $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
-        else
-            loginfo -n "set datetimeoriginal to $newDateTimeOriginal"
-            $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
-            loginfo -n "set createdate to datetimeoriginal: "
-            $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '(($createdate =~ "0000:00:00*" or not $createdate) and $datetimeoriginal)' "$file"
-            loginfo -n "set datetimeoriginal to createdate: "
-            $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
-        fi
+
+        case ${setartist:-false} in
+            false)
+                unset ARTIST
+                ;;
+            true)
+                ARTIST="${FULLNAME:-$(getent passwd $USER|awk -F ":" '{print $5}'|awk -F "," '{print $1}')}"
+                ;;
+            *)
+                ARTIST="$setartist"
+                ;;
+        esac
+        
+        [ -z "${ARTIST-x}" ] || exiftool -overwrite_original "-artist=$ARTIST" -if '(not $artist)' "$file"
+
+        case $forcedate in
+            true)
+                loginfo -n "set datetimeoriginal to $newDateTimeOriginal"
+                $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" "$file"
+                loginfo -n "set createdate to datetimeoriginal: "
+                $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+                loginfo -n "set datetimeoriginal to createdate: "
+                $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
+                ;;
+            sensitive)
+                if [[ $newDateTimeOriginal =~ ^([0-9]{4})(:)([0-9]{2})(:)([0-9]{2})( )([0-9]{2})(:)([0-9]{2})(:)([0-9]{2}).*$ ]]; then
+                    YYYYMM="$(printf "%04d:%02d:*"  "${BASH_REMATCH[1]#0}" "${BASH_REMATCH[3]#0}")"
+                    loginfo "YYYYMM: $YYYYMM"
+                fi
+                loginfo -n "set datetimeoriginal to $newDateTimeOriginal if not start with $YYYYMM"
+                $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $DateTimeOriginal =~ "'$YYYYMM'" )' "$file"
+                loginfo -n "set createdate to datetimeoriginal: "
+                $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '($datetimeoriginal)' "$file"
+                loginfo -n "set datetimeoriginal to createdate: "
+                $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
+                ;;
+            *)
+                loginfo -n "set datetimeoriginal to $newDateTimeOriginal"
+                $setdate && [ -n "$newDateTimeOriginal" ] && exiftool -overwrite_original "-DateTimeOriginal=$newDateTimeOriginal" -if '(not $datetimeoriginal)' "$file"
+                loginfo -n "set createdate to datetimeoriginal: "
+                $setdate && exiftool -overwrite_original '-createdate<datetimeoriginal' -if '(($createdate =~ "0000:00:00*" or not $createdate) and $datetimeoriginal)' "$file"
+                loginfo -n "set datetimeoriginal to createdate: "
+                $setdate && exiftool -overwrite_original '-datetimeoriginal<createdate' -if '(not $datetimeoriginal and $createdate)' "$file"
+                ;;
+        esac
 
         loginfo "fileinfos from modified file: $(exiftool -filename -createdate -datetimeoriginal -originalfilename "$file")"
 
@@ -249,10 +281,34 @@ run_fix () {
 
 }
 
+run_check () {
+    file="${@}"
+    mime="$(file --mime-type "$file" | awk '{print $NF}')"
+    loginfo "file: $file : mime-type: $mime"
+
+    newDateTimeOriginal="$(parsedatetime "$file")"
+    loginfo "search for DateTime-File: $newDateTimeOriginal"
+    #echo $newDateTimeOriginal|sed -e 's/://g;s/ /_/'
+    if [ $(find ${dest} -name "$(echo $newDateTimeOriginal|sed -e 's/://g;s/ /_/')*"|wc -l) -eq 0 ]; then
+        loginfo " not found"
+        echo "$@" |tee -a  holdfiles
+    else
+        loginfo " found"
+        echo "$@" |tee -a  rmfiles
+    fi
+
+
+}
+
 if [ $# -gt 0 ]; then
     case $1 in
         -h|help|--help)
             help
+            ;;
+        -c)
+            shift
+            loginfo "Check if createdate-file already exists"
+            run_check "${@}"
             ;;
         *)
             loginfo "Progress only one file from cmdline ${@}"
