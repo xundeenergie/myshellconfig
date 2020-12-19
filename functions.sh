@@ -948,7 +948,30 @@ get_crtime() {
 
 
 is_btrfs_subvolume() {
-    btrfs subvolume show "$1" >/dev/null 2>&1
+    sudo btrfs subvolume show "$1" >/dev/null
 }
 
+convert_to_subvolume () {
+    local XSUDO
+    local DIR
+    case $1 in
+        --sudo|-s)
+            XSUDO=sudo
+            shift
+            ;;
+    esac
+    DIR="${1}"
+    [ -d "${DIR}" ] || return 1
+    is_btrfs_subvolume "${DIR}" && return 0
+    set -x
+    #btrfs subvolume create "${DIR}".new && \ 
+    ${XSUDO:+sudo} btrfs subvolume create "${DIR}.new" && \
+    /bin/cp -Tr --reflink=always "${DIR}" "${DIR}".new && \ 
+    mv "${DIR}" "${DIR}".orig && \
+    mv "${DIR}".new "${DIR}" || return 2
+
+    set +x
+    return 0
+
+}
 #EOF
