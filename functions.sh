@@ -966,7 +966,7 @@ convert_to_subvolume () {
     set -x
     #btrfs subvolume create "${DIR}".new && \ 
     ${XSUDO:+sudo} btrfs subvolume create "${DIR}.new" && \
-    /bin/cp -Tr --reflink=always "${DIR}" "${DIR}".new && \ 
+    /bin/cp -aTr --reflink=always "${DIR}" "${DIR}".new && \ 
     mv "${DIR}" "${DIR}".orig && \
     mv "${DIR}".new "${DIR}" || return 2
 
