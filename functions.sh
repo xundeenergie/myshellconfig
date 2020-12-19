@@ -946,4 +946,9 @@ get_crtime() {
 #    return 0
 #}
 
+
+is_btrfs_subvolume() {
+    btrfs subvolume show "$1" >/dev/null 2>&1
+}
+
 #EOF
