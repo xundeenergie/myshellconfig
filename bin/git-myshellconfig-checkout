@@ -66,13 +66,13 @@ done
 [ -z "${MSC_GIT_UPD_REPO_STATFILE+x}" ] && export MSC_GIT_UPD_REPO_STATFILE="${MSC_BASE%/}${MSC_BASE:+/}.last_update_repo" 
 
 if [ $(stat --printf %Y ${MSC_GIT_UPD_SUBMOD_STATFILE}  2>/dev/null || echo 0 ) \
-    -lt $(date --date="${MSC_GIT_SUBMODULES_UPDATE_INTERVALL} hours ago" "+%s") \
+    -lt $(date --date="${MSC_GIT_SUBMODULES_UPDATE_INTERVALL-${MSC_GIT_SUBMODULES_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") \
     -a ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
     [ -z "${dosrepoupdate+x}" ] && dorepoupdate="true"
 fi
 
 if [ $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
-    -lt $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL} hours ago" "+%s") \
+    -lt $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") \
     -a ${MSC_GIT_REPO_UPDATE-${MSC_GIT_REPO_UPDATE_DEFAULT-true}} ]; then
     [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
 fi
