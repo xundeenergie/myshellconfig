@@ -48,8 +48,10 @@ if [[ $- = *i* ]] ; then
     [ -z "${MSC_GIT_TIMEOUT+x}" ]                           && export MSC_GIT_TIMEOUT=5s
     [ -z "${MSC_GIT_CHECKOUT_TIMEOUT+x}" ]                  && export MSC_GIT_CHECKOUT_TIMEOUT=20s
     [ -z "${MSC_GIT_SYNC+x}" ]                              && export MSC_GIT_SYNC=true
+    [ -z "${MSC_GIT_REPO_UPDATE_DEFAULT+x}" ]               && export MSC_GIT_REPO_UPDATE_DEFAULT=true
+    [ -z "${MSC_GIT_REPO_UPDATE_INTERVALL+x}" ]             && export MSC_GIT_REPO_UPDATE_INTERVALL=48 #intervall in hours
     [ -z "${MSC_GIT_SUBMODULES_UPDATE_DEFAULT+x}" ]         && export MSC_GIT_SUBMODULES_UPDATE_DEFAULT=true
-    [ -z "${MSC_GIT_SUBMODULES_UPDATE_INTERVALL+x}" ]       && export MSC_GIT_SUBMODULES_UPDATE_INTERVALL=96 #intervall in hours
+    [ -z "${MSC_GIT_SUBMODULES_UPDATE_INTERVALL+x}" ]       && export MSC_GIT_SUBMODULES_UPDATE_INTERVALL=168 #intervall in hours 168=1week
     [ -z "${MSC_GIT_SUBMODULES_SERVER_DEFAULT+x}" ]         && export MSC_GIT_SUBMODULES_SERVER_DEFAULT="git://git.schuerz.at/github.com/"
     [ -z "${MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT+x}" ]    && export MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT="-h"
     
