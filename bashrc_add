@@ -98,7 +98,7 @@ EOF
                     return 3
                 fi
             else
-                logwarn "sync-intervall not reached"
+                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) not reached"
                 return 2
             fi
         else
