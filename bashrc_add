@@ -98,8 +98,8 @@ EOF
                     return 3
                 fi
             else
-                local seconds=$(( $(date "+%s") - $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") ))
-                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours, $((seconds/86400)) days $(date -d "1970-01-01 + $seconds seconds" "+%H hours %M minutes %S seconds") left ) not reached"
+                local seconds=$(( $( date --date="@$(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 )" "+%s") - $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s")  ))
+                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) not reached yes. $((seconds/86400)) days $(date -d "1970-01-01 + $seconds seconds" "+%H hours %M minutes %S seconds") left."
                 return 2
             fi
         else
