@@ -44,7 +44,11 @@ while [ $# -gt 0 ]; do
             PRE="${MSC_GIT_REMOTE_NAME}"
             shift
             ;;
-        -s|--submodules-update)
+        -r|--force-repo-update)
+            dosubmodupdate="true"
+            shift
+            ;;
+        -s|--force-submodules-update)
             dosubmodupdate="true"
             shift
             ;;
@@ -68,7 +72,7 @@ done
 if [ $(stat --printf %Y ${MSC_GIT_UPD_SUBMOD_STATFILE}  2>/dev/null || echo 0 ) \
     -lt $(date --date="${MSC_GIT_SUBMODULES_UPDATE_INTERVALL-${MSC_GIT_SUBMODULES_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") \
     -a ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
-    [ -z "${dosrepoupdate+x}" ] && dorepoupdate="true"
+    [ -z "${dorepoupdate+x}" ] && dorepoupdate="true"
 fi
 
 if [ $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
@@ -78,53 +82,55 @@ if [ $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
 fi
     
 #echo $SGIT fetch ${MSC_GIT_REMOTE_NAME} -p 1>&2 
-loginfo "fetch repo${dosubmodupdate:+ and submodules}"
-$SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MSC_GIT_REMOTE_NAME} -p  2>>"${MSC_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
-if ${dosubmodupdate:-false}; then 
-    lastupdatesubmodules
-fi
+if $dorepoupdate; then
+    loginfo "fetch repo${dosubmodupdate:+ and submodules}"
+    $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MSC_GIT_REMOTE_NAME} -p  2>>"${MSC_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
+    if ${dosubmodupdate:-false}; then 
+        lastupdatesubmodules
+    fi
 
-echo "Check for local changes:" >> "${MSC_LOGFILE}"
-if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MSC_LOGFILE}" ; then
-    cat << EOF >> "${MSC_LOGFILE}"
-    no changes in local repo
-    $SGIT checkout repo ${PRE}${PRE:+/}${MSC_GIT_BRANCH}
+    echo "Check for local changes:" >> "${MSC_LOGFILE}"
+    if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MSC_LOGFILE}" ; then
+        cat << EOF >> "${MSC_LOGFILE}"
+        no changes in local repo
+        $SGIT checkout repo ${PRE}${PRE:+/}${MSC_GIT_BRANCH}
+    EOF
+        $SGIT checkout ${PRE}${PRE:+/}${MSC_GIT_BRANCH} 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 2; }
+        $SGIT merge FETCH_HEAD 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 3; }
+        touch $MSC_GIT_UPD_REPO_STATFILE
+    else
+        logwarn -n "    Lokale Änderungen festgestellt:"
+        echo "    Siehe Logfile ${MSC_LOGFILE}" >&2
+        cat << EOF >> "${MSC_LOGFILE}"
+        um die Änderung zurückzusetzen bitte
+
+          $SGIT checkout \$FILENAME
+
+        oder um alle lokalen Änderungen auf einmal zurückzusetzen:
+
+          $SGIT checkout .
+
+        ausführen
+
+        Die Änderungen sind:
+        $($SGIT diff-index HEAD --|awk '{print $5, $6}')
+        $($SGIT diff-index -p HEAD --)
 EOF
-    $SGIT checkout ${PRE}${PRE:+/}${MSC_GIT_BRANCH} 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 2; }
-    $SGIT merge FETCH_HEAD 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 3; }
-    touch $MSC_GIT_UPD_REPO_STATFILE
-else
-    logwarn -n "    Lokale Änderungen festgestellt:"
-    echo "    Siehe Logfile ${MSC_LOGFILE}" >&2
-    cat << EOF >> "${MSC_LOGFILE}"
-    um die Änderung zurückzusetzen bitte
 
-      $SGIT checkout \$FILENAME
+        gitupdateend
+        exit 4
 
-    oder um alle lokalen Änderungen auf einmal zurückzusetzen:
+    fi
 
-      $SGIT checkout .
+    loginfo "repo${dosubmodupdate:+ and submodules} synced"
 
-    ausführen
-
-    Die Änderungen sind:
-    $($SGIT diff-index HEAD --|awk '{print $5, $6}')
-    $($SGIT diff-index -p HEAD --)
-EOF
-
-    gitupdateend
-    exit 4
-
-fi
-
-loginfo "repo${dosubmodupdate:+ and submodules} synced"
-
-if ${dosubmodupdate:-false}; then 
-    loginfo "update and commit submodules"
-    logdebug "$($SGIT submodule update --remote)"
-    logdebug "$($SGIT commit -a -m 'update submodules')"
-    touch $MSC_GIT_UPD_SUBMOD_STATFILE
-    logwarn "submodules synced"
+    if ${dosubmodupdate:-false}; then 
+        loginfo "update and commit submodules"
+        logdebug "$($SGIT submodule update --remote)"
+        logdebug "$($SGIT commit -a -m 'update submodules')"
+        touch $MSC_GIT_UPD_SUBMOD_STATFILE
+        logwarn "submodules synced"
+    fi
 fi
 
 EXIT
