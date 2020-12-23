@@ -45,15 +45,9 @@ if [[ $- = *i* ]] ; then
     [ -z "${GIT_COMMITTER_NAME+x}" ]    && export GIT_COMMITTER_NAME=$FULLNAME
     [ -z "${GIT_COMMITTER_EMAIL+x}" ]   && export GIT_COMMITTER_EMAIL=$USEREMAIL
 
-    [ -z "${MSC_GIT_TIMEOUT+x}" ]                           && export MSC_GIT_TIMEOUT=5s
+#    [ -z "${MSC_GIT_TIMEOUT+x}" ]                           && export MSC_GIT_TIMEOUT=5s
     [ -z "${MSC_GIT_CHECKOUT_TIMEOUT+x}" ]                  && export MSC_GIT_CHECKOUT_TIMEOUT=20s
     [ -z "${MSC_GIT_SYNC+x}" ]                              && export MSC_GIT_SYNC=true
-    [ -z "${MSC_GIT_REPO_UPDATE_DEFAULT+x}" ]               && export MSC_GIT_REPO_UPDATE_DEFAULT=true
-    [ -z "${MSC_GIT_REPO_UPDATE_INTERVALL+x}" ]             && export MSC_GIT_REPO_UPDATE_INTERVALL=48 #intervall in hours
-    [ -z "${MSC_GIT_SUBMODULES_UPDATE_DEFAULT+x}" ]         && export MSC_GIT_SUBMODULES_UPDATE_DEFAULT=true
-    [ -z "${MSC_GIT_SUBMODULES_UPDATE_INTERVALL+x}" ]       && export MSC_GIT_SUBMODULES_UPDATE_INTERVALL=168 #intervall in hours 168=1week
-    [ -z "${MSC_GIT_SUBMODULES_SERVER_DEFAULT+x}" ]         && export MSC_GIT_SUBMODULES_SERVER_DEFAULT="git://git.schuerz.at/github.com/"
-    [ -z "${MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT+x}" ]    && export MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT="-h"
     
     # hardcoded git
     export SGIT="git -C ${MSC_BASE}" 
@@ -68,11 +62,7 @@ if [[ $- = *i* ]] ; then
     # Logging
     [ -z "${MSC_LOGDIR+x}" ]                && export MSC_LOGDIR="${HOME}/logs"
     [ -z "${MSC_LOGFILE+x}" ]               && export MSC_LOGFILE="${MSC_LOGDIR}/myshellconfig.log"
-    [ -z "${MSC_LOGLEVEL_DEFAULT+x}" ]      && export MSC_LOGLEVEL_DEFAULT="INFO"
-    [ -z "${MSC_FILELOGLEVEL_DEFAULT+x}" ]  && export MSC_FILELOGLEVEL_DEFAULT="DEBUG"
     [ -z "${SCRIPT_LOG+x}" ]                && export SCRIPT_LOG="${MSC_LOGFILE}"
-    [ -z "${LOGLEVEL_DEFAULT+x}" ]          && export LOGLEVEL_DEFAULT="${MSC_LOGLEVEL_DEFAULT-INFO}"
-    [ -z "${FILELOGLEVEL_DEFAULT+x}" ]      && export FILELOGLEVEL_DEFAULT="${MSC_FILELOGLEVEL_DEFAULT-INFO}"
     # Create necessary directories for logging
     [ -n "${MSC_LOGDIR-x}" ]                && mkdir -p "$MSC_LOGDIR"
     # load logging functions
@@ -95,9 +85,9 @@ EOF
 
     ckrepo () {
         # check if remote repo is reachable
-        if [ $MSC_GIT_SYNC -a $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
+        if [ ${MSC_GIT_SYNC-$MSC_GIT_REPO_UPDATE} -a $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
                 -lt $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-0} hours ago" "+%s") ]; then
-            if $( timeout --foreground "${MSC_GIT_TIMEOUT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
+            if $( timeout --foreground "${MSC_GIT_TIMEOUT-$MSC_GIT_TIMEOUT_DEFAULT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
                 return 0
             else 
                 return 1
