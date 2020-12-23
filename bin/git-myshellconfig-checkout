@@ -35,7 +35,7 @@ cat << EOF >> "${MSC_LOGFILE}"
 +-----BEGINN git update repo $(date) -------------------------------+
 EOF
 
-set -- $(getopt -u -o hs  --long headless,submodules-update -- "$@" )
+set -- $(getopt -u -o hrs  --long headless,force-repo-update,force-submodules-update -- "$@" )
 
 while [ $# -gt 0 ]; do
     case $1 in
