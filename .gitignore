@@ -11,3 +11,4 @@ bashrc_local
 .local_scripts
 .git-token
 .last_update_submodules
+.last_update_repo
