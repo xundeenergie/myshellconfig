@@ -98,7 +98,9 @@ EOF
                     return 3
                 fi
             else
-                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) not reached"
+                local seconds=$(( $(date "+%s") - $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") ))
+                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours, \
+                    $((seconds/86400))" days" $(date -d "1970-01-01 + $seconds seconds" "+%H hours %M minutes %S seconds") left ) not reached"
                 return 2
             fi
         else
