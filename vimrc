@@ -271,8 +271,8 @@ nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
  
 " Map :next to <C-TAB> 
-nmap <C-Tab> :next<CR>
-nmap <C-S-Tab> :prev<CR>
+nmap <C-Tab> :tabNext<CR>
+nmap <C-S-Tab> :tabPrev<CR>
 nmap <C-t> :tabnew<CR>
 "------------------------------------------------------------
 let g:SimplyFold_docstring_preview=1

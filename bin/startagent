@@ -7,7 +7,7 @@ for f in logerror logwarn loginfo logdebug logtrace ENTRY EXIT SCRIPTENTRY SCRIP
         :
     else
       fx=${f//log/}
-      #echo create function $f for $fx
+      echo create function $f for $fx
       eval "$f () { \
           local loglevels; \
           declare -a loglevels; \

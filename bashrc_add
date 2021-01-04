@@ -89,6 +89,7 @@ EOF
 
             if [ $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
                 -lt $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") ]; then
+                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) reached"
                 logwarn "check if reachable"
                 if $( timeout --foreground "${MSC_GIT_TIMEOUT-$MSC_GIT_TIMEOUT_DEFAULT}"  $SGIT ls-remote >/dev/null  2>&1) ;then 
                     logwarn "reachable"
@@ -99,7 +100,7 @@ EOF
                 fi
             else
                 local seconds=$(( $( date --date="@$(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 )" "+%s") - $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s")  ))
-                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) not reached yes. $((seconds/86400)) days $(date -d "1970-01-01 + $seconds seconds" "+%H hours %M minutes %S seconds") left."
+                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) not reached yet. $((seconds/86400)) days $(date -d "1970-01-01 + $seconds seconds" "+%H hours %M minutes %S seconds") left."
                 return 2
             fi
         else
