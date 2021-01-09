@@ -55,11 +55,11 @@ help () {
     ${dest}/${mimedestvid}/${subdestvid}/%Y/%Y_%m"
 
     Supported Filet-extensions
-    *.jpg, *.jpeg, *.png, *.mp4, *.3gp, *.gif
+    *.jpg, *.jpeg, *.png, *.mp4, *.mov, *.3gp, *.gif
 
     Examples:
     
-    # Scan current directory for all jpg|jpeg|mp4|png files, set datetimeoriginal and createdate
+    # Scan current directory for all jpg|jpeg|mp4|mov|png|3gp|gif files, set datetimeoriginal and createdate
     $(basename $0)
 
     # set datetimeoriginal and createdate from given file (only one is possible)
@@ -157,7 +157,7 @@ run_fix () {
         image/gif)
             MIMEDEST="${mimedestpic}/${subdestpic}"
             ;;
-        video/mp4|video/m4a|video/3gpp)
+        video/mp4|video/m4a|video/3gpp|application/octet-stream)
             MIMEDEST="${mimedestvid}/${subdestvid}"
             ;;
         *)
@@ -317,9 +317,9 @@ if [ $# -gt 0 ]; then
     esac
 
 else
-    loginfo "Progress all *.jpg, *.jpeg, *.png and mp4, *.3gp, *.gif files in pwd $(pwd)"
-    all=$(find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$\|.3gp$\|.gif$"|wc -l)
-    find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.png$\|.3gp$\|.gif$"|while read file; do
+    loginfo "Progress all *.jpg, *.jpeg, *.png and mp4, *.3gp, *.gif *.mov files in pwd $(pwd)"
+    all=$(find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.mov$\|.png$\|.3gp$\|.gif$"|wc -l)
+    find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.mov$\|.png$\|.3gp$\|.gif$"|while read file; do
         let "i=i+1"
         loginfo "$i/$all"
         run_fix "$file"
