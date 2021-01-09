@@ -38,17 +38,21 @@ help () {
                                                 renameinplace: rename file to YYYYMMDD_HHmmss-c.ext in place (just rename file)
                                                 rename: move like true, but rename ist like renameinplace
                                                 copyrename: rename file in place and copy it to final destination with new name
-    forcedate=$forcedate    [fase|true]         false: datetimeoriginal and createdate is only updated from filename, if not set; true: tags are always updated
+    forcedate=$forcedate    [false|true]         false: datetimeoriginal and createdate is only updated from filename, if not set; true: tags are always updated
     setdate=$setdate        [false|true]        false: do not set date-tags, only if you are sure, tags are ok, and you want move or copy files; 
-    setoriginalfilenamee=$setoriginalfilename   [false|true|force]        false: do not set originalfilename from filname (default); true: set it, if not set; force: set it, also if exists; 
+    setoriginalfilename=$setoriginalfilename   [false|true|force]        false: do not set originalfilename from filname (default); true: set it, if not set; force: set it, also if exists; 
     setartist=$setartist  [false|true|<User Name>]    true: set USERNAME from user, running the script; <User Name> set this User Name
 
     # destination
     dest=$dest
     mimedestpic=$mimedestpic
     mimedestvid=$mimedestvid
+
     subdestpic=$subdestpic
     subdestvid=$subdestvid
+
+    # or set subdestdefault, which is default for subdestpic and subdestvid
+    subdestdefault=$subdestdefault
 
     # final destinationpath
     ${dest}/${mimedestpic}/${subdestpic}/%Y/%Y_%m"
