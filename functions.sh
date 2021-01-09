@@ -353,13 +353,15 @@ sshs() {
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
     local FILELIST=( "${MSC_BASE}/functions.sh" "${MSC_BASE}/logging" "${MSC_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MSC_BASE}/aliases" "${MSC_BASE}/PS1" "${MSC_BASE}/bash_completion.d/*" )
 
+    echo "FILELIST: $FILELIST"
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
-        for file in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
-            [ -e "$file" ] && {\
-                echo "add $file to FILELIST"; \
-                FILELIST+=("$i"); } 
+        for f in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
+            [ -e "$f" ] && {\
+                echo "add $f to FILELIST"; \
+                FILELIST+=("$f"); } 
         done
     fi
+    echo "FILELIST: $FILELIST"
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%r@%h:%p"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
@@ -944,4 +946,32 @@ get_crtime() {
 #    return 0
 #}
 
+
+is_btrfs_subvolume() {
+    sudo btrfs subvolume show "$1" >/dev/null
+}
+
+convert_to_subvolume () {
+    local XSUDO
+    local DIR
+    case $1 in
+        --sudo|-s)
+            XSUDO=sudo
+            shift
+            ;;
+    esac
+    DIR="${1}"
+    [ -d "${DIR}" ] || return 1
+    is_btrfs_subvolume "${DIR}" && return 0
+    set -x
+    #btrfs subvolume create "${DIR}".new && \ 
+    ${XSUDO:+sudo} btrfs subvolume create "${DIR}.new" && \
+    /bin/cp -aTr --reflink=always "${DIR}" "${DIR}".new && \ 
+    mv "${DIR}" "${DIR}".orig && \
+    mv "${DIR}".new "${DIR}" || return 2
+
+    set +x
+    return 0
+
+}
 #EOF

@@ -116,13 +116,13 @@ if ! $SSHS; then
             else
                 loginfo "Clone ${MSC_GIT_REMOTE} and configure git" >&2
 
-                if $( timeout --foreground "${MSC_GIT_CHECKOUT_TIMEOUT}" \
+                if $( timeout --foreground "${MSC_GIT_CHECKOUT_TIMEOUT-$MSC_GIT_CHECKOUT_TIMEOUT_DEFAULT}" \
                     git -C ${HOME} clone --recurse-submodules "${MSC_GIT_REMOTE}" "${MSC_BASE}" ); then
                     :
                 else
                     MSC_GIT_REMOTE="${MSC_GIT_REMOTE_PUBLIC_HTTP}${MSC_GIT_REPO_NAME}"
                     loginfo "Clone ${MSC_GIT_REMOTE} (http, because other protocol is not reachable) and configure git" >&2
-                    timeout --foreground "${MSC_GIT_CHECKOUT_TIMEOUT}" \
+                    timeout --foreground "${MSC_GIT_CHECKOUT_TIMEOUT-$MSC_GIT_CHECKOUT_TIMEOUT_DEFAULT}" \
                         git -C ${HOME} clone --recurse-submodules "${MSC_GIT_REMOTE}" "${MSC_BASE}" || return 1 2>/dev/null || exit 1
                 fi
 
