@@ -117,7 +117,6 @@ export HISTTIMEFORMAT='%F %T  '
 export HISTSIZE=999999
 
 loginfo "bashrc_add sourced" 2>&1 |tee -a ${MSC_LOGFILE} >&2
-#echo "bashrc_add sourced" >&2
 
 # Export several functions for being usable in subshells
 export -f token
@@ -138,8 +137,3 @@ export -f reachable-default
 [ -z "${SSH_AGENTS_DEFAULT_DIR+x}" ] || mkdir -p "${SSH_AGENTS_DEFAULT_DIR}"
 
 
-#cat << EOF > "${SSH_AGENTS_DEFAULT_DIR}/agent-default-$(hostname)"
-#SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; export SSH_AUTH_SOCK;
-#SSH_AGENT_PID=${SSH_AGENT_PID}; export SSH_AGENT_PID;
-#loginfo Agent pid ${SSH_AGENT_PID};
-#EOF
