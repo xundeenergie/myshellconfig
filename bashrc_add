@@ -100,7 +100,7 @@ EOF
                 fi
             else
                 local seconds=$(( $( date --date="@$(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 )" "+%s") - $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s")  ))
-                logwarn "sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) not reached yet. $((seconds/86400)) days $(date -d "1970-01-01 + $seconds seconds" "+%H hours %M minutes %S seconds") left."
+                logwarn "repo sync-intervall (${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours) not reached yet. $((seconds/86400)) days $(date -d "1970-01-01 + $seconds seconds" "+%H hours %M minutes %S seconds") left."
                 return 2
             fi
         else
@@ -111,13 +111,11 @@ EOF
     }
 
     lastupdatesubmodules () {
-        #date "+%s" > ${MSC_GIT_UPD_SUBMOD_STATFILE}
-        touch ${MSC_GIT_UPD_REPO_STATFILE}
+        touch ${MSC_GIT_UPD_SUBMOD_STATFILE}
     }
     export -f lastupdatesubmodules
 
     lastupdaterepo () {
-        #date "+%s" > ${MSC_GIT_UPD_REPO_STATFILE}
         touch ${MSC_GIT_UPD_REPO_STATFILE}
     }
     export -f lastupdaterepo
