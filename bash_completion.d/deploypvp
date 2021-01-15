@@ -16,5 +16,5 @@ function _scppvpfiles() {
     COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
     return 0
 }
-complete -F _scppvpfiles scppvp
+complete -F _scppvpfiles scppvp deploypvp
 
