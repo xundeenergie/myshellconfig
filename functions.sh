@@ -115,6 +115,8 @@ setproxy () {
             fi
          ;;
     esac
+    
+    logwarn "CONFIG: ${CONFIG}"
 
     if [ -e ${CONFIG} ]; then
         loginfo -n "${CONFIG} existing: "
