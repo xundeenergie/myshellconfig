@@ -1,0 +1,20 @@
+function _scppvpconfig() {
+    CONFIG_DIRS=(~/.config/scppvp.d)
+    KEYS=""
+    for KEY_DIR in ${CONFIG_DIRS[*]};do
+        KEYS="${KEYS} $(find ${CONFIG_DIRS[*]} -type f -name "*.conf" -exec basename {} \; 2>/dev/null |sed 's/\.conf$//' )"
+    done
+    echo $KEYS
+    
+}
+
+function _scppvpfiles() {
+    COMPREPLY=()
+    local CUR KEYS
+    CUR="${COMP_WORDS[COMP_CWORD]}"
+    KEYS=$(_scppvpconfig)
+    COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
+    return 0
+}
+complete -F _scppvpfiles scppvp
+
