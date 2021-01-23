@@ -827,7 +827,7 @@ token(){
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
 #    startagent -t $@
     loadagent $@
-    loginfo "$(ssh-add -s $PKCS11_MODULE || { ssh-add -e $PKCS11-MODULE; ssh-add -s $PKCS11_MODULE; } )"
+    loginfo "$(ssh-add -s $PKCS11_MODULE || { ssh-add -e $PKCS11-MODULE; ssh-add -s $PKCS11_MODULE; } )"
     loginfo "$(ssh-add -l)"
 
     
