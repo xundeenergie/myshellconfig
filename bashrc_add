@@ -11,7 +11,6 @@
 
 # set some variables to defaults, if not set in .bashrc
 [ -z ${SSHS+x} ] && export SSHS=false
-[ -z ${STARTTMUX+x} ] && export STARTTMUX=false
 
 # check if we are a interactive shell
 # https://guide.bash.academy/expansions/
@@ -204,8 +203,8 @@ EOF
     SCRIPTEXIT
 
     # Start tmux if not defined as STARTTMUX in bashrc
-    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
-    if ${STARTTMUXDEFAULT-$STARTTMUX} ; then
+    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
+    if ${STARTTMUX-$STARTTMUXDEFAULT} ; then
         cat << EOF
 
 "User: $USER - $UID"
