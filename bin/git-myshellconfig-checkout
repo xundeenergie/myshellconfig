@@ -60,7 +60,8 @@ while [ $# -gt 0 ]; do
     esac
 done
 # If MSC_GIT_TAG is set, checkout is always headless. 
-[ -z "${MSC_GIT_TAG:+x}" ] || { export MSC_GIT_BRANCH=${MSC_GIT_TAG}; export PRE=""; }
+[ -z "${MSC_GIT_TAG:+x}" ] || { export MSC_GIT_BRANCH=${MSC_GIT_TAG}; export PRE=""; echo "DEBUG"; }
+logwarn "git PRE: ${PRE}"
 
 # Output
 #echo -n " remote: ${MSC_GIT_REMOTE_NAME}, branch: ${MSC_GIT_BRANCH}: "
