@@ -41,9 +41,9 @@ while [ $# -gt 0 ]; do
     case $1 in
         -h|--headless)
             # Headless repo local
-            logwarn "git remote name: ${MSC_GIT_REMOTE_NAME}"
+            echo "git remote name: ${MSC_GIT_REMOTE_NAME}"
             PRE="${MSC_GIT_REMOTE_NAME}"
-            logwarn "git PRE: ${PRE}"
+            echo "git PRE: ${PRE}"
             shift
             ;;
         -r|--force-repo-update)
