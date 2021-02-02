@@ -21,6 +21,14 @@ esac
 
 # Load default values, functions, aliases for myshellconfig
 if ! $SSHS; then
+    ######################################################################################
+    # ls is not in color on all systems
+    export LS_OPTIONS='--color=auto'
+    eval "`dircolors`"
+
+    #######################################################################################
+    # User specific aliases and function
+    echo "notmpconf"
     if [ -e ${MSC_BASE}/functions.sh ]; then
         . ${MSC_BASE}/functions.sh
     else
@@ -29,13 +37,6 @@ if ! $SSHS; then
 
 
 
-    ######################################################################################
-    # ls is not in color on all systems
-    export LS_OPTIONS='--color=auto'
-    eval "`dircolors`"
-
-    #######################################################################################
-    # User specific aliases and function
 
 
     if [ -d "${MSC_BASE}/bin" ] ; then
@@ -93,7 +94,7 @@ if ! $SSHS; then
 else
     # run with temporary config
 
-    logwarn "tmpconf"
+    echo "tmpconf"
     case $TERM in
         *screen*)
             loginfo BASHRC: $BASHRC -> source it
