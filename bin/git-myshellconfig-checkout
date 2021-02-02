@@ -94,8 +94,8 @@ if $dorepoupdate; then
     if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MSC_LOGFILE}" ; then
         cat << EOF >> "${MSC_LOGFILE}"
         no changes in local repo
-        $SGIT checkout repo  ${PRE}${PRE:+/}${MSC_GIT_BRANCH}
-    EOF
+        $SGIT checkout repo ${PRE}${PRE:+/}${MSC_GIT_BRANCH}
+EOF
         $SGIT checkout ${PRE}${PRE:+/}${MSC_GIT_BRANCH} 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 2; }
         $SGIT merge FETCH_HEAD 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 3; }
         touch $MSC_GIT_UPD_REPO_STATFILE
