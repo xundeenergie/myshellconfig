@@ -41,11 +41,12 @@ while [ $# -gt 0 ]; do
     case $1 in
         -h|--headless)
             # Headless repo local
+            logwarn "git remote name: ${MSC_GIT_REMOTE_NAME}"
             PRE="${MSC_GIT_REMOTE_NAME}"
             shift
             ;;
         -r|--force-repo-update)
-            dosubmodupdate="true"
+            dorepomodupdate="true"
             shift
             ;;
         -s|--force-submodules-update)
@@ -66,14 +67,8 @@ done
 
 # Check for updates in submodules only if last check was INTERVALL hours in the past
 #if [ $(cat ${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules 2>/dev/null || echo 0 ) \
-[ -z "${MSC_GIT_UPD_SUBMOD_STATFILE+x}" ] && export MSC_GIT_UPD_SUBMOD_STATFILE="${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules" 
 [ -z "${MSC_GIT_UPD_REPO_STATFILE+x}" ] && export MSC_GIT_UPD_REPO_STATFILE="${MSC_BASE%/}${MSC_BASE:+/}.last_update_repo" 
-
-if [ $(stat --printf %Y ${MSC_GIT_UPD_SUBMOD_STATFILE}  2>/dev/null || echo 0 ) \
-    -lt $(date --date="${MSC_GIT_SUBMODULES_UPDATE_INTERVALL-${MSC_GIT_SUBMODULES_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") \
-    -a ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
-    [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
-fi
+[ -z "${MSC_GIT_UPD_SUBMOD_STATFILE+x}" ] && export MSC_GIT_UPD_SUBMOD_STATFILE="${MSC_BASE%/}${MSC_BASE:+/}.last_update_submodules" 
 
 if [ $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
     -lt $(date --date="${MSC_GIT_REPO_UPDATE_INTERVALL-${MSC_GIT_REPO_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") \
@@ -81,6 +76,12 @@ if [ $(stat --printf %Y ${MSC_GIT_UPD_REPO_STATFILE}  2>/dev/null || echo 0 ) \
     [ -z "${dorepoupdate+x}" ] && dorepoupdate="true"
 fi
     
+if [ $(stat --printf %Y ${MSC_GIT_UPD_SUBMOD_STATFILE}  2>/dev/null || echo 0 ) \
+    -lt $(date --date="${MSC_GIT_SUBMODULES_UPDATE_INTERVALL-${MSC_GIT_SUBMODULES_UPDATE_INTERVALL_DEFAULT}} hours ago" "+%s") \
+    -a ${MSC_GIT_SUBMODULES_UPDATE-${MSC_GIT_SUBMODULES_UPDATE_DEFAULT-true}} ]; then
+    [ -z "${dosubmodupdate+x}" ] && dosubmodupdate="true"
+fi
+
 #echo $SGIT fetch ${MSC_GIT_REMOTE_NAME} -p 1>&2 
 if $dorepoupdate; then
     loginfo "fetch repo${dosubmodupdate:+ and submodules}"
