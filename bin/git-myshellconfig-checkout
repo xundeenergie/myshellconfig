@@ -52,6 +52,10 @@ while [ $# -gt 0 ]; do
             dosubmodupdate="true"
             shift
             ;;
+        --)
+            shift
+            break
+            ;;
         *)
             echo "1: $1"
             PRE=""
