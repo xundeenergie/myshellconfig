@@ -334,7 +334,10 @@ sshmyshellconfig() {
     echo
     echo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
-    echo git clone
+    echo mkdir -p ~/.local
+    mkdir -p ~/.local
+    #echo git clone
+    echo git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_submodules
     date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
