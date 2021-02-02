@@ -80,8 +80,12 @@ if ! $SSHS; then
     #cd ${HOME}
 
     # Start tmux if not defined as STARTTMUX in bashrc
+    logwarn -n "attach tmux?"
     if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
-            STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+        STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+        logwarn "${STARTTMUXDEFAULT}"
+    else
+        logwarn "no"
     fi
 
     unset -f pathmunge
