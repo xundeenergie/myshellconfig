@@ -93,6 +93,7 @@ if ! $SSHS; then
 else
     # run with temporary config
 
+    logwarn "tmpconf"
     case $TERM in
         *screen*)
             loginfo BASHRC: $BASHRC -> source it
