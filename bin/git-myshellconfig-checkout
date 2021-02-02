@@ -59,7 +59,7 @@ while [ $# -gt 0 ]; do
             ;;
     esac
 done
-# If TAG is set, checkout is always headless. 
+# If MSC_GIT_TAG is set, checkout is always headless. 
 [ -z "${MSC_GIT_TAG:+x}" ] || { export MSC_GIT_BRANCH=${MSC_GIT_TAG}; export PRE=""; }
 
 # Output
@@ -94,7 +94,7 @@ if $dorepoupdate; then
     if $SGIT diff-index --ignore-submodules --exit-code HEAD -- >> "${MSC_LOGFILE}" ; then
         cat << EOF >> "${MSC_LOGFILE}"
         no changes in local repo
-        $SGIT checkout repo ${PRE}${PRE:+/}${MSC_GIT_BRANCH}
+        $SGIT checkout repo  ${PRE}${PRE:+/}${MSC_GIT_BRANCH}
     EOF
         $SGIT checkout ${PRE}${PRE:+/}${MSC_GIT_BRANCH} 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 2; }
         $SGIT merge FETCH_HEAD 1>>"${MSC_LOGFILE}" 2>>"${MSC_LOGFILE}"|| { gitupdateend; exit 3; }
