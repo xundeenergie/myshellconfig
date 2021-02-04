@@ -66,6 +66,7 @@ sudo() {
         SSHS="$SSHS" \
         SSH_TTY="$SSH_TTY" \
         SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
+        http_proxy="$http_proxy" \
         "$@"
 
 }
