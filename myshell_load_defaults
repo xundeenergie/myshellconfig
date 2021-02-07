@@ -82,6 +82,10 @@ if ! $SSHS; then
 
     # Start tmux if not defined as STARTTMUX in bashrc
     logwarn -n "attach tmux?"
+    logwarn "TMUX: $TMUX"
+    logwarn "SSH_TTY: $SSH_TTY"
+    logwarn "TERM: $TERM"
+    logwarn "tmux@${USER}: $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? )"
     if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
       : #  STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
     else
