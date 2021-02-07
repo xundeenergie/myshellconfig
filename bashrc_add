@@ -203,7 +203,7 @@ EOF
     SCRIPTEXIT
 
     # Start tmux if not defined as STARTTMUX in bashrc
-    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT} - ${STARTTMUXDEFAULT-$STARTTMUX}"
+    logdebug "start tmux ${STARTTMUXDEFAULT} - ${STARTTMUXREMOTEDEFAULT} - ${STARTTMUX-$STARTTMUXDEFAULT}"
     if ${STARTTMUX-$STARTTMUXDEFAULT} ; then
         cat << EOF
 

@@ -86,13 +86,24 @@ if ! $SSHS; then
     logwarn "SSH_TTY: $SSH_TTY"
     logwarn "TERM: $TERM"
     logwarn "tmux@${USER}: $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? )"
-    if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
-      : #  STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
-      logwarn "TEST1"
-    else
-      logwarn "TEST2"
-        STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+    if test $SSH_TTY; then
+        logwarn "im remote"
+        if test ! $TMUX && $TERM != screen; then
+            logwarn "no screen"
+            if test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
+                logwarn "tmux@${USER} is running"
+                STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+            fi
+        fi
     fi
+
+#    if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
+#      : #  STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+#      logwarn "TEST1"
+#    else
+#      logwarn "TEST2"
+#        STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+#    fi
     logwarn "${STARTTMUXDEFAULT}"
 
     unset -f pathmunge
