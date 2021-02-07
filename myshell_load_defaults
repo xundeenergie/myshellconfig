@@ -88,7 +88,7 @@ if ! $SSHS; then
     logwarn "tmux@${USER}: $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? )"
     if test $SSH_TTY; then
         logwarn "im remote"
-        if test ! $TMUX && $TERM != screen; then
+        if test ! $TMUX && test $TERM != screen; then
             logwarn "no screen"
             if test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
                 logwarn "tmux@${USER} is running"
