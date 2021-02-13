@@ -79,7 +79,7 @@ if ! $SSHS; then
     [ -z "${MSC_GIT_REMOTE_NAME+x}" ] && export MSC_GIT_REMOTE_NAME=origin
     [ -z "${MSC_GIT_BRANCH+x}" ] && export MSC_GIT_BRANCH=master
     # If TAG is set, checkout is always headless. 
-    [ -z "${MSC_GIT_TAG:+x}" ] || { export MSC_GIT_BRANCH=${MSC_GIT_TAG}; export MSC_GIT_CHECKOUTSCRIPT_OPTIONS="-h"; }
+    [ -z "${MSC_GIT_TAG:-x}" ] || { export MSC_GIT_BRANCH=${MSC_GIT_TAG}; export MSC_GIT_CHECKOUTSCRIPT_OPTIONS="-h"; }
 
     #GIT_SSH_PATH="/srv/repos"
 
