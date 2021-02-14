@@ -340,7 +340,7 @@ sshmyshellconfig() {
     echo git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_submodules
-    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
+#    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
 
 EOF
     EXIT
