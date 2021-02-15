@@ -12,3 +12,4 @@ bashrc_local
 .git-token
 .last_update_submodules
 .last_update_repo
+defaults.config
