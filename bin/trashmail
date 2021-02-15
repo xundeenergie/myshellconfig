@@ -6,12 +6,14 @@
 # this created email-address is added to LDAP target email als dcMailAlias
 # also added to pass passwordmanager of user
 
-OWN_DOMAIN=schuerz.at
-TARGET_MAIL=wertstoffe@xundeenergie.at
-LDAP_HOST=ldap.schuerz.at
-BIND_DN=cn=admin,dc=schuerz,dc=at
-PASS_ID="LDAP/binddn-admin"
-HASHED_DEFAULT=true
+[ -e ${MSC_BASE}/defaults.conf ] && . ${MSC_BASE}/defaults.conf
+
+LDAP_HOST=${LDAP_HOST_DEFAULT}
+BIND_DN=${LDAP_ADMIN_BIND_DN}
+PASS_ID=${PASS_ID_LDAP_ADMIN}
+OWN_DOMAIN=${TRASHMAIL_OWN_DOMAIN_DEFAULT}
+TARGET_MAIL=${TRASHMAIL_TARGET_MAIL_DEFAULT}
+HASHED_DEFAULT=${TRASHMAIL_HASHED_DEFAULT}
 
 set -- $(getopt -u -o fh --long force,hashed,not-hashed -- "$@" )
 
