@@ -118,7 +118,7 @@ fi
 
 if ${CREATE-false}; then
 cat << EOF |pass insert -m ${PASS_ENTRY}
-$(pwgen -s 50 1)
+$(pwgen -y 50 1)
 email: ${TRASHMAIL}
 login: ${TRASHUSER}
 url: ${URL}
