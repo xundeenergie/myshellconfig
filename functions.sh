@@ -335,10 +335,13 @@ sshmyshellconfig() {
     echo
     echo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
-    echo git clone
+    echo mkdir -p ~/.local
+    mkdir -p ~/.local
+    #echo git clone
+    echo git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_submodules
-    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
+#    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
 
 EOF
     EXIT
@@ -828,7 +831,7 @@ token(){
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
 #    startagent -t $@
     loadagent $@
-    loginfo "$(ssh-add -s $PKCS11_MODULE)"
+    loginfo "$(ssh-add -s $PKCS11_MODULE || { ssh-add -e $PKCS11-MODULE; ssh-add -s $PKCS11_MODULE; } )"
     loginfo "$(ssh-add -l)"
 
     

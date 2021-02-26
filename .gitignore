@@ -7,7 +7,6 @@ logs
 *.swp
 *.orig
 serverconfig.local.conf
-bashrc_local
 .local_scripts
 .git-token
 .last_update_submodules
