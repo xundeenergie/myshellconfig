@@ -14,21 +14,40 @@ PASS_ID=${PASS_ID_LDAP_ADMIN}
 OWN_DOMAIN=${TRASHMAIL_OWN_DOMAIN_DEFAULT}
 TARGET_MAIL=${TRASHMAIL_TARGET_MAIL_DEFAULT}
 HASHED_DEFAULT=${TRASHMAIL_HASHED_DEFAULT}
+HASHLENGTH_DEFAULT=8
+PWOPTS_DEFAULT="-c -n -s"
+PWLENGTH_DEFAULT=50
 
-set -- $(getopt -u -o fh --long force,hashed,not-hashed -- "$@" )
+set -- $(getopt -u -o dfhl:nwy --long force,hashed,not-hashed,hashlength:,whole-hash -- "$@" )
 
 while : ; do
     case $1 in
-        -n|--not-hashed)
-            HASHED=false
+        -d)
+            INCLUDE_DOMAIN=true
+            shift
+            ;;
+        -f|--force)
+            FORCE=true
             shift
             ;;
         -h|--hashed)
             HASHED=true
             shift
             ;;
-        -f|--force)
-            FORCE=true
+        -l|--hashlength)
+            HASHLENGTH=$2
+            shift; shift;
+            ;;
+        -n|--not-hashed)
+            HASHED=false
+            shift
+            ;;
+        -w|--full-hash)
+            HASHLENGTH=full
+            shift;
+            ;;
+        -y)
+            PWOPTS="${PWOPTS} -y"
             shift
             ;;
         --)
@@ -36,42 +55,75 @@ while : ; do
             break
             ;;
         *)
-            wrong argument $1
+            wrong argument $1 >&2
             shift
             continue
             ;;
     esac
 done
 
-URL=$1
+# Urlparsing inspired by: https://gist.github.com/joshisa/297b0bc1ec0dcdda0d1625029711fa24
+# Referenced and tweaked from http://stackoverflow.com/questions/6174220/parse-url-in-shell-script#6174447
 
-case $URL in
-    http*)
-        DEST_DOMAIN=$(echo $URL|awk -F/ '{print $3}')
-        ;;
-    [a-zA-Z]*)
-        DEST_DOMAIN=${URL,,}
-        ;;
-    *)
-        logwarn "$URL is no regular url"
-        exit 1
-        ;;
-esac
-echo "Create a trashmail-address for ${DEST_DOMAIN}" >&2
+URL=$1
+protocol=$(echo "$1" | grep "://" | sed -e's,^\(.*://\).*,\1,g')
+# Remove the protocol
+url_no_protocol=$(echo "${1/$protocol/}")
+# Use tr: Make the protocol lower-case for easy string compare
+protocol=$(echo "$protocol" | tr '[:upper:]' '[:lower:]')
+
+
+# Extract the user and password (if any)
+# cut 1: Remove the path part to prevent @ in the querystring from breaking the next cut
+# rev: Reverse string so cut -f1 takes the (reversed) rightmost field, and -f2- is what we want
+# cut 2: Remove the host:port
+# rev: Undo the first rev above 
+userpass=$(echo "$url_no_protocol" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
+pass=$(echo "$userpass" | grep ":" | cut -d":" -f2)
+if [ -n "$pass" ]; then
+  user=$(echo "$userpass" | grep ":" | cut -d":" -f1)
+else
+  user="$userpass"
+fi
+
+# Extract the host
+hostport=$(echo "${url_no_protocol/$userpass@/}" | cut -d"/" -f1)
+host=$(echo "$hostport" | cut -d":" -f1)
+port=$(echo "$hostport" | grep ":" | cut -d":" -f2)
+path=$(echo "$url_no_protocol" | grep "/" | cut -d"/" -f2-)
+
+echo "Create a trashmail-address for ${host}" >&2
 
 
 if ${HASHED:-$HASHED_DEFAULT}; then
-    TRASHUSER="$(echo ${DEST_DOMAIN}${USER}|md5sum -|awk '{print $1}')"
+    case $HASHLENGTH in
+        full)
+            TRASHUSER="$(echo ${host}${USER}|md5sum -|awk '{print $1}')"
+            ;;
+        [0-9]|[0-9][0-9])
+            TRASHUSER="$(echo ${host}${USER}|md5sum -|awk '{print $1}'|cut -c-${HASHLENGTH})"
+            ;;
+        *)
+            TRASHUSER="$(echo ${host}${USER}|md5sum -|awk '{print $1}'|cut -c-${HASHLENGTH_DEFAULT})"
+            ;;
+    esac
+
+    if ${INCLUDE_DOMAIN:-false} ;then
+        $INCLUDE_DOMAIN && TRASHUSER=${TRASHUSER}.${host}
+    fi
+    
+
 else
-    TRASHUSER=${DEST_DOMAIN}
+    TRASHUSER=${host}
 fi
 
 TRASHMAIL=${TRASHUSER}@${OWN_DOMAIN}
 echo $TRASHMAIL
 
-PASS_ENTRY="${PASS_PREFIX%/}${PASS_PREFIX:+/}${DEST_DOMAIN}/${TRASHMAIL}"
+PASS_ENTRY="${PASS_PREFIX%/}${PASS_PREFIX:+/}${host}/${TRASHMAIL}"
 
-set -x
+#set -x
+echo "Add new trashmail to LDAP"
 cat << EOF |ldapmodify -Z -H ldap://${LDAP_HOST} -D ${BIND_DN} -x -w $(pass ${PASS_ID}|head -n 1)
 dn: dcSubMailAddress=${TARGET_MAIL},ou=mailaccounts,dc=schuerz,dc=at
 changetype: modify
@@ -81,19 +133,19 @@ EOF
 
 if [ $? -gt 0 ]; then
     echo pass find ${PASS_ENTRY}
-    pass find ${TRASHMAIL}
     pass find ${TRASHMAIL}|grep -v "Search Terms"
     case $? in
         1)
             # returncode 1 from grep means, no line selected. so no entry exists, create new one
-            echo "TEST1"
+            echo "Entry not found --> create new pass-entry"
             CREATE=true
             ;;
         0)
-            echo FORCE: ${FORCE-false}
             if ${FORCE-false} ; then
+                echo "Entry found but enforced to overwrite"
                 CREATE=true
             else
+                echo
                 echo "Current password for ${PASS_ENTRY} is $(pass ${PASS_ENTRY} |head -n1)."
                 read -p "Overwrite? [Y|n]: "
                 echo ""
@@ -118,13 +170,13 @@ fi
 
 if ${CREATE-false}; then
 cat << EOF |pass insert -m ${PASS_ENTRY}
-$(pwgen -y 50 1)
+$(pwgen ${PWOPTS_DEFAULT} ${PWOPTS} ${2:-$PWLENGTH_DEFAULT} 1)
 email: ${TRASHMAIL}
 login: ${TRASHUSER}
 url: ${URL}
-comment: trashemail autogenerated, delete, when delete account there
+comment: trashemail autogenerated md5-hash from »${host}${USER}« cut to ${HASHLENGTH}. Delete email, when account deleted!!!
 EOF
 fi
-set +x
-    #pass git commit "${PASS_ENTRY}"
-    pass -c ${PASS_ENTRY}
+#set +x
+#pass git commit "${PASS_ENTRY}"
+pass -c ${PASS_ENTRY}
