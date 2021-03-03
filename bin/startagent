@@ -227,6 +227,8 @@ agent-load-identity-keys () {
     local agentsocket
     local fingerprints
     declare -a fingerprints
+    local pubkeysonly
+    declare -a pubkeysonly
     local fingerprint
     local tokenfingerprint
 
@@ -248,6 +250,7 @@ agent-load-identity-keys () {
                 logdebug "$f"
             done
             if ! $tokenonly ; then
+                # load keys
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep -v "pub$\|so$\|config$\|public$"); do
                     fingerprint=$(ssh-keygen -l -f $key|awk '{print $2}')
                     if [[ ${fingerprints[*]} =~ "$fingerprint" ]]; then
@@ -266,6 +269,25 @@ agent-load-identity-keys () {
                 done
             fi
             if ! $keyonly ; then
+                # load tokens
+                for pubkey in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep "pub$\|public$"|grep -v "cert.pub"); do
+                    if $( ls ${pubkey%.pub} 1>/dev/null 2>&1);then
+                        echo "pk1 $pubkey"
+                    else
+                        echo "pk2 $pubkey"
+                        pubkeysonly+=($pubkey)
+                    fi
+                done
+                loginfo "pubkeysonly: ${pubkeysonly[@]} ${#pubkeysonly[*]}"
+                if [ ${#pubkeysonly[*]} -gt 0 ] ; then
+                    for p in ${pubkeysonly[@]}; do
+                        ssh-runinagent $agentfile ssh-add -T ${p} 2>&1 || { $remove || readd=true; break; }
+                    done
+                fi
+                logdebug "readd: $readd"
+
+
+
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
                     tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
