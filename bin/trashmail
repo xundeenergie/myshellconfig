@@ -18,7 +18,30 @@ HASHLENGTH_DEFAULT=8
 PWOPTS_DEFAULT="-c -n -s"
 PWLENGTH_DEFAULT=50
 
-set -- $(getopt -u -o dfhl:nwy --long force,hashed,not-hashed,hashlength:,whole-hash -- "$@" )
+show_help () {
+    cat << EOF
+
+    usage: ${0} <OPTIONS> <URL> [<PWLENGTH>]
+
+    URL:	https://target.domain.tld:8080/path/to/site | target.domain.tld
+    PWLENGTH:	Integer, count characters in generated password
+
+    OPTIONS:
+        -d				include domain from <URL> in username: 8ee948ae.target.domain.tld@mydomain.tld
+        -f|--force			force overwrite existing entry in pass
+        -h|--hashed			create hash from domain and linux-login-user (${USER})
+        --help				show this help/usage
+        -l|--length <INTEGER>|full	cut hashed part of username to <INTGER> characters from start (default: ${HASHLENGHT_DEFAULT})
+        -n|--not-hashed			do not hash username from targetdomain and linux-login-user 
+        -w|--full-hash			do not cut hash (same as »-l full«)
+        -y|--symbols			same option as in pwgen. Include at least one special character in the password.
+
+
+EOF
+
+}
+set -- $(getopt -u -o dfhl:nwy --long force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit 2)
+echo getopt $?
 
 while : ; do
     case $1 in
@@ -33,6 +56,10 @@ while : ; do
         -h|--hashed)
             HASHED=true
             shift
+            ;;
+        --help)
+            show_help
+            exit 0
             ;;
         -l|--hashlength)
             HASHLENGTH=$2
@@ -55,9 +82,9 @@ while : ; do
             break
             ;;
         *)
-            wrong argument $1 >&2
-            shift
-            continue
+            echo wrong argument $1 >&2
+            show_help
+            exit 1
             ;;
     esac
 done
