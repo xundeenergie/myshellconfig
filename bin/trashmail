@@ -40,9 +40,12 @@ show_help () {
 EOF
 
 }
-set -- $(getopt -u -o dfhl:nwy --long force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit 2)
-echo getopt $?
 
+# TODO: how exit main-shell from error in subshell???
+getopt -u -o dfhl:nwy --long force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit $? 
+set -- $(getopt -u -o dfhl:nwy --long force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@"|| exit $?)
+
+echo @: $@
 while : ; do
     case $1 in
         -d)

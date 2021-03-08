@@ -81,18 +81,18 @@ if ! $SSHS; then
     #cd ${HOME}
 
     # Start tmux if not defined as STARTTMUX in bashrc
-    logwarn -n "attach tmux?"
-    logwarn "TMUX: $TMUX"
-    logwarn "SSH_TTY: $SSH_TTY"
-    logwarn "TERM: $TERM"
-    logwarn "tmux@${USER}: $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? )"
+    logdebug "attach tmux?"
+    logdebug "TMUX: $TMUX"
+    logdebug "SSH_TTY: $SSH_TTY"
+    logdebug "TERM: $TERM"
+    logdebug "tmux@${USER}: $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? )"
     if test $SSH_TTY; then
-        logwarn "i am remote"
+        loginfo "i am remote"
         if test ! $TMUX && test $TERM != screen; then
-            logwarn "no screen"
+            loginfo "no screen"
 #            if test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
             if tmux has-session -t User || tmux has-session -t "${USER}"; then
-                logwarn "tmux@${USER} is running"
+                loginfo "tmux@${USER} is running"
                 STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
             fi
         fi
@@ -105,7 +105,7 @@ if ! $SSHS; then
 #      logwarn "TEST2"
 #        STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
 #    fi
-    logwarn "${STARTTMUXDEFAULT}"
+    logdebug "${STARTTMUXDEFAULT}"
 
     unset -f pathmunge
 
