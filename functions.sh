@@ -369,7 +369,7 @@ sshs() {
     fi
     echo "FILELIST: $FILELIST"
     #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%C"
-    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=2s -o ControlPath=~/.ssh/ssh-%C"
+    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
 [ -e /etc/bashrc ] && BASHRC=/etc/bashrc
