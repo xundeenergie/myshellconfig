@@ -424,6 +424,7 @@ EOF
 
            logdebug "create fill remote bashrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
+           ssh -T ${SSH_OPTS} $@ "cat ${REMOTETMPBASHCONFIG}"
            logdebug "create fill remote vimrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MSC_BASE}/vimrc"
            RCMD="
@@ -831,8 +832,8 @@ token(){
     #   token <identity>                        will load token in agent. does nothing, if token is already loaded
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
 #    startagent -t $@
-    loadagent $@
-    loginfo "$(ssh-add -s $PKCS11_MODULE || { ssh-add -e $PKCS11-MODULE; ssh-add -s $PKCS11_MODULE; } )"
+#    loadagent $@
+    loginfo "$(ssh-add -s $PKCS11_MODULE || { ssh-add -e $PKCS11_MODULE; ssh-add -s $PKCS11_MODULE; } )"
     loginfo "$(ssh-add -l)"
 
     
