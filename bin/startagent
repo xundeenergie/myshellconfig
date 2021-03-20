@@ -279,12 +279,6 @@ agent-load-identity-keys () {
                     fi
                 done
                 loginfo "pubkeysonly: ${pubkeysonly[@]} ${#pubkeysonly[*]}"
-                if [ ${#pubkeysonly[*]} -gt 0 ] ; then
-                    for p in ${pubkeysonly[@]}; do
-                        ssh-runinagent $agentfile ssh-add -T ${p} 2>&1 || { $remove || readd=true; break; }
-                    done
-                fi
-                logdebug "readd: $readd"
 
 
 
@@ -292,6 +286,7 @@ agent-load-identity-keys () {
                     tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                         logdebug "token: $key ($tokenfingerprint) is loaded"
+                        check-pubkeysonly
                         if  $readd || $remove ; then
                             $readd && logdebug "re-add token $key"
                             $remove && logdebug "remove token $key"
@@ -312,6 +307,22 @@ agent-load-identity-keys () {
         fi
     fi
     EXIT
+}
+
+function check-pubkeysonly () { 
+    if [ ${#pubkeysonly[*]} -gt 0 ] ; then
+        for p in ${pubkeysonly[@]}; do
+            ssh-runinagent $agentfile ssh-add -T ${p} 2>&1 || { $remove || readd=true; break; }
+        done
+    else
+        logwarn "obviously there is no pubkey for the token in ${SSH_IDENTITIES_DIR}/${ssh_identity}/"
+        logwarn "you can add the pubkey with"
+        logwarn "   ssh-add -L > ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_etoken.pub"
+        logwarn "make sure, only the token is loaded into ssh-agent with"
+        logwarn "   ssh-add -l"
+        logwarn "only one line should be the output"
+    fi
+    logdebug "readd: $readd"
 }
 
 ssh-runinagent () {
