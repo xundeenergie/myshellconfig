@@ -27,6 +27,7 @@ show_help () {
     PWLENGTH:	Integer, count characters in generated password
 
     OPTIONS:
+        --delete                        delete trashmail from LDAP
         -d				include domain from <URL> in username: 8ee948ae.target.domain.tld@mydomain.tld
         -f|--force			force overwrite existing entry in pass
         -h|--hashed			create hash from domain and linux-login-user (${USER})
@@ -42,12 +43,16 @@ EOF
 }
 
 # TODO: how exit main-shell from error in subshell???
-getopt -u -o dfhl:nwy --long force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit $? 
-set -- $(getopt -u -o dfhl:nwy --long force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@"|| exit $?)
+getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit $? 
+set -- $(getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@"|| exit $?)
 
 echo @: $@
 while : ; do
     case $1 in
+        --delete)
+            ACTION=delete
+            shift
+            ;;
         -d)
             INCLUDE_DOMAIN=true
             shift
@@ -152,6 +157,8 @@ echo $TRASHMAIL
 
 PASS_ENTRY="${PASS_PREFIX%/}${PASS_PREFIX:+/}${host}/${TRASHMAIL}"
 
+case ${ACTION:-create} in
+    create)
 #set -x
 echo "Add new trashmail to LDAP"
 cat << EOF |ldapmodify -Z -H ldap://${LDAP_HOST} -D ${BIND_DN} -x -w $(pass ${PASS_ID}|head -n 1)
@@ -210,3 +217,18 @@ fi
 #set +x
 #pass git commit "${PASS_ENTRY}"
 pass -c ${PASS_ENTRY}
+        ;;
+    delete)
+        
+cat << EOF |ldapmodify -Z -H ldap://${LDAP_HOST} -D ${BIND_DN} -x -w $(pass ${PASS_ID}|head -n 1)
+dn: dcSubMailAddress=${TARGET_MAIL},ou=mailaccounts,dc=schuerz,dc=at
+changetype: modify
+delete: dcMailAlternateAddress
+dcMailAlternateAddress: ${TRASHMAIL}
+EOF
+        ;;
+    *)
+        echo action $ACTION not known
+        exit 1
+        ;;
+esac
