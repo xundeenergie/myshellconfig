@@ -368,8 +368,8 @@ sshs() {
         done
     fi
     echo "FILELIST: $FILELIST"
-    #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%C"
-    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
+    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%C"
+    #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
 [ -e /etc/bashrc ] && BASHRC=/etc/bashrc
@@ -407,6 +407,7 @@ EOF
            local RCMD="/bin/bash --noprofile --norc -c "
            logdebug "create remote bashrc"
            local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
+           ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}"
            logdebug "create remote vimrc"
            local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
 
@@ -424,7 +425,7 @@ EOF
 
            logdebug "create fill remote bashrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
-           ssh -T ${SSH_OPTS} $@ "cat ${REMOTETMPBASHCONFIG}"
+           ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}"
            logdebug "create fill remote vimrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MSC_BASE}/vimrc"
            RCMD="
