@@ -406,10 +406,12 @@ EOF
         if [ -e "${TMPBASHCONFIG}" ] ; then
            local RCMD="/bin/bash --noprofile --norc -c "
            logdebug "create remote bashrc"
-           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
+           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf" 2> ~/myshellconfig.log | tr -d '[:space:]' )
+           logwarn "REMOTETMPBASHCONFIG: $REMOTETMPBASHCONFIG"
            ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}"
+           ssh -T ${SSH_OPTS} $@ "hostnamectl"
            logdebug "create remote vimrc"
-           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
+           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf" 2> ~/myshellconfig.log | tr -d '[:space:]' )
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
