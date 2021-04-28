@@ -363,7 +363,7 @@ sshs() {
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
         for f in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
             [ -e "$f" ] && {\
-                loginfo "add $f to FILELIST"; \
+                logdebug "add $f to FILELIST"; \
                 FILELIST+=("$f"); } 
         done
     fi
@@ -407,12 +407,12 @@ EOF
            logdebug "create remote bashrc"
            logdebug "SSH_OPTS: $SSH_OPTS"
            local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf" | tr -d '[:space:]' )
-           logwarn "REMOTETMPBASHCONFIG: $REMOTETMPBASHCONFIG"
+           logdebug "REMOTETMPBASHCONFIG: $REMOTETMPBASHCONFIG"
            logdebug $(ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}")
            logdebug $(ssh -T ${SSH_OPTS} $@ "hostnamectl")
            logdebug "create remote vimrc"
            local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf" | tr -d '[:space:]' )
-           logwarn "REMOTETMPVIMCONFIG: $REMOTETMPVIMCONFIG"
+           logdebug "REMOTETMPVIMCONFIG: $REMOTETMPVIMCONFIG"
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
@@ -438,7 +438,7 @@ EOF
            ssh -t ${SSH_OPTS} $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
            rm "${TMPBASHCONFIG}"
         else
-           loginfo "${TMPBASHCONFIG} does not exist. Using »ssh -t $@«"
+           logwarn "${TMPBASHCONFIG} does not exist. Using »ssh -t $@«"
            ssh -t "$@" 
         fi
     else
@@ -794,7 +794,7 @@ reachable () {
     local i
     loginfo -n "Try to connect to ${SERVER} (${IP}):${PORT} " >&2
     for i in $(seq 1 $SEC); do
-        logdebug -n "." >&2
+        loginfo -n "." >&2
         if reachable-default ${IP} ${PORT} 2>/dev/null; then
             res=0
             break
