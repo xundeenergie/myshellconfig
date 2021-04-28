@@ -428,7 +428,7 @@ EOF
 
            logdebug "create fill remote bashrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
-           ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}"
+           logdebug  $(ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}")
            logdebug "create fill remote vimrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MSC_BASE}/vimrc"
            local RCMD="/bin/bash --noprofile --norc -c "
