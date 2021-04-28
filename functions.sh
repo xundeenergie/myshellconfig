@@ -368,7 +368,7 @@ sshs() {
         done
     fi
     echo "FILELIST: $FILELIST"
-    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%C"
+    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%C"
     #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
@@ -404,14 +404,15 @@ EOF
     
     if [ $# -ge 1 ]; then
         if [ -e "${TMPBASHCONFIG}" ] ; then
-           local RCMD="/bin/bash --noprofile --norc -c "
            logdebug "create remote bashrc"
-           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf" 2> ~/myshellconfig.log | tr -d '[:space:]' )
+           logdebug "SSH_OPTS: $SSH_OPTS"
+           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf" | tr -d '[:space:]' )
            logwarn "REMOTETMPBASHCONFIG: $REMOTETMPBASHCONFIG"
-           ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}"
-           ssh -T ${SSH_OPTS} $@ "hostnamectl"
+           logdebug $(ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}")
+           logdebug $(ssh -T ${SSH_OPTS} $@ "hostnamectl")
            logdebug "create remote vimrc"
-           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf" 2> ~/myshellconfig.log | tr -d '[:space:]' )
+           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf" | tr -d '[:space:]' )
+           logwarn "REMOTETMPVIMCONFIG: $REMOTETMPVIMCONFIG"
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
@@ -430,13 +431,14 @@ EOF
            ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}"
            logdebug "create fill remote vimrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MSC_BASE}/vimrc"
+           local RCMD="/bin/bash --noprofile --norc -c "
            RCMD="
            trap \"rm -f ${REMOTETMPBASHCONFIG} ${REMOTETMPVIMCONFIG}\" EXIT " ;
            logdebug "run remote shell with temporary config"
            ssh -t ${SSH_OPTS} $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
            rm "${TMPBASHCONFIG}"
         else
-           loginfo "${TMPBASHCONFIG} does not exist. Use »ssh $@«" >&2
+           loginfo "${TMPBASHCONFIG} does not exist. Using »ssh -t $@«"
            ssh -t "$@" 
         fi
     else
