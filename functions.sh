@@ -397,7 +397,7 @@ EOF
 
     for f in ${FILELIST[*]}; do
         if [ -e $f ]; then
-            echo add $f to tmpconfig
+            logdebug "add $f to tmpconfig"
             cat "$f" >> "${TMPBASHCONFIG}";
         fi
     done
