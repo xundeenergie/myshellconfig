@@ -48,3 +48,5 @@
     path = ~/.gitconfig_local
 [status]
 	submodulesummary = 1
+[pull]
+	rebase = true
