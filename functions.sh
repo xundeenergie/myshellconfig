@@ -817,14 +817,14 @@ utoken () {
     ENTRY
     ssh_identity=$1
 
-    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+    [ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
     
     if [ -n "${ssh_identity+x}" ]; then
         agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
         if [ -e "$agentfile" ]; then 
             local SSH_AUTH_SOCK
             local SSH_AGENT_PID
-            /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; ssh-add -l; ssh-add -e $PKCS11_MODULE; ssh-add -l"
+            /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; ssh-add -l; ssh-add -e $P11M; ssh-add -l"
         fi
     fi
     EXIT
@@ -832,14 +832,14 @@ utoken () {
 
 token(){
 
-    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+    [ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
 
     # Usage:
     #   token <identity>                        will load token in agent. does nothing, if token is already loaded
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
 #    startagent -t $@
 #    loadagent $@
-    loginfo "$(ssh-add -s $PKCS11_MODULE || { ssh-add -e $PKCS11_MODULE; ssh-add -s $PKCS11_MODULE; } )"
+    loginfo "$(ssh-add -s $P11M || { ssh-add -e $P11M; ssh-add -s $P11M; } )"
     loginfo "$(ssh-add -l)"
 
     
@@ -847,8 +847,8 @@ token(){
 
 
 token-extract-pubkey() {
-    if pkcs11-tool --module $PKCS11_MODULE --list-token-slots >&2 ;then
-        ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+    if pkcs11-tool --module $P11M --list-token-slots >&2 ;then
+        ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $P11M -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
         if [ $? -gt 0 ] ; then
             token-list-objects
         fi
@@ -861,10 +861,10 @@ token-extract-pubkey() {
 token-list-objects() {
     case $1 in
         --login|-l)
-            pkcs11-tool --module $PKCS11_MODULE --login --list-objects
+            pkcs11-tool --module $P11M --login --list-objects
             ;;
         *)
-            pkcs11-tool --module $PKCS11_MODULE --list-objects
+            pkcs11-tool --module $P11M --list-objects
             ;;
     esac
 
