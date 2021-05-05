@@ -64,6 +64,7 @@ sudo() {
         GIT_COMMITTER_NAME="$GIT_COMMITTER_NAME" \
         TMUX="$TMUX" \
         SSHS="$SSHS" \
+        P11M="$P11M" \
         SSH_TTY="$SSH_TTY" \
         SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
         http_proxy="$http_proxy" \
