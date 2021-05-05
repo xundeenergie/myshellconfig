@@ -72,7 +72,7 @@ if [[ $- = *i* ]] ; then
     echo PM: $PM
     echo P11M: $P11M
     [ -z "${P11M+x}" ]                      && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
-    [ -z "${P11M+x}" ]             && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
+    #[ -z "${P11M+x}" ]             && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
 
     # Basics
     [ -z "${VISUAL+x}" ]    && export VISUAL=vim
