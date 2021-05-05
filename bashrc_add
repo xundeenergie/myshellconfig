@@ -69,7 +69,7 @@ if [[ $- = *i* ]] ; then
 
     # P11M for etoken/smartcard authentification
     echo P11M: $P11M
-    [ -n "${P11M+x}" ]                      && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
+    [ -z "${P11M+x}" ]                      && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
     #[ -z "${P11M+x}" ]             && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
 
     # Basics
