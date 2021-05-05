@@ -67,8 +67,12 @@ if [[ $- = *i* ]] ; then
     # load logging functions
     . ${MSC_BASE}/logging
 
-    # PKCS11_MODULE for etoken/smartcard authentification
-    [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && PKCS11_MODULE=$(whereis p11-kit-proxy.so|awk '{print $2}')
+    # P11M for etoken/smartcard authentification
+    echo P11M: $P11M
+    echo PM: $PM
+    echo P11M: $P11M
+    [ -z "${P11M+x}" ]                      && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
+    [ -z "${P11M+x}" ]             && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
 
     # Basics
     [ -z "${VISUAL+x}" ]    && export VISUAL=vim
