@@ -283,6 +283,8 @@ agent-load-identity-keys () {
 
 
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
+                    logdebug "P11M: $P11M - key: $key"
+                    [ "$(readlink - f $key)" == "$P11M" ] || key="$P11M"
                     tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
                     if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
                         logdebug "token: $key ($tokenfingerprint) is loaded"

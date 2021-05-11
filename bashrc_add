@@ -68,10 +68,8 @@ if [[ $- = *i* ]] ; then
     . ${MSC_BASE}/logging
 
     # P11M for etoken/smartcard authentification
-    logdebug P11M: $P11M
     [ -z "${P11M+x}" ]                      && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && P11M=$(whereis p11-kit-proxy.so|awk '{print $2}')
     export P11M
-    logdebug P11M: $P11M
 
     # Basics
     [ -z "${VISUAL+x}" ]    && export VISUAL=vim
