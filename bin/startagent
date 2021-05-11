@@ -272,13 +272,13 @@ agent-load-identity-keys () {
                 # load tokens
                 for pubkey in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/id_*|grep "pub$\|public$"|grep -v "cert.pub"); do
                     if $( ls ${pubkey%.pub} 1>/dev/null 2>&1);then
-                        echo "pk1 $pubkey"
+                        echo "pubkey with privkey: $pubkey"
                     else
-                        echo "pk2 $pubkey"
+                        echo "pubkey without privkey: $pubkey"
                         pubkeysonly+=($pubkey)
                     fi
                 done
-                loginfo "pubkeysonly: ${pubkeysonly[@]} ${#pubkeysonly[*]}"
+                loginfo "pubkeysonly: ${pubkeysonly[@]} (count: ${#pubkeysonly[*]})"
 
 
 
@@ -286,10 +286,11 @@ agent-load-identity-keys () {
                     logdebug "P11M: $P11M - key: $key"
                     [ "$(readlink - f $key)" == "$P11M" ] || key="$P11M"
                     logdebug "P11M: $P11M - key: $key"
-                    logdebug "$(ssh-add -T $key)"
-                    tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
-                    if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
-                        logdebug "token: $key ($tokenfingerprint) is loaded"
+
+                    #tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
+
+#                    if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
+#                        logdebug "token: $key ($tokenfingerprint) is loaded"
                         check-pubkeysonly
                         if  $readd || $remove ; then
                             $readd && logdebug "re-add token $key"
@@ -297,11 +298,11 @@ agent-load-identity-keys () {
                             logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
                             $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
                         fi
-                    else
-                        logdebug "token: $key is not loaded -> load it" 
-                        logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
-                        $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
-                    fi
+#                    else
+#                        logdebug "token: $key is not loaded -> load it" 
+#                        logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
+#                        $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
+#                    fi
                 done
             fi
             loginfo "currently loaded keys after action: $(ssh-runinagent $agentfile ssh-add -l|wc -l)"
