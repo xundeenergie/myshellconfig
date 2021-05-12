@@ -842,7 +842,6 @@ token(){
     loginfo "$(ssh-add -s $P11M || { ssh-add -e $P11M; ssh-add -s $P11M; } )"
     loginfo "$(ssh-add -l)"
 
-    
 }
 
 
