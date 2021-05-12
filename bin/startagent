@@ -287,22 +287,22 @@ agent-load-identity-keys () {
                     [ "$(readlink - f $key)" == "$P11M" ] || key="$P11M"
                     logdebug "P11M: $P11M - key: $key"
 
-                    #tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
+                    tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
 
-#                    if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
-#                        logdebug "token: $key ($tokenfingerprint) is loaded"
+                    if [[ ${fingerprints[*]} =~ "$tokenfingerprint" ]]; then
+                        logdebug "token: $key ($tokenfingerprint) is loaded"
                         check-pubkeysonly
                         if  $readd || $remove ; then
                             $readd && logdebug "re-add token $key"
                             $remove && logdebug "remove token $key"
-                            logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
-                            $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
+                            logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e "${key}" 2>&1)"
+                            $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s "${key}" 2>&1)"
                         fi
-#                    else
-#                        logdebug "token: $key is not loaded -> load it" 
-#                        logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
-#                        $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
-#                    fi
+                    else
+                        logdebug "token: $key is not loaded -> load it" 
+                        logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
+                        $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
+                    fi
                 done
             fi
             loginfo "currently loaded keys after action: $(ssh-runinagent $agentfile ssh-add -l|wc -l)"
