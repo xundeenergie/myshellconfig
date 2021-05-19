@@ -277,6 +277,9 @@ agent-load-identity-keys () {
                         echo "pubkey without privkey: $pubkey"
                         pubkeysonly+=($pubkey)
                     fi
+                    [ -e "${pubkey%.pub}-cert.pub" ] && \
+                        [ $(date +%s -d $(ssh-keygen -L -f "${pubkey%.pub}-cert.pub"|awk '$1 == "Valid:"{print $5}')) -le $(date +%s -d NOW) ] \
+                        || logwarn "CERTIFICATE IS NOT VALID ANYMORE: ${pubkey%.pub}-cert.pub"
                 done
                 loginfo "pubkeysonly: ${pubkeysonly[@]} (count: ${#pubkeysonly[*]})"
 
