@@ -117,16 +117,16 @@ while :; do
 done
 
 SCRIPTENTRY
-[ -z "${SSH_IDENTITIES_DIR+x}" ] && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
-[ -z "${SSH_AGENTS_DIR+x}" ] && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
+[ -z "${SSH_IDENTITIES_DIR+x}" ]    && { SSH_IDENTITIES_DIR="${SSH_IDENTITIES_DEFAULT_DIR-${HOME}/.ssh/identities}"; export SSH_IDENTITIES_DIR; }
+[ -z "${SSH_AGENTS_DIR+x}" ]        && { SSH_AGENTS_DIR=${SSH_AGENTS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENTS_DIR; }
 [ -z "${SSH_AGENT_SOCKETS_DIR+x}" ] && { SSH_AGENT_SOCKETS_DIR=${SSH_AGENT_SOCKETS_DEFAULT_DIR-~/.ssh/agents}; export SSH_AGENT_SOCKETS_DIR; }
-[ -z "${SSH_AGENT_OPTIONS+x}" ] && { SSH_AGENT_OPTIONS=${SSH_AGENT_DEFAULT_OPTIONS--t 7200 }; export SSH_AGENT_OPTIONS; }
-logtrace "SSH_AGENTS_DIR: $SSH_AGENTS_DIR"
+[ -z "${SSH_AGENT_OPTIONS+x}" ]     && { SSH_AGENT_OPTIONS=${SSH_AGENT_DEFAULT_OPTIONS--t 7200 }; export SSH_AGENT_OPTIONS; }
+logtrace "       SSH_AGENTS_DIR: $SSH_AGENTS_DIR"
 logtrace "SSH_AGENT_SOCKETS_DIR: $SSH_AGENT_SOCKETS_DIR"
-logtrace "SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR"
-[ -z "${SSH_AGENTS_DIR-x}" ]                || mkdir -vp "$SSH_AGENTS_DIR"
-[ -z "${SSH_AGENT_SOCKETS_DIR-x}" ]         || mkdir -vp "$SSH_AGENT_SOCKETS_DIR"
-[ -z "${SSH_IDENTITIES_DIR-x}" ]            || mkdir -vp "$SSH_IDENTITIES_DIR"
+logtrace "   SSH_IDENTITIES_DIR: $SSH_IDENTITIES_DIR"
+[ -z "${SSH_AGENTS_DIR-x}" ]        || mkdir -vp "$SSH_AGENTS_DIR"
+[ -z "${SSH_AGENT_SOCKETS_DIR-x}" ] || mkdir -vp "$SSH_AGENT_SOCKETS_DIR"
+[ -z "${SSH_IDENTITIES_DIR-x}" ]    || mkdir -vp "$SSH_IDENTITIES_DIR"
 
 
 agent-start-or-restart () {
@@ -287,11 +287,12 @@ agent-load-identity-keys () {
                 loginfo "pubkeysonly: ${pubkeysonly[@]} (count: ${#pubkeysonly[*]})"
 
 
-
                 for key in $(ls ${SSH_IDENTITIES_DIR}/${ssh_identity}/*|grep  "\.so$"); do
-                    logdebug "P11M: $P11M - key: $key"
+                    logdebug "P11M: ${P11M:-not set} - key: $key"
+                    #[ -e "${P11M-x}" ] || [ "$(readlink - f $key)" == "$P11M" ] || key="$P11M"
                     [ "$(readlink - f $key)" == "$P11M" ] || key="$P11M"
-                    logdebug "P11M: $P11M - key: $key"
+                    logdebug "P11M: ${P11M:-not set} - key: $key"
+                    echo "P11M: ${P11M:-not set} - key: $key"
 
                     tokenfingerprint="$(ssh-keygen -l -D $key|tr -s ' '|awk '{print $2}')"
 
@@ -301,12 +302,14 @@ agent-load-identity-keys () {
                         if  $readd || $remove ; then
                             $readd && logdebug "re-add token $key"
                             $remove && logdebug "remove token $key"
+                        echo agentfile1 $agentfile \$SSH_ADD_OPTIONS $key >&2
                             logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e "${key}" 2>&1)"
+                            ssh-runinagent $agentfile echo $SSH_AUTH_SOCK >&2
                             $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s "${key}" 2>&1)"
                         fi
                     else
                         logdebug "token: $key is not loaded -> load it" 
-                        logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
+                        logdebug "$(ssh-runinagent $agentfile ssh-add -v ${SSH_ADD_OPTIONS} -e ${key} 2>&1)"
                         $remove || logdebug "$(ssh-runinagent $agentfile ssh-add ${SSH_ADD_OPTIONS} -s ${key} 2>&1)"
                     fi
                 done
