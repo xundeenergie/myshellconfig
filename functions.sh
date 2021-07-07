@@ -817,7 +817,8 @@ utoken () {
     ENTRY
     ssh_identity=$1
 
-    [ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
+    #[ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
+    [ -z "${P11M+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
     
     if [ -n "${ssh_identity+x}" ]; then
         agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
@@ -832,10 +833,11 @@ utoken () {
 
 token(){
 
-    [ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
+    #[ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
+    [ -z "${P11M+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
 
     tmppubkey="${XDG_RUNTIME_DIR}/token.pub"
-    loginfo "$(ssh-keygen -D $P11M >$tmppubkey)"
+    loginfo "$(ssh-keygen -D $PKCS11_MODULE >$tmppubkey)"
     # Usage:
     #   token <identity>                        will load token in agent. does nothing, if token is already loaded
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
