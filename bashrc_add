@@ -72,8 +72,8 @@ if [[ $- = *i* ]] ; then
 #    which dnf >/dev/null 2>&1 [ -z "${P11M+x}" ] && P11M="$(dnf repoquery --installed -l p11-kit | grep \/p11-kit-proxy.so\$ | head -1)"
 #    which dpkg >/dev/null 2>&1 && [ -z "${P11M+x}" ] && P11M="$(dpkg -L p11-kit-modules|grep \/p11-kit-proxy.so\$ | head -1)"
 
-    [ -z "${PKCS11_MODULE+x}" ]             && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && export PKCS11_MODULE=$(whereis p11-kit-proxy.so|awk '{print $2}' || { echo "p11-kit-proxy not installed, unset KCS11_MODULE"; unset PKCS11_MODULE; })
-    [ -z "${P11M+x}" ]                      && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && export P11M=$(whereis p11-kit-proxy.so|awk '{print $2}' || { echo "p11-kit-proxy not forwarded by ssh or installed, unset P11M"; unset P11M; })
+    [ -z "${PKCS11_MODULE:+x}" ]             && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && export PKCS11_MODULE=$(whereis p11-kit-proxy.so|awk '{print $2}' || { echo "p11-kit-proxy not installed, unset KCS11_MODULE"; unset PKCS11_MODULE; })
+    [ -z "${P11M:+x}" ]                      && [ -n "$(whereis p11-kit-proxy.so|awk '{print $2}')" ] && export P11M=$(whereis p11-kit-proxy.so|awk '{print $2}' || { echo "p11-kit-proxy not forwarded by ssh or installed, unset P11M"; unset P11M; })
 
     # Basics
     [ -z "${VISUAL+x}" ]    && export VISUAL=vim
