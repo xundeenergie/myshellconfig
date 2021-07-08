@@ -280,8 +280,13 @@ agent-load-identity-keys () {
                     if [ -e "${pubkey%.pub}-cert.pub" ]; then
                         #logwarn "${pubkey%.pub}-cert.pub: $(date +%s -d $(ssh-keygen -L -f "${pubkey%.pub}-cert.pub"|awk '$1 == "Valid:"{print $5}'))"
                         #logwarn "now: $(date +%s -d NOW)"
-                        [ $(date +%s -d $(ssh-keygen -L -f "${pubkey%.pub}-cert.pub"|awk '$1 == "Valid:"{print $5}')) -gt $(date +%s -d NOW) ] \
+                        cert_exp_date=$(ssh-keygen -L -f "${pubkey%.pub}-cert.pub"|awk '$1 == "Valid:"{print $5}')
+                        #[ $(date +%s -d $(ssh-keygen -L -f "${pubkey%.pub}-cert.pub"|awk '$1 == "Valid:"{print $5}')) -gt $(date +%s -d NOW) ] \
+                        [ $(date +%s -d $cert_exp_date) -gt $(date +%s -d NOW) ] \
                         || logwarn "CERTIFICATE IS NOT VALID ANYMORE: ${pubkey%.pub}-cert.pub"
+                        #[ $(date +%s -d $(ssh-keygen -L -f "${pubkey%.pub}-cert.pub"|awk '$1 == "Valid:"{print $5}')) -lt $(date +%s -d "$SSH_CERT_VALIDITY_WARN_SEC") ] \
+                        [ $(date +%s -d $cert_exp_date) -lt $(date +%s -d "$SSH_CERT_VALIDITY_WARN_SEC") ] \
+                            && logwarn "CERTIFICATE expires in $(echo "scale=0; ( `date -d $cert_exp_date +%s` - `date -d now +%s`) / (24*3600)" | bc -l) days: ${pubkey%.pub}-cert.pub"
                     fi
                 done
                 loginfo "pubkeysonly: ${pubkeysonly[@]} (count: ${#pubkeysonly[*]})"
