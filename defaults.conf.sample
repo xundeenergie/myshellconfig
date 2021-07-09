@@ -22,3 +22,5 @@ export PASS_ID_LDAP_ADMIN="LDAP/binddn-admin"
 export TRASHMAIL_OWN_DOMAIN_DEFAULT=example.com
 export TRASHMAIL_TARGET_MAIL_DEFAULT=user@example.com
 export TRASHMAIL_HASHED_DEFAULT=true
+
+export SSH_CERT_VALIDITY_WARN_SEC="14 days"
