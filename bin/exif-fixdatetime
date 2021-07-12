@@ -2,8 +2,6 @@
 
 [ type loginfo > /dev/null 2>&1 ] || . $(dirname $0)/../logging
 
-export SCRIPT_LOG=./$(basename $0).log
-export LOGFILE=./$(basename $0).move.log
 [ -z "${move+x}" ] && move=false
 [ -z "${forcedate+x}" ] && forcedate=false
 [ -z "${setdate+x}" ] && setdate=true
@@ -331,6 +329,8 @@ else
     all=$(find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.mov$\|.png$\|.3gp$\|.gif$"|wc -l)
     find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.mov$\|.png$\|.3gp$\|.gif$"|while read file; do
         let "i=i+1"
+        export SCRIPT_LOG=./$(basename $0).log
+        export LOGFILE=./$(basename $0).move.log
         loginfo "$i/$all"
         run_fix "$file"
     done
