@@ -14,6 +14,7 @@ alias cdlastfiledir='cd $(history -p \!\!:$:h)'
 alias s='sshs $(history -p \!ssh:$:t)'
 alias sexit='ssh -O exit $(history -p \!ssh:$:t)'
 alias remountshared='sudo systemctl restart media-remote-sharefs-userdata.mount'
+alias umountshared='sudo systemctl stop media-remote-sharefs-userdata.mount'
 
 
 
