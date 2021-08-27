@@ -21,6 +21,14 @@ esac
 
 # Load default values, functions, aliases for myshellconfig
 if ! $SSHS; then
+    ######################################################################################
+    # ls is not in color on all systems
+    export LS_OPTIONS='--color=auto'
+    eval "`dircolors`"
+
+    #######################################################################################
+    # User specific aliases and function
+    echo "notmpconf"
     if [ -e ${MSC_BASE}/functions.sh ]; then
         . ${MSC_BASE}/functions.sh
     else
@@ -29,13 +37,6 @@ if ! $SSHS; then
 
 
 
-    ######################################################################################
-    # ls is not in color on all systems
-    export LS_OPTIONS='--color=auto'
-    eval "`dircolors`"
-
-    #######################################################################################
-    # User specific aliases and function
 
 
     if [ -d "${MSC_BASE}/bin" ] ; then
@@ -80,15 +81,38 @@ if ! $SSHS; then
     #cd ${HOME}
 
     # Start tmux if not defined as STARTTMUX in bashrc
-    if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
-            STARTTMUXDEFAULT=true
+    logdebug "attach tmux?"
+    logdebug "TMUX: $TMUX"
+    logdebug "SSH_TTY: $SSH_TTY"
+    logdebug "TERM: $TERM"
+    logdebug "tmux@${USER}: $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? )"
+    if test $SSH_TTY; then
+        loginfo "i am remote"
+        if test ! $TMUX && test $TERM != screen; then
+            loginfo "no screen"
+#            if test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
+            if tmux has-session -t User || tmux has-session -t "${USER}"; then
+                loginfo "tmux@${USER} is running"
+                STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+            fi
+        fi
     fi
+
+#    if test ! $TMUX && test $SSH_TTY && test $TERM != screen && test $(systemctl status tmux@${USER}.service 1>/dev/null 2>&1; echo $? ) -eq 0; then
+#      : #  STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+#      logwarn "TEST1"
+#    else
+#      logwarn "TEST2"
+#        STARTTMUXDEFAULT=${STARTTMUXREMOTEDEFAULT}
+#    fi
+    logdebug "${STARTTMUXDEFAULT}"
 
     unset -f pathmunge
 
 else
     # run with temporary config
 
+    echo "tmpconf"
     case $TERM in
         *screen*)
             loginfo BASHRC: $BASHRC -> source it

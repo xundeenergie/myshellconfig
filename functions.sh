@@ -64,8 +64,10 @@ sudo() {
         GIT_COMMITTER_NAME="$GIT_COMMITTER_NAME" \
         TMUX="$TMUX" \
         SSHS="$SSHS" \
+        P11M="$P11M" \
         SSH_TTY="$SSH_TTY" \
         SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
+        http_proxy="$http_proxy" \
         "$@"
 
 }
@@ -334,10 +336,13 @@ sshmyshellconfig() {
     echo
     echo cleanup from old config
     rm -rf  ~/server-config && echo rm -rf  ~/server-config
-    echo git clone
+    echo mkdir -p ~/.local
+    mkdir -p ~/.local
+    #echo git clone
+    echo git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     git clone --recurse-submodules $MSC_GIT_REMOTE \${HOME}/${MSC_SUBPATH}
     date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_submodules
-    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
+#    date "+%s" > \${HOME}/${MSC_SUBPATH}/.last_update_repo
 
 EOF
     EXIT
@@ -355,16 +360,17 @@ sshs() {
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
     local FILELIST=( "${MSC_BASE}/functions.sh" "${MSC_BASE}/logging" "${MSC_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MSC_BASE}/aliases" "${MSC_BASE}/PS1" "${MSC_BASE}/bash_completion.d/*" )
 
-    echo "FILELIST: $FILELIST"
+    logdebug "FILELIST: $FILELIST"
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
         for f in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
             [ -e "$f" ] && {\
-                echo "add $f to FILELIST"; \
+                logdebug "add $f to FILELIST"; \
                 FILELIST+=("$f"); } 
         done
     fi
-    echo "FILELIST: $FILELIST"
-    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%n-%C"
+    logdebug "FILELIST: $FILELIST"
+    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%C"
+    #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     cat << EOF >> "${TMPBASHCONFIG}"
 [ -e /etc/bashrc ] && BASHRC=/etc/bashrc
@@ -392,18 +398,22 @@ EOF
 
     for f in ${FILELIST[*]}; do
         if [ -e $f ]; then
-            echo add $f to tmpconfig
+            logdebug "add $f to tmpconfig"
             cat "$f" >> "${TMPBASHCONFIG}";
         fi
     done
     
     if [ $# -ge 1 ]; then
         if [ -e "${TMPBASHCONFIG}" ] ; then
-           local RCMD="/bin/bash --noprofile --norc -c "
            logdebug "create remote bashrc"
-           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]' )
+           logdebug "SSH_OPTS: $SSH_OPTS"
+           local REMOTETMPBASHCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t bashrc.XXXXXXXX --suffix=.conf" | tr -d '[:space:]' )
+           logdebug "REMOTETMPBASHCONFIG: $REMOTETMPBASHCONFIG"
+           logdebug $(ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}")
+           logdebug $(ssh -T ${SSH_OPTS} $@ "hostnamectl")
            logdebug "create remote vimrc"
-           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf"| tr -d '[:space:]')
+           local REMOTETMPVIMCONFIG=$(ssh -T ${SSH_OPTS} $@ "mktemp -p \${XDG_RUNTIME_DIR-~} -t vimrc.XXXXXXXX --suffix=.conf" | tr -d '[:space:]' )
+           logdebug "REMOTETMPVIMCONFIG: $REMOTETMPVIMCONFIG"
 
            # Add additional aliases to bashrc for remote-machine
            cat << EOF >> "${TMPBASHCONFIG}"
@@ -419,15 +429,17 @@ EOF
 
            logdebug "create fill remote bashrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPBASHCONFIG}" < "${TMPBASHCONFIG}"
+           logdebug  $(ssh -T ${SSH_OPTS} $@ "stat ${REMOTETMPBASHCONFIG}")
            logdebug "create fill remote vimrc"
            ssh -T ${SSH_OPTS} $@ "cat > ${REMOTETMPVIMCONFIG}" < "${MSC_BASE}/vimrc"
+           local RCMD="/bin/bash --noprofile --norc -c "
            RCMD="
            trap \"rm -f ${REMOTETMPBASHCONFIG} ${REMOTETMPVIMCONFIG}\" EXIT " ;
            logdebug "run remote shell with temporary config"
            ssh -t ${SSH_OPTS} $@ "$RCMD; SSHS=true bash -c \"function bash () { /bin/bash --rcfile ${REMOTETMPBASHCONFIG} -i ; } ; export -f bash; exec bash --rcfile ${REMOTETMPBASHCONFIG}\""
            rm "${TMPBASHCONFIG}"
         else
-           loginfo "${TMPBASHCONFIG} does not exist. Use »ssh $@«" >&2
+           logwarn "${TMPBASHCONFIG} does not exist. Using »ssh -t $@«"
            ssh -t "$@" 
         fi
     else
@@ -783,7 +795,7 @@ reachable () {
     local i
     loginfo -n "Try to connect to ${SERVER} (${IP}):${PORT} " >&2
     for i in $(seq 1 $SEC); do
-        logdebug -n "." >&2
+        loginfo -n "." >&2
         if reachable-default ${IP} ${PORT} 2>/dev/null; then
             res=0
             break
@@ -805,14 +817,15 @@ utoken () {
     ENTRY
     ssh_identity=$1
 
-    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+    #[ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
+    [ -z "${P11M+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
     
     if [ -n "${ssh_identity+x}" ]; then
         agentfile="${HOME}/.ssh/agents/agent-${ssh_identity}-$(hostname)"
         if [ -e "$agentfile" ]; then 
             local SSH_AUTH_SOCK
             local SSH_AGENT_PID
-            /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; ssh-add -l; ssh-add -e $PKCS11_MODULE; ssh-add -l"
+            /bin/sh -c ". $agentfile >/dev/null 2>/dev/null; ssh-add -l; ssh-add -e $P11M; ssh-add -l"
         fi
     fi
     EXIT
@@ -820,23 +833,26 @@ utoken () {
 
 token(){
 
-    [ -z "${PKCS11_MODULE+x}" ] && { PKCS11_MODULE=/usr/lib64/p11-kit-proxy.so; export PKCS11_MODULE; }
+    #[ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
+    [ -z "${P11M:+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
+
+    tmppubkey="${XDG_RUNTIME_DIR}/token.pub"
+    loginfo "$(ssh-add -L > $tmppubkey)"
 
     # Usage:
     #   token <identity>                        will load token in agent. does nothing, if token is already loaded
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
 #    startagent -t $@
-    loadagent $@
-    loginfo "$(ssh-add -s $PKCS11_MODULE || { ssh-add -e $PKCS11-MODULE; ssh-add -s $PKCS11_MODULE; } )"
+#    loadagent $@
+    loginfo "$(ssh-add -T ${tmppubkey} || { ssh-add -e $P11M; ssh-add -s $P11M; } )"
     loginfo "$(ssh-add -l)"
 
-    
 }
 
 
 token-extract-pubkey() {
-    if pkcs11-tool --module $PKCS11_MODULE --list-token-slots >&2 ;then
-        ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $PKCS11_MODULE -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
+    if pkcs11-tool --module $P11M --list-token-slots >&2 ;then
+        ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $P11M -r --type pubkey $1 $2 |openssl rsa -pubin -inform DER )
         if [ $? -gt 0 ] ; then
             token-list-objects
         fi
@@ -849,10 +865,10 @@ token-extract-pubkey() {
 token-list-objects() {
     case $1 in
         --login|-l)
-            pkcs11-tool --module $PKCS11_MODULE --login --list-objects
+            pkcs11-tool --module $P11M --login --list-objects
             ;;
         *)
-            pkcs11-tool --module $PKCS11_MODULE --list-objects
+            pkcs11-tool --module $P11M --list-objects
             ;;
     esac
 

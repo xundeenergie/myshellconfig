@@ -1,0 +1,234 @@
+#!/bin/bash
+
+# creates trash email for registration for online-services
+# email is hashed from domain of service + login-username from linux-system
+# or only unhashed service-domain
+# this created email-address is added to LDAP target email als dcMailAlias
+# also added to pass passwordmanager of user
+
+[ -e ${MSC_BASE}/defaults.conf ] && . ${MSC_BASE}/defaults.conf
+
+LDAP_HOST=${LDAP_HOST_DEFAULT}
+BIND_DN=${LDAP_ADMIN_BIND_DN}
+PASS_ID=${PASS_ID_LDAP_ADMIN}
+OWN_DOMAIN=${TRASHMAIL_OWN_DOMAIN_DEFAULT}
+TARGET_MAIL=${TRASHMAIL_TARGET_MAIL_DEFAULT}
+HASHED_DEFAULT=${TRASHMAIL_HASHED_DEFAULT}
+HASHLENGTH_DEFAULT=8
+PWOPTS_DEFAULT="-c -n -s"
+PWLENGTH_DEFAULT=50
+
+show_help () {
+    cat << EOF
+
+    usage: ${0} <OPTIONS> <URL> [<PWLENGTH>]
+
+    URL:	https://target.domain.tld:8080/path/to/site | target.domain.tld
+    PWLENGTH:	Integer, count characters in generated password
+
+    OPTIONS:
+        --delete                        delete trashmail from LDAP
+        -d				include domain from <URL> in username: 8ee948ae.target.domain.tld@mydomain.tld
+        -f|--force			force overwrite existing entry in pass
+        -h|--hashed			create hash from domain and linux-login-user (${USER})
+        --help				show this help/usage
+        -l|--length <INTEGER>|full	cut hashed part of username to <INTGER> characters from start (default: ${HASHLENGHT_DEFAULT})
+        -n|--not-hashed			do not hash username from targetdomain and linux-login-user 
+        -w|--full-hash			do not cut hash (same as »-l full«)
+        -y|--symbols			same option as in pwgen. Include at least one special character in the password.
+
+
+EOF
+
+}
+
+# TODO: how exit main-shell from error in subshell???
+getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit $? 
+set -- $(getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@"|| exit $?)
+
+echo @: $@
+while : ; do
+    case $1 in
+        --delete)
+            ACTION=delete
+            shift
+            ;;
+        -d)
+            INCLUDE_DOMAIN=true
+            shift
+            ;;
+        -f|--force)
+            FORCE=true
+            shift
+            ;;
+        -h|--hashed)
+            HASHED=true
+            shift
+            ;;
+        --help)
+            show_help
+            exit 0
+            ;;
+        -l|--hashlength)
+            HASHLENGTH=$2
+            shift; shift;
+            ;;
+        -n|--not-hashed)
+            HASHED=false
+            shift
+            ;;
+        -w|--full-hash)
+            HASHLENGTH=full
+            shift;
+            ;;
+        -y)
+            PWOPTS="${PWOPTS} -y"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo wrong argument $1 >&2
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
+# Urlparsing inspired by: https://gist.github.com/joshisa/297b0bc1ec0dcdda0d1625029711fa24
+# Referenced and tweaked from http://stackoverflow.com/questions/6174220/parse-url-in-shell-script#6174447
+
+URL=$1
+protocol=$(echo "$1" | grep "://" | sed -e's,^\(.*://\).*,\1,g')
+# Remove the protocol
+url_no_protocol=$(echo "${1/$protocol/}")
+# Use tr: Make the protocol lower-case for easy string compare
+protocol=$(echo "$protocol" | tr '[:upper:]' '[:lower:]')
+
+
+# Extract the user and password (if any)
+# cut 1: Remove the path part to prevent @ in the querystring from breaking the next cut
+# rev: Reverse string so cut -f1 takes the (reversed) rightmost field, and -f2- is what we want
+# cut 2: Remove the host:port
+# rev: Undo the first rev above 
+userpass=$(echo "$url_no_protocol" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
+pass=$(echo "$userpass" | grep ":" | cut -d":" -f2)
+if [ -n "$pass" ]; then
+  user=$(echo "$userpass" | grep ":" | cut -d":" -f1)
+else
+  user="$userpass"
+fi
+
+# Extract the host
+hostport=$(echo "${url_no_protocol/$userpass@/}" | cut -d"/" -f1)
+host=$(echo "$hostport" | cut -d":" -f1)
+port=$(echo "$hostport" | grep ":" | cut -d":" -f2)
+path=$(echo "$url_no_protocol" | grep "/" | cut -d"/" -f2-)
+
+echo "Create a trashmail-address for ${host}" >&2
+
+
+if ${HASHED:-$HASHED_DEFAULT}; then
+    case $HASHLENGTH in
+        full)
+            TRASHUSER="$(echo ${host}${USER}|md5sum -|awk '{print $1}')"
+            ;;
+        [0-9]|[0-9][0-9])
+            TRASHUSER="$(echo ${host}${USER}|md5sum -|awk '{print $1}'|cut -c-${HASHLENGTH})"
+            ;;
+        *)
+            TRASHUSER="$(echo ${host}${USER}|md5sum -|awk '{print $1}'|cut -c-${HASHLENGTH_DEFAULT})"
+            ;;
+    esac
+
+    if ${INCLUDE_DOMAIN:-false} ;then
+        $INCLUDE_DOMAIN && TRASHUSER=${TRASHUSER}.${host}
+    fi
+    
+
+else
+    TRASHUSER=${host}
+fi
+
+TRASHMAIL=${TRASHUSER}@${OWN_DOMAIN}
+echo $TRASHMAIL
+
+PASS_ENTRY="${PASS_PREFIX%/}${PASS_PREFIX:+/}${host}/${TRASHMAIL}"
+
+case ${ACTION:-create} in
+    create)
+#set -x
+echo "Add new trashmail to LDAP"
+cat << EOF |ldapmodify -Z -H ldap://${LDAP_HOST} -D ${BIND_DN} -x -w $(pass ${PASS_ID}|head -n 1)
+dn: dcSubMailAddress=${TARGET_MAIL},ou=mailaccounts,dc=schuerz,dc=at
+changetype: modify
+add: dcMailAlternateAddress
+dcMailAlternateAddress: ${TRASHMAIL}
+EOF
+
+if [ $? -gt 0 ]; then
+    echo pass find ${PASS_ENTRY}
+    pass find ${TRASHMAIL}|grep -v "Search Terms"
+    case $? in
+        1)
+            # returncode 1 from grep means, no line selected. so no entry exists, create new one
+            echo "Entry not found --> create new pass-entry"
+            CREATE=true
+            ;;
+        0)
+            if ${FORCE-false} ; then
+                echo "Entry found but enforced to overwrite"
+                CREATE=true
+            else
+                echo
+                echo "Current password for ${PASS_ENTRY} is $(pass ${PASS_ENTRY} |head -n1)."
+                read -p "Overwrite? [Y|n]: "
+                echo ""
+                case $REPLY in
+                    y|Y)
+                        CREATE=true
+                        ;;
+                    *)
+                        CREATE=false
+                        ;;
+                esac
+            fi
+            ;;
+        *)
+            echo "Something went wrong"
+            exit 2
+            ;;
+    esac
+else
+    CREATE=true
+fi
+
+if ${CREATE-false}; then
+cat << EOF |pass insert -m ${PASS_ENTRY}
+$(pwgen ${PWOPTS_DEFAULT} ${PWOPTS} ${2:-$PWLENGTH_DEFAULT} 1)
+email: ${TRASHMAIL}
+login: ${TRASHUSER}
+url: ${URL}
+comment: trashemail autogenerated md5-hash from »${host}${USER}« cut to ${HASHLENGTH}. Delete email, when account deleted!!!
+EOF
+fi
+#set +x
+#pass git commit "${PASS_ENTRY}"
+pass -c ${PASS_ENTRY}
+        ;;
+    delete)
+        
+cat << EOF |ldapmodify -Z -H ldap://${LDAP_HOST} -D ${BIND_DN} -x -w $(pass ${PASS_ID}|head -n 1)
+dn: dcSubMailAddress=${TARGET_MAIL},ou=mailaccounts,dc=schuerz,dc=at
+changetype: modify
+delete: dcMailAlternateAddress
+dcMailAlternateAddress: ${TRASHMAIL}
+EOF
+        ;;
+    *)
+        echo action $ACTION not known
+        exit 1
+        ;;
+esac
