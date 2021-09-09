@@ -91,7 +91,7 @@ fi
 if $dorepoupdate; then
     loginfo "fetch repo${dosubmodupdate:+ and submodules}"
     #$SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MSC_GIT_REMOTE_NAME} -p  2>>"${MSC_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
-    $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MSC_GIT_BRANCH} -p  2>>"${MSC_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
+    $SGIT fetch ${dosubmodupdate:+--recurse-submodules} ${MSC_GIT_REMOTE_NAME} -p  2>>"${MSC_LOGFILE}"|| { logwarn fetch failed; gitupdateend; exit 1; }
     if ${dosubmodupdate:-false}; then 
         lastupdatesubmodules
     fi
