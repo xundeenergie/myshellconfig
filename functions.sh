@@ -997,4 +997,10 @@ convert_to_subvolume () {
     return 0
 
 }
+
+cporig () {
+
+    cp -b -i "${1}" "${1}.orig"
+
+}
 #EOF
