@@ -2,8 +2,6 @@
 
 [ type loginfo > /dev/null 2>&1 ] || . $(dirname $0)/../logging
 
-export SCRIPT_LOG=./$(basename $0).log
-export LOGFILE=./$(basename $0).move.log
 [ -z "${move+x}" ] && move=false
 [ -z "${forcedate+x}" ] && forcedate=false
 [ -z "${setdate+x}" ] && setdate=true
@@ -236,6 +234,7 @@ run_fix () {
 
         case $move in
             true)
+                export UMASK=002
                 echo move to ${dest}/${MIMEDEST}/%Y/%Y_%m
                 if $movecreatedate ; then
                     loginfo "$(exiftool '-Directory<CreateDate' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($CreateDate)' "$file" 2>&1 |tee -a ${LOGFILE})"
@@ -244,6 +243,7 @@ run_fix () {
                 fi
                 ;;
             copy)
+                export UMASK=002
                 echo copy to ${dest}/${MIMEDEST}/%Y/%Y_%m
                 if $movecreatedate ; then
                     loginfo "$(exiftool -o . '-Directory<DateTimeOriginal' -d ${dest}/${MIMEDEST}/%Y/%Y_%m -if '($datetimeoriginal)' "$file" 2>&1 |tee -a ${LOGFILE})"
@@ -262,6 +262,7 @@ run_fix () {
                 fi
                 ;;
             rename)
+                export UMASK=002
                 echo move to ${dest}/${MIMEDEST}/%Y/%Y_%m
                 if $movecreatedate ; then
                     loginfo "$(exiftool -v '-FileName<CreateDate' -d ${dest}/${MIMEDEST}/%Y/%Y_%m/%Y%m%d_%H%M%S%%-c.%%e -if '($CreateDate)' "$file" 2>&1 | tee -a ${LOGFILE})"
@@ -270,6 +271,7 @@ run_fix () {
                 fi
                 ;;
             copyrename)
+                export UMASK=002
                 echo move to ${dest}/${MIMEDEST}/%Y/%Y_%m
                 if $movecreatedate ; then
                     loginfo "$(exiftool -o . '-FileName<CreateDate' -d ${dest}/${MIMEDEST}/%Y/%Y_%m/%Y%m%d_%H%M%S%%-c.%%e -if '($CreateDate)' "$file" 2>&1 | tee -a ${LOGFILE})"
@@ -327,6 +329,8 @@ else
     all=$(find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.mov$\|.png$\|.3gp$\|.gif$"|wc -l)
     find ${maxdepth:+-maxdepth} ${maxdepth:+$maxdepth} -type f |grep -i ".jpg$\|.jpeg$\|.mp4$\|.mov$\|.png$\|.3gp$\|.gif$"|while read file; do
         let "i=i+1"
+        export SCRIPT_LOG=./$(basename $0).log
+        export LOGFILE=./$(basename $0).move.log
         loginfo "$i/$all"
         run_fix "$file"
     done

@@ -13,6 +13,8 @@ alias cdlastfiledir='cd $(history -p \!\!:$:h)'
 #alias ssh='function f() { trap "reset; stty sane; tput rs1; clear; echo -e \"\033c\"" EXIT ; ssh $@; }; f $@'
 alias s='sshs $(history -p \!ssh:$:t)'
 alias sexit='ssh -O exit $(history -p \!ssh:$:t)'
+alias remountshared='sudo systemctl restart media-remote-sharefs-userdata.mount'
+alias umountshared='sudo systemctl stop media-remote-sharefs-userdata.mount'
 
 
 

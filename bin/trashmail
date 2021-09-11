@@ -18,10 +18,41 @@ HASHLENGTH_DEFAULT=8
 PWOPTS_DEFAULT="-c -n -s"
 PWLENGTH_DEFAULT=50
 
-set -- $(getopt -u -o dfhl:nwy --long force,hashed,not-hashed,hashlength:,whole-hash -- "$@" )
+show_help () {
+    cat << EOF
 
+    usage: ${0} <OPTIONS> <URL> [<PWLENGTH>]
+
+    URL:	https://target.domain.tld:8080/path/to/site | target.domain.tld
+    PWLENGTH:	Integer, count characters in generated password
+
+    OPTIONS:
+        --delete                        delete trashmail from LDAP
+        -d				include domain from <URL> in username: 8ee948ae.target.domain.tld@mydomain.tld
+        -f|--force			force overwrite existing entry in pass
+        -h|--hashed			create hash from domain and linux-login-user (${USER})
+        --help				show this help/usage
+        -l|--length <INTEGER>|full	cut hashed part of username to <INTGER> characters from start (default: ${HASHLENGHT_DEFAULT})
+        -n|--not-hashed			do not hash username from targetdomain and linux-login-user 
+        -w|--full-hash			do not cut hash (same as »-l full«)
+        -y|--symbols			same option as in pwgen. Include at least one special character in the password.
+
+
+EOF
+
+}
+
+# TODO: how exit main-shell from error in subshell???
+getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit $? 
+set -- $(getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@"|| exit $?)
+
+echo @: $@
 while : ; do
     case $1 in
+        --delete)
+            ACTION=delete
+            shift
+            ;;
         -d)
             INCLUDE_DOMAIN=true
             shift
@@ -33,6 +64,10 @@ while : ; do
         -h|--hashed)
             HASHED=true
             shift
+            ;;
+        --help)
+            show_help
+            exit 0
             ;;
         -l|--hashlength)
             HASHLENGTH=$2
@@ -55,9 +90,9 @@ while : ; do
             break
             ;;
         *)
-            wrong argument $1 >&2
-            shift
-            continue
+            echo wrong argument $1 >&2
+            show_help
+            exit 1
             ;;
     esac
 done
@@ -122,6 +157,8 @@ echo $TRASHMAIL
 
 PASS_ENTRY="${PASS_PREFIX%/}${PASS_PREFIX:+/}${host}/${TRASHMAIL}"
 
+case ${ACTION:-create} in
+    create)
 #set -x
 echo "Add new trashmail to LDAP"
 cat << EOF |ldapmodify -Z -H ldap://${LDAP_HOST} -D ${BIND_DN} -x -w $(pass ${PASS_ID}|head -n 1)
@@ -180,3 +217,18 @@ fi
 #set +x
 #pass git commit "${PASS_ENTRY}"
 pass -c ${PASS_ENTRY}
+        ;;
+    delete)
+        
+cat << EOF |ldapmodify -Z -H ldap://${LDAP_HOST} -D ${BIND_DN} -x -w $(pass ${PASS_ID}|head -n 1)
+dn: dcSubMailAddress=${TARGET_MAIL},ou=mailaccounts,dc=schuerz,dc=at
+changetype: modify
+delete: dcMailAlternateAddress
+dcMailAlternateAddress: ${TRASHMAIL}
+EOF
+        ;;
+    *)
+        echo action $ACTION not known
+        exit 1
+        ;;
+esac

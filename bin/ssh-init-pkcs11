@@ -2,7 +2,9 @@
 
 set -eu
 set -x
-[ -z "${PKCS11_MODULE+x}" ] && PKCS11_MODULE="$(dnf repoquery --installed -l p11-kit | grep \/p11-kit-proxy.so\$ | head -1)"
+which dnf >/dev/null 2>&1 [ -z "${P11M+x}" ] && P11M="$(dnf repoquery --installed -l p11-kit | grep \/p11-kit-proxy.so\$ | head -1)"
+which dpkg >/dev/null 2>&1 && [ -z "${P11M+x}" ] && P11M="$(dpkg -L p11-kit-modules|grep \/p11-kit-proxy.so\$ | head -1)"
+
 
 echo SSH_AGENT_PID before: $SSH_AGENT_PID
 
@@ -11,13 +13,13 @@ echo SSH_AGENT_PID before: $SSH_AGENT_PID
 
 echo SSH_AGENT_PID after: $SSH_AGENT_PID
 
-#if ssh-add -l | grep -q "${PKCS11_MODULE}"; then
+#if ssh-add -l | grep -q "${P11M}"; then
 #    # Remove any stale loaded keys from token, ssh-agent does not automatically
 #    # reconnect with the token when you reinsert it.
-#    ssh-add -e "${PKCS11_MODULE}"
+#    ssh-add -e "${P11M}"
 #fi
 
-ssh-add -e "${PKCS11_MODULE}" 2>/dev/null
+ssh-add -e "${P11M}" 2>/dev/null
 echo $?
 # Tell ssh-agent to use the keys on the token
-ssh-add -s "${PKCS11_MODULE}"
+ssh-add -s "${P11M}"

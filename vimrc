@@ -468,8 +468,17 @@ let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
 " write .netrwhist to cache-dir instead of ~/.vim to prevent configcheckout
 " problems
 let g:netrw_home=$XDG_CACHE_HOME.'/vim'
+
 "let g:nerdtree_tabs_open_on_console_startup=1
 let g:nerdtree_tabs_open_on_console_startup=0
+
+" Start NERDTree. If a file is specified, move the cursor to its window.
+"autocmd StdinReadPre * let s:std_in=1
+"autocmd VimEnter * NERDTree | if argc() > 0 || exists("s:std_in") | wincmd p | endif
+
+" Start NERDTree when Vim is started without file arguments.
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
 
 let g:NERDTreeGitStatusIndicatorMapCustom= {
     \ "Modified"  : "✹",
@@ -530,3 +539,5 @@ let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6  }  }
 " Configure Gitgutter
 nmap <Leader>hn <Plug>(GitGutterNextHunk)
 nmap <Leader>hp <Plug>(GitGutterPrevHunk)
+
+autocmd BufWritePre /etc/bind/vpn/db.* Soa

@@ -17,3 +17,4 @@ install plugins https://github.com/junegunn/fzf.vim.git
 install plugins https://github.com/airblade/vim-gitgutter.git
 remove plugins https://github.com/Lokaltog/powerline.git
 install plugins https://github.com/jamessan/vim-gnupg
+install plugins git@git.schuerz.at:/public/vim-soa.git
