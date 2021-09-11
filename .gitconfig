@@ -35,15 +35,13 @@
         sdiff = !"git diff && git submodule foreach 'git diff'"
         spush = push --recurse-submodules=on-demand
         supdate = submodule update --remote --merge
+        pushup = "!gitbranchname() { git symbolic-ref --short HEAD; }; gitpushupstream() { git push --set-upstream origin `gitbranchname`; }; gitpushupstream"
+        permission-reset = !git diff -p -R --no-ext-diff --no-color | grep -E \"^(diff|(old|new) mode)\" --color=never | git apply
 [merge]
 	conflictstyle = diff3
 	tool = vimdiff
 [mergetool]
 	prompt = false
-
-[alias]
-  pushup = "!gitbranchname() { git symbolic-ref --short HEAD; }; gitpushupstream() { git push --set-upstream origin `gitbranchname`; }; gitpushupstream"
-
 [include]
     path = ~/.gitconfig_local
 [status]
