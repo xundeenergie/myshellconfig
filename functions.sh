@@ -279,16 +279,17 @@ unsetproxy () {
     EXIT
 }
 
-git-mergedetachedheadtomaster () {
-    ENTRY
-    git checkout -b tmp
-    git branch -f master tmp
-    git checkout master
-    git branch -d tmp
-    git commit -m "Merged detached head into master" .
-    #git push origin master
-    EXIT
-}
+# transfered to bin
+#git-mergedetachedheadtomaster () {
+#    ENTRY
+#    git checkout -b tmp
+#    git branch -f master tmp
+#    git checkout master
+#    git branch -d tmp
+#    git commit -m "Merged detached head into master" .
+#    #git push origin master
+#    EXIT
+#}
 
 pathmunge () {
     ENTRY
@@ -835,6 +836,7 @@ token(){
     [ -z "${P11M:+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
 
     tmppubkey="${XDG_RUNTIME_DIR}/token.pub"
+    # Write public keys of all in agent stored keys to a temporary file
     loginfo "$(ssh-add -L > $tmppubkey)"
 
     # Usage:
@@ -842,6 +844,7 @@ token(){
     #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
 #    startagent -t $@
 #    loadagent $@
+    # Check if public-keys in tmppubkey are working. They are not working, if you removed and add back hardware-token. 
     loginfo "$(ssh-add -T ${tmppubkey} || { ssh-add -e $P11M; ssh-add -s $P11M; } )"
     loginfo "$(ssh-add -l)"
 
