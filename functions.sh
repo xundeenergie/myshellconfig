@@ -817,7 +817,6 @@ utoken () {
     ENTRY
     ssh_identity=$1
 
-    #[ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
     [ -z "${P11M+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
     
     if [ -n "${ssh_identity+x}" ]; then
@@ -833,7 +832,6 @@ utoken () {
 
 token(){
 
-    #[ -z "${P11M+x}" ] && { P11M=/usr/lib64/p11-kit-proxy.so; export P11M; }
     [ -z "${P11M:+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
 
     tmppubkey="${XDG_RUNTIME_DIR}/token.pub"
