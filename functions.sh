@@ -170,7 +170,7 @@ mencfs () {
     logdebug "DESTDIR:  $DESTDIR"
     [ -d "$DESTDIR" ] || mkdir -p "$DESTDIR"
     $PASS "${PKEY}" 1>/dev/null 2>&1 || { logerror "entry $PKEY does not exist in passwordsotre"; return 5; }
-    local ENCFS_PASSWORD=$($PASS "${PKEY}" | head -n1)
+    local ENCFS_PASSWORD=$($PASS show "${PKEY}")
 
     if [ -z ${ENCDIR+x} -a -d ${ENCDIR} ];then
         logerror "no encrypted directory found -> exit"
@@ -246,7 +246,7 @@ kinit-custom () {
 
     [ -z ${PKEY+x} ] && return 3
     $PASS "${PKEY}" 1>/dev/null 2>&1 || return 3
-    local KERBEROS_PASSWORD=$($PASS "${PKEY}" | head -n1)
+    local KERBEROS_PASSWORD=$($PASS show "${PKEY}")
     local KERBEROS_USER=$($PASS "${PKEY}" | grep login | sed -e 's/^login: //' )
     #echo KERBEROS_PASSWORD: $KERBEROS_PASSWORD
     loginfo "Get kerberos-ticket for: $KERBEROS_USER@$REALM"
@@ -576,14 +576,17 @@ cat << EOF
 EOF
 }
 
-function pdsh-update-hetzner()
+function update-hetzner-serverlist()
 {
-    curl -s -H "Authorization: Bearer $(pass hetzner.com/api-token | head -n1)" \
-        https://api.hetzner.cloud/v1/servers \
-        | /usr/bin/jq '.servers[].public_net.ipv4.ip'|sed -e 's/\"//g' \
-        |while read i; do 
-            dig -x $i | awk '$0 !~ /^;/ && $4 == "PTR" {print $5}' 
-        done |sed -s -e 's/\.$//' > ~/.dsh/group/hetzner-servers
+    for i in basic-services sc xe tu; do
+        curl -s -H "Authorization: Bearer $(pass show hetzner.com/projects/${i}/api-token)" \
+            https://api.hetzner.cloud/v1/servers \
+            | /usr/bin/jq '.servers[].public_net.ipv4.ip'|sed -e 's/\"//g' \
+            |while read i; do 
+                dig -x $i | awk '$0 !~ /^;/ && $4 == "PTR" {print $5}' 
+            done |sed -s -e 's/\.$//' > ~/.dsh/group/hetzner-servers-${i}
+    done
+    cat ~/.dsh/group/hetzner-servers-* > ~/.dsh/group/hetzner-servers
 }
 
 function tmuxx() {
@@ -727,12 +730,14 @@ gnome-shell-extensions-make-actual-permanent-systemwide() {
     sudo mkdir -p "/etc/dconf/profile/"
     local line='user-db:user'
     if [ -e "${file}" ] ; then
+        command="grep -xqF -- ${line} ${file} || echo $line >> $file"
         logtrace "$command"
         sudo sh -c "$command"
     fi
     local line='system-db:local'
     if [ -e "${file}" ] ; then
         command="grep -xqF -- ${line} ${file} || echo $line >> $file"
+        logtrace "$command"
         sudo sh -c "$command"
     fi
     local line='enabled-extensions='
@@ -996,6 +1001,7 @@ convert_to_subvolume () {
 
     set +x
     return 0
+
 
 }
 
