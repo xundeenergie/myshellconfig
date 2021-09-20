@@ -1,0 +1,9 @@
+#!/bin/bash
+
+N=$1
+DNS=$1
+
+sudo nmap -v -sn -n $1 -oG - | awk '!/Status: Down/{print $2}'|while read i;do 
+    echo "$i: $(dig "$DNS" -x $i +short +search)"
+    
+done
