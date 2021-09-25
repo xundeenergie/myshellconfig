@@ -124,7 +124,7 @@ alias nedit='LC_ALL=ISO-8850-15;export LC_ALL;nedit -fn win8x15 -xrm "*fontList:
 alias o='less -r'
 alias totem='VDPAU_DRIVER=va_gl totem'
 alias unetbootin='export QT_X11_NO_MITSHM=1 unetbootin'
-alias vi='/usr/bin/vim'
+alias vi='/usr/bin/vimx'
 alias vlc='VDPAU_DRIVER=va_gl vlc'
 alias tmux='tmux -f ~/.tmux.conf'
 alias youtube-dl-whole-video="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(title)s-%(id)s.%(ext)s' -w -c "
