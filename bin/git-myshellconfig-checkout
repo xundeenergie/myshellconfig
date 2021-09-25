@@ -37,6 +37,7 @@ EOF
 
 set -- $(getopt -u -o hrs  --long headless,force-repo-update,force-submodules-update -- "$@" )
 
+loginfo "git checkout-options: $@"
 while [ $# -gt 0 ]; do
     case $1 in
         -h|--headless)
