@@ -998,6 +998,11 @@ convert_to_subvolume () {
 
 }
 
+getfreeip () {
+    local N=$1
+    sudo nmap -v -sn -n $1 -oG - | awk '/Status: Down/{print $2}'
+}
+
 cporig () {
 
     cp -b -i "${1}" "${1}.orig"
