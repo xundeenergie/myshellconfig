@@ -858,12 +858,12 @@ token(){
 
 token-extract-pubkey() {
     if pkcs11-tool --module $P11M --list-token-slots >&2 ;then
-        ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $P11M -r --type pubkey ${1:---label} ${1} |openssl rsa -pubin -inform DER )
+        ssh-keygen -i -m pkcs8 -f <(pkcs11-tool --module $P11M -r --type pubkey ${1:+--label} ${1} |openssl rsa -pubin -inform DER )
         if [ $? -gt 0 ] ; then
-            token-list-objects
+            token-list-objects >&2
         fi
     else
-        echo "Please insert token. Exit"
+        echo "Please insert token. Exit" >&2
         return 1
     fi
 }
