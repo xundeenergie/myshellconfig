@@ -131,7 +131,7 @@ EOF
             if which git >/dev/null; then
                 loginfo -n "Sync config with ${MSC_GIT_SERVER}: " 
                 # MSC_GITCHECKOUTSCRIPT_OPTIONS are options for bin/git-myshellconfig-checkout
-                ${MSC_BASE}/bin/git-myshellconfig-checkout ${MSC_GIT_CHECKOUTSCRIPT_OPTIONS:=${MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT}}|| nok="not " 1>>"${MSC_LOGFILE}" 2>&1 
+                ${MSC_BASE}/bin/git-myshellconfig-checkout ${MSC_GIT_CHECKOUTSCRIPT_OPTIONS=${MSC_GIT_CHECKOUTSCRIPT_OPTIONS_DEFAULT}}|| nok="not " 1>>"${MSC_LOGFILE}" 2>&1 
                 loginfo "$(printf '%s\n' "${nok}synced" )"
                 [ -z "$nok"  ] && mkdir -pv "${MSC_LOGDIR}"
 
