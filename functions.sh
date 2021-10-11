@@ -20,7 +20,7 @@ promptcommandmunge () {
     esac
     EXIT
 }
-## this function updates in combination with PROMPT_COMMAND the shell-environment-variables in tmus-sessions,
+## this function updates in combination with PROMPT_COMMAND the shell-environment-variables in tmux-sessions,
 #  every time prompt is called. It does it only, when called from tmux (Environment TMUX is set)
 function _tmux_hook() {
 #    [ -z "${TMUX+x}" ] || eval "$(tmux show-environment -s)"
@@ -30,10 +30,6 @@ function _tmux_hook() {
     fi
 
 }
-
-# Append `;` if PROMPT_COMMAND is not empty
-#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_tmux_hook"
-
 
 # To make the code more reliable on detecting the default umask
 function _umask_hook {
@@ -46,9 +42,6 @@ function _umask_hook {
     umask "$DEFAULT_UMASK"
   fi
 }
-
-# Append `;` if PROMPT_COMMAND is not empty
-#PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_umask_hook"
 
 cpb() {
     scp "$1" ${SSH_CLIENT%% *}:~/Work
