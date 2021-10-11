@@ -368,7 +368,14 @@ ssh-runinagent () {
 
 }
 
-agent-start-or-restart $ssh_identity
-! $createonly && agent-load-identity-keys $ssh_identity
+if [ $SSH_TTY ] ; then
+    echo remote >&2
+    res=1
+else
+    echo local >&2
+    agent-start-or-restart $ssh_identity
+    ! $createonly && agent-load-identity-keys $ssh_identity
+    res=0
+fi
 SCRIPTEXIT
-exit $?
+exit $res
