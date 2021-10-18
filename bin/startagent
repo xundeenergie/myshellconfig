@@ -369,10 +369,10 @@ ssh-runinagent () {
 }
 
 if [ $SSH_TTY ] ; then
-    echo remote >&2
+    logdebug "run with forwarded ssh-agent"
     res=1
 else
-    echo local >&2
+    logdebug "run with local ssh-agent"
     agent-start-or-restart $ssh_identity
     ! $createonly && agent-load-identity-keys $ssh_identity
     res=0
