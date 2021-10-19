@@ -1016,4 +1016,24 @@ vgrename_full () {
     sed -i "s/${altevolumegroup}/${neuevolumegroup}/g" /etc/initramfs-tools/conf.d/resume
     update-initramfs -c -k all
 }
+
+getfreeip () {
+    
+    local N=$1
+
+    sudo nmap -v -sn -n $1 -oG - | awk '/Status: Down/{print $2}'
+
+}
+
+getusedip () {
+
+    local N=$1
+    local DNS=$2
+
+    sudo nmap -v -sn -n $1 -oG - | awk '!/Status: Down/{print $2}'|while read i;do 
+        echo "$i: $(dig "${DNS:+@}${DNS}" -x $i +short +search)"
+        
+    done
+
+}
 #EOF
