@@ -1003,4 +1003,17 @@ cporig () {
     cp -b -i "${1}" "${1}.orig"
 
 }
+
+vgrename_full () {
+
+    altevolumegroup="$1"
+    neuevolumegroup="$2"
+
+    vgrename ${altevolumegroup} ${neuevolumegroup}
+    sed -i "s/${altevolumegroup}/${neuevolumegroup}/g" /etc/fstab
+    sed -i "s/${altevolumegroup}/${neuevolumegroup}/g" /boot/grub/grub.cfg
+    sed -i "s/${altevolumegroup}/${neuevolumegroup}/g" /boot/grub/menu.lst
+    sed -i "s/${altevolumegroup}/${neuevolumegroup}/g" /etc/initramfs-tools/conf.d/resume
+    update-initramfs -c -k all
+}
 #EOF
