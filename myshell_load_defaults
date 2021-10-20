@@ -28,7 +28,7 @@ if ! $SSHS; then
 
     #######################################################################################
     # User specific aliases and function
-    echo "notmpconf"
+    logdebug "notmpconf"
     if [ -e ${MSC_BASE}/functions.sh ]; then
         . ${MSC_BASE}/functions.sh
     else
@@ -112,7 +112,7 @@ if ! $SSHS; then
 else
     # run with temporary config
 
-    echo "tmpconf"
+    logdebug "tmpconf"
     case $TERM in
         *screen*)
             loginfo BASHRC: $BASHRC -> source it
