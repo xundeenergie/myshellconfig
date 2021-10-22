@@ -1041,4 +1041,74 @@ getusedip () {
     done
 
 }
+
+function getdbcreds_jra () {
+    case $# in
+        0)
+            gojirahome
+            DB_FILE=dbconfig.xml
+            cd -
+            ;;
+        1)
+            DB_FILE=$1
+            ;;
+        *)
+            echo "wrong number of arguments"
+            return 1
+            ;;
+    esac
+
+    DB_URL="$(grep -oPm1 "(?<=<url>)[^<]+" ${DB_FILE})"
+    DB_USER="$(grep -oPm1 "(?<=<username>)[^<]+" ${DB_FILE})"
+    DB_PWD="$(grep -oPm1 "(?<=<password>)[^<]+" ${DB_FILE})"
+    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\1@')"
+    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\2@')"
+    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\3@')"
+
+    return 0
+}
+
+function getdbcreds_cnf () {
+    case $# in
+        0)
+            gocnfhome
+            DB_FILE=confluence.cfg.xml
+            ;;
+        1)
+            DB_FILE=$1
+            ;;
+        *)
+            echo "wrong number of arguments"
+            cd -
+            return 1
+            ;;
+    esac
+
+    DB_URL="$(grep -oPm1 "(?<=<property name=\"hibernate.connection.url\">)[^<]+" ${DB_FILE})"
+    DB_USER="$(grep -oPm1 "(?<=<property name=\"hibernate.connection.username\">)[^<]+" ${DB_FILE})"
+    DB_PWD="$(grep -oPm1 "(?<=<property name=\"hibernate.connection.password\">)[^<]+" ${DB_FILE})"
+    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\1@')"
+    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\2@')"
+    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\3@')"
+
+    cd -
+    return 0
+}
+function connectdb () {
+
+    case $1 in 
+        jra|jira)
+            getdbcreds_jra
+            ;;
+        cnf|conf|confluence)
+            getdbcreds_cnf
+            ;;
+        *)
+            echo "wrong argument"
+            return 1
+            ;;
+    esac
+
+    PGPASSWORD=$DB_PWD psql -h $DB_HOST -p $DB_PORT -U $DB_USER $DB_NAME
+}
 #EOF
