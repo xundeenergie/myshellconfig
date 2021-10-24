@@ -34,6 +34,7 @@ show_help () {
         --help				show this help/usage
         -l|--length <INTEGER>|full	cut hashed part of username to <INTGER> characters from start (default: ${HASHLENGHT_DEFAULT})
         -n|--not-hashed			do not hash username from targetdomain and linux-login-user 
+        -t|--target-mail <TARGET_MAIL>  Emailadress for which trashmail is created
         -w|--full-hash			do not cut hash (same as »-l full«)
         -y|--symbols			same option as in pwgen. Include at least one special character in the password.
 
@@ -43,8 +44,8 @@ EOF
 }
 
 # TODO: how exit main-shell from error in subshell???
-getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@" || exit $? 
-set -- $(getopt -u -o dfhl:nwy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols -- "$@"|| exit $?)
+getopt -u -o dfhl:nt:wy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols,target-mail: -- "$@" || exit $? 
+set -- $(getopt -u -o dfhl:nt:wy --long delete,force,hashed,help,not-hashed,hashlength:,whole-hash,symblols,target-mail: -- "$@"|| exit $?)
 
 echo @: $@
 while : ; do
@@ -76,6 +77,10 @@ while : ; do
         -n|--not-hashed)
             HASHED=false
             shift
+            ;;
+        -t|--target-mail)
+            TARGET_MAIL=$2
+            shift; shift;
             ;;
         -w|--full-hash)
             HASHLENGTH=full

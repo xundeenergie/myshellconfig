@@ -1,0 +1,14 @@
+#!/bin/bash
+
+function _trashmail() {
+    COMPREPLY=()
+    local CUR KEYS
+    CUR="${COMP_WORDS[COMP_CWORD]}"
+    KEYS=$(ldapsearch -LLL -Z -H ldap://${LDAP_HOST_DEFAULT} -D ${LDAP_ADMIN_BIND_DN} -x -w $(pass ${PASS_ID_LDAP_ADMIN}|head -n 1) -b ou=mailaccounts,dc=schuerz,dc=at '(&(dcAccountStatus=active)(objectClass=dcExternalMailAccount))' dcSubMailAddress|grep "^dcSubMailAddress"|awk '{print $2}')
+    COMPREPLY=( $(compgen -W "${KEYS}" -- ${CUR}) )
+    return 0
+}
+complete -F _trashmail trashmail
+
+
+
