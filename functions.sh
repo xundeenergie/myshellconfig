@@ -346,6 +346,7 @@ EOF
 sshs() {
     ENTRY
 
+
     local LOGLEVEL="WARN"
 #    MKTMPCMD='mktemp $(echo ${XDG_RUNTIME_DIR}/bashrc.XXXXXXXX.conf)'
 #    VIMMKTMPCMD="mktemp ${XDG_RUNTIME_DIR}/vimrc.XXXXXXXX.conf"
@@ -363,9 +364,10 @@ sshs() {
         done
     fi
     logdebug "FILELIST: $FILELIST"
-    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=15s -o ControlPath=~/.ssh/ssh-%C"
+    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=2s -o ControlPath=~/.ssh/master-%C"
     #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
+    ssh -T ${SSH_OPTS} $@ "pwd" >/dev/null 2>/dev/null || { logerror "Server $@ not reachable -> exit"; return 1; }
     cat << EOF >> "${TMPBASHCONFIG}"
 [ -e /etc/bashrc ] && BASHRC=/etc/bashrc
 [ -e /etc/bash.bashrc ] && BASHRC=/etc/bash.bashrc
@@ -490,7 +492,7 @@ vim-repair-vundle () {
 getbashrcfile () {
     ENTRY
     if [ -z ${BASHRC+x} ] ; then
-        echo "bash uses default" >&2
+        loginfo "bash uses default"
     else
         cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}'
     fi
@@ -500,7 +502,7 @@ getbashrcfile () {
 catbashrcfile () {
     ENTRY
     if [ -z ${BASHRC+x} ] ; then
-        echo "bash uses default" >&2
+        loginfo "bash uses default"
     else
         #cat $(cat /proc/$$/cmdline | xargs -0 echo|awk '{print $3}')
         cat $(getbashrcfile)
@@ -879,7 +881,7 @@ loadagent() {
     af=$(startagent --create-only $1 )
     loginfo "Load agent from $af"
     unset SSH_AUTH_SOCKET SSH_AGENT_PID
-    eval $(<$af)
+    [ -n "${af+x}" ] && eval $(<$af)
     logdebug "SSH_AUTH_SOCK: ${SSH_AUTH_SOCK-not set}"
     logdebug "SSH_AGENT_PID: ${SSH_AGENT_PID-not set}"
     loginfo "currently loaded keys in agent:
@@ -1040,5 +1042,75 @@ getusedip () {
         
     done
 
+}
+
+function getdbcreds_jra () {
+    case $# in
+        0)
+            gojirahome
+            DB_FILE=dbconfig.xml
+            cd -
+            ;;
+        1)
+            DB_FILE=$1
+            ;;
+        *)
+            echo "wrong number of arguments"
+            return 1
+            ;;
+    esac
+
+    DB_URL="$(grep -oPm1 "(?<=<url>)[^<]+" ${DB_FILE})"
+    DB_USER="$(grep -oPm1 "(?<=<username>)[^<]+" ${DB_FILE})"
+    DB_PWD="$(grep -oPm1 "(?<=<password>)[^<]+" ${DB_FILE})"
+    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\1@')"
+    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\2@')"
+    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\3@')"
+
+    return 0
+}
+
+function getdbcreds_cnf () {
+    case $# in
+        0)
+            gocnfhome
+            DB_FILE=confluence.cfg.xml
+            ;;
+        1)
+            DB_FILE=$1
+            ;;
+        *)
+            echo "wrong number of arguments"
+            cd -
+            return 1
+            ;;
+    esac
+
+    DB_URL="$(grep -oPm1 "(?<=<property name=\"hibernate.connection.url\">)[^<]+" ${DB_FILE})"
+    DB_USER="$(grep -oPm1 "(?<=<property name=\"hibernate.connection.username\">)[^<]+" ${DB_FILE})"
+    DB_PWD="$(grep -oPm1 "(?<=<property name=\"hibernate.connection.password\">)[^<]+" ${DB_FILE})"
+    DB_HOST="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\1@')"
+    DB_PORT="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\2@')"
+    DB_NAME="$(echo $DB_URL|sed 's@^.*//@@;s@\(^.*\):\(.*\)/\(.*\)$@\3@')"
+
+    cd -
+    return 0
+}
+function connectdb () {
+
+    case $1 in 
+        jra|jira)
+            getdbcreds_jra
+            ;;
+        cnf|conf|confluence)
+            getdbcreds_cnf
+            ;;
+        *)
+            echo "wrong argument"
+            return 1
+            ;;
+    esac
+
+    PGPASSWORD=$DB_PWD psql -h $DB_HOST -p $DB_PORT -U $DB_USER $DB_NAME
 }
 #EOF

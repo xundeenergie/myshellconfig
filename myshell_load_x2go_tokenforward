@@ -14,7 +14,7 @@ if [ -n "$SSH_AUTH_SOCK" ] && \
         chmod 600 ~/.x2go/agentsocket
         chown $USER ~/.x2go/agentsocket
         # write file name of agent socket into file
-        loginfo "old agentsock $( cat ~/.x2go/agentsocket)"
+        logdebug "old agentsock $( cat ~/.x2go/agentsocket)"
         echo $SSH_AUTH_SOCK > ~/.x2go/agentsocket
         #rm ~/.x2go/agentsocket
         #ln -s $SSH_AUTH_SOCK ~/.x2go/agentsocket
