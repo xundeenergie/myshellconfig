@@ -60,4 +60,4 @@
 	url = https://github.com/jamessan/vim-gnupg
 [submodule "vim/pack/plugins/start/vim-soa"]
 	path = vim/pack/plugins/start/vim-soa
-	url = git@git.schuerz.at:/public/vim-soa.git
+        url = https://git.schuerz.at/public/vim-soa.git
