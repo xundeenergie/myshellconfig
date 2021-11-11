@@ -355,7 +355,7 @@ sshs() {
     local TMPBASHCONFIG=$(mktemp -p ${XDG_RUNTIME_DIR} -t bashrc.XXXXXXXX --suffix=.conf)
     local FILELIST=( "${MSC_BASE}/functions.sh" "${MSC_BASE}/logging" "${MSC_BASE}/myshell_load_fortmpconfig" $(getbashrcfile) ~/.aliases "${MSC_BASE}/aliases" "${MSC_BASE}/PS1" "${MSC_BASE}/bash_completion.d/*" )
 
-    logdebug "FILELIST: $FILELIST"
+    logdebug "FILELIST: ${FILELIST[@]}"
     if [ -e "${HOME}/.config/myshellconfig/sshs_addfiles.conf" ] ; then
         for f in $(cat "${HOME}/.config/myshellconfig/sshs_addfiles.conf");do
             [ -e "$f" ] && {\
@@ -363,7 +363,7 @@ sshs() {
                 FILELIST+=("$f"); } 
         done
     fi
-    logdebug "FILELIST: $FILELIST"
+    logdebug "FILELIST1: ${FILELIST[@]}"
     local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=2s -o ControlPath=~/.ssh/master-%C"
     #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
@@ -1049,7 +1049,7 @@ function getdbcreds_jra () {
         0)
             gojirahome
             DB_FILE=dbconfig.xml
-            cd -
+            #cd -
             ;;
         1)
             DB_FILE=$1
@@ -1100,10 +1100,10 @@ function connectdb () {
 
     case $1 in 
         jra|jira)
-            getdbcreds_jra
+            getdbcreds_jra $2
             ;;
         cnf|conf|confluence)
-            getdbcreds_cnf
+            getdbcreds_cnf $2
             ;;
         *)
             echo "wrong argument"
