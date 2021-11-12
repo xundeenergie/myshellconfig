@@ -155,6 +155,7 @@ unsetproxy () {
 
 
     git config -f ~/.gitconfig_local --unset http.proxy
+    git config -f ~/.gitconfig_local --unset http.sslverify false
     git config -f ~/.gitconfig_local --unset https.proxy
 #    git config -f ~/.gitconfig_local --unset core.sshCommand
 
