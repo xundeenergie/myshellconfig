@@ -94,6 +94,7 @@ create_symlinks() {
 
 setproxy () {
 
+    # https://gist.github.com/yougg/5d2b3353fc5e197a0917aae0b3287d64
     ENTRY
     local CONFIG
     case $# in
@@ -123,8 +124,8 @@ setproxy () {
         loginfo "${CONFIG} not existing"
 #        export PROXY_CREDS=""
     fi
-    export {http,https,ftp}_proxy="${PROXY_PROTO:-http}://${PROXY_CREDS}${PROXY_CREDS:+@}${PROXY_SERVER}${PROXY_PORT:+:}${PROXY_PORT}"
-    export {HTTP,HTTPS,FTP}_PROXY="${PROXY_PROTO:-http}://${PROXY_CREDS}${PROXY_CREDS:+@}${PROXY_SERVER}${PROXY_PORT:+:}${PROXY_PORT}"
+    export {http,https,ftp,rsync,all}_proxy="${PROXY_PROTO:-http}://${PROXY_CREDS}${PROXY_CREDS:+@}${PROXY_SERVER}${PROXY_PORT:+:}${PROXY_PORT}"
+    export {HTTP,HTTPS,FTP,RSYNC,ALL}_PROXY="${PROXY_PROTO:-http}://${PROXY_CREDS}${PROXY_CREDS:+@}${PROXY_SERVER}${PROXY_PORT:+:}${PROXY_PORT}"
     no_proxy="127.0.0.1,localhost"
     #no_proxy=$no_proxy,$(echo 10.{0..255}.{0..255}.{0..255}|tr ' ' ',')
     #no_proxy=$no_proxy,$(echo 172.{16..31}.{0..255}.{0..255}|tr ' ' ',')
@@ -134,9 +135,32 @@ setproxy () {
     
     export no_proxy
 
+    git config -f ~/.gitconfig_local http.sslverify false
+    git config -f ~/.gitconfig_local http.proxy $http_proxy
+    git config -f ~/.gitconfig_local https.proxy $http_proxy
+
+    # only for 'github.com'
+    git config -f ~/.gitconfig_local http.https://github.com.proxy $http_proxy
     EXIT
 }
 
+
+unsetproxy () {
+    ENTRY
+    unset {HTTP,HTTPS,FTP,RSYNC,ALL}_PROXY
+    unset PROXY_{CREDS,USER,PASS,SERVER,PORT,PROTO,IGNORE}
+    unset {http,https,ftp,rsync,all}_proxy
+    unset proxy_{creds,user,pass,server,port}
+    unset no_proxy NO_PROXY
+
+
+    git config -f ~/.gitconfig_local --unset http.proxy
+    git config -f ~/.gitconfig_local --unset https.proxy
+#    git config -f ~/.gitconfig_local --unset core.sshCommand
+
+    git config -f ~/.gitconfig_local --unset http.https://github.com.proxy
+    EXIT
+}
 mencfs () {
 
     ENTRY
@@ -270,15 +294,6 @@ ${KERBEROS_PASSWORD}
         fi
 
     fi
-    EXIT
-}
-
-unsetproxy () {
-    ENTRY
-    unset {HTTP,HTTPS,FTP}_PROXY
-    unset PROXY_{CREDS,USER,PASS,SERVER,PORT}
-    unset {http,https,ftp}_proxy
-    unset proxy_{creds,user,pass,server,port}
     EXIT
 }
 
