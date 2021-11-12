@@ -107,6 +107,7 @@ setproxy () {
                 return 1
             else
                 CONFIG=$(find ${SETPROXY_CREDS_DIRS[*]} -mindepth 1 -name "$1.conf" -print -quit 2>/dev/null )
+                NO_PROXY=$(find ${SETPROXY_CREDS_DIRS[*]} -mindepth 1 -name "no_proxy.conf" -print -quit 2>/dev/null )
             fi
          ;;
     esac
@@ -114,16 +115,25 @@ setproxy () {
     logwarn "CONFIG: ${CONFIG}"
 
     if [ -e ${CONFIG} ]; then
-        loginfo -n "${CONFIG} existing: "
+        logdebug -n "${CONFIG} existing: "
         source "${CONFIG}"
-        loginfo "sourced"
-        export PROXY_CREDS="${PROXY_USER}:${PROXY_PASS}@"
+        loginfo "read $CONFIG"
+        export PROXY_CREDS="$(urlencode ${PROXY_USER})${PROXY_PASS:+:}$(urlencode ${PROXY_PASS})"
     else
         loginfo "${CONFIG} not existing"
-        export PROXY_CREDS=""
+#        export PROXY_CREDS=""
     fi
-    export {http,https,ftp}_proxy="http://${PROXY_CREDS}${PROXY_SERVER}:${PROXY_PORT}"
-    export {HTTP,HTTPS,FTP}_PROXY="http://${PROXY_CREDS}${PROXY_SERVER}:${PROXY_PORT}"
+    export {http,https,ftp}_proxy="${PROXY_PROTO:-http}://${PROXY_CREDS}${PROXY_CREDS:+@}${PROXY_SERVER}${PROXY_PORT:+:}${PROXY_PORT}"
+    export {HTTP,HTTPS,FTP}_PROXY="${PROXY_PROTO:-http}://${PROXY_CREDS}${PROXY_CREDS:+@}${PROXY_SERVER}${PROXY_PORT:+:}${PROXY_PORT}"
+    no_proxy="127.0.0.1,localhost"
+    #no_proxy=$no_proxy,$(echo 10.{0..255}.{0..255}.{0..255}|tr ' ' ',')
+    #no_proxy=$no_proxy,$(echo 172.{16..31}.{0..255}.{0..255}|tr ' ' ',')
+    #no_proxy=$no_proxy,$(echo 192.168.{0..255}.{0..255}|tr ' ' ',')
+    no_proxy=${no_proxy}${PROXY_IGNORE:+,}${PROXY_IGNORE}
+    . $NO_PROXY
+    
+    export no_proxy
+
     EXIT
 }
 
@@ -1113,4 +1123,27 @@ function connectdb () {
 
     PGPASSWORD=$DB_PWD psql -h $DB_HOST -p $DB_PORT -U $DB_USER $DB_NAME
 }
+
+
+urlencode() {
+    # urlencode <string>
+
+    local LANG=C
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf "$c" ;;
+            *) printf '%%%02X' "'$c" ;; 
+        esac
+    done
+}
+
+urldecode() {
+    # urldecode <string>
+
+    local url_encoded="${1//+/ }"
+    printf '%b' "${url_encoded//%/\\x}"
+}
+
 #EOF
