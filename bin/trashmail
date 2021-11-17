@@ -18,7 +18,7 @@ HASHLENGTH_DEFAULT=8
 PWOPTS_DEFAULT="-c -n -s"
 PWLENGTH_DEFAULT=50
 
-show_help () {
+usage () {
     cat << EOF
 
     usage: ${0} <OPTIONS> <URL> [<PWLENGTH>]
@@ -67,7 +67,7 @@ while : ; do
             shift
             ;;
         --help)
-            show_help
+            usage
             exit 0
             ;;
         -l|--hashlength)
@@ -96,7 +96,7 @@ while : ; do
             ;;
         *)
             echo wrong argument $1 >&2
-            show_help
+            usage
             exit 1
             ;;
     esac
