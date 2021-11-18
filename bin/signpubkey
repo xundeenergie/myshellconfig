@@ -1,0 +1,95 @@
+#!/bin/bash
+
+
+usage() {
+    cat << EOF
+    
+    Usage: $(dirname $0) [-n|--principals] <principal>[,<principal>[,<principal>[,...]]] [-V|--valid-time] <TIME> [-s|--serialnumber] <INT> [-S|-serialnumber-file] <filename> [-I|--identity] <identity> publickey
+
+
+EOF
+
+}
+default_serialnumberfile="${HOME}/ssh-ca/serialnumbers/serialnumber"
+
+set -- $(getopt -u -o hHn:V:s:S:I:tU --long help,host,user,principals:,valid-time:,serialnumber:,serialnumber-file:,identity:,hms -- "$@"|| exit $?)
+
+while : ;do
+    case $1 in
+        -h|--help)
+            usage
+            break
+            ;;
+        -H|host)
+            host_or_user=host
+            shift
+            ;;
+        -U|user)
+            host_or_user=user
+            shift
+            ;;
+        -n|--principals)
+            shift
+            principals=$1
+            shift
+            ;;
+        -V|--valid-time)
+            shift
+            validtime="${1}"
+            shift
+            ;;
+        -S|--serialnumber)
+            shift
+            serialnumber=$1
+            shift
+            ;;
+        -s|--serialnumber-file)
+            shift
+            serialnumberfile="$1"
+            shift
+            ;;
+        -I|--identity)
+            shift
+            identity=${1}
+            shift
+            ;;
+        -t|--hms)
+            # t wie token
+            shift
+            hms=true
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo wrong argument $1 >&2
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+[ -z "${validtime+x}" ]         && validtime="+8W"
+[ -z "${identity+x}" ]          && identity=${USER}@$(hostname -f)
+[ -z "${serialnumberfile+x}" ]  && serialnumberfile=${default_serialnumberfile}
+[ -z "${serialnumber+x}" ]      && serialnumber=$(sed -i -r 's/^([0-9]+)$/echo "$((\1+1))"/ge' "${serialnumberfile}"; cat "${serialnumberfile}" )
+[ -z "${principals+x}" ]        && { echo "no principals given"; usage; exit 1; }
+
+CABASE=~/ssh-ca
+host_or_user=user
+case $host_or_user in
+    host)
+        CAPATH=$CABASE/${host_or_user^^}_CA/${host_or_user}
+        ;;
+    user)
+        CAPATH=$CABASE/${host_or_user^^}_CA/${host_or_user}_ca.pub
+esac
+
+if ${hms:-false};then
+    echo ssh-keygen -s $CABASE/${host_or_user^^}_CA/${host_or_user}_ca.pub -n "${principals}" -V "${validtime}" -z $serialnumber -I "${identity}" "$1"
+    ssh-keygen -s $CABASE/${host_or_user^^}_CA/${host_or_user}_ca.pub -D $P11M -n "${principals}" -V "${validtime}" -z $serialnumber -I "${identity}" "$1"
+else
+    echo ssh-keygen -s $CABASE/${host_or_user^^}_CA/${host_or_user}_ca -n "${principals}" -V "${validtime}" -z $serialnumber -I "${identity}" "$1"
+    ssh-keygen -s $CABASE/${host_or_user^^}_CA/${host_or_user}_ca -n "${principals}" -V "${validtime}" -z $serialnumber -I "${identity}" "$1"
+fi
