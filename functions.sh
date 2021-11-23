@@ -130,8 +130,8 @@ setproxy () {
     #no_proxy=$no_proxy,$(echo 10.{0..255}.{0..255}.{0..255}|tr ' ' ',')
     #no_proxy=$no_proxy,$(echo 172.{16..31}.{0..255}.{0..255}|tr ' ' ',')
     #no_proxy=$no_proxy,$(echo 192.168.{0..255}.{0..255}|tr ' ' ',')
-    no_proxy=${no_proxy}${PROXY_IGNORE:+,}${PROXY_IGNORE}
-    . $NO_PROXY
+#    no_proxy=${no_proxy}${PROXY_IGNORE:+,}${PROXY_IGNORE}
+#    . $NO_PROXY
     
     export no_proxy
 
