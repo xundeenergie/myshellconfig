@@ -15,6 +15,7 @@ alias s='sshs $(history -p \!ssh:$:t)'
 alias sexit='ssh -O exit $(history -p \!ssh:$:t)'
 alias remountshared='sudo systemctl restart media-remote-sharefs-userdata.mount'
 alias umountshared='sudo systemctl stop media-remote-sharefs-userdata.mount'
+alias musictag='python3 -m music_tag'
 
 
 
@@ -130,9 +131,11 @@ alias vi='/usr/bin/vim'
 alias vlc='VDPAU_DRIVER=va_gl vlc'
 alias tmux='tmux -f ~/.tmux.conf'
 alias youtube-dl-whole-video="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(title)s-%(id)s.%(ext)s' -w -c "
+alias youtube-dl-audio-only="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -x -o '%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-whole-video-to-playlistdir="youtube-dl -i --no-overwrites --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-whole-user="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(uploader)s/%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-whole-playlist="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
+alias youtube-dl-whole-playlist-audio-only="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -x -o '%(playlist)s/%(title)s-%(id)s.%(ext)s' -w -c "
 alias youtube-dl-mp4-best="youtube-dl -i --no-overwrites --yes-playlist --write-description --write-info-json --write-annotations --write-all-thumbnails -f 'mp4' -o '%(title)s-%(id)s.%(ext)s' -w -c "
 
 # rock64
