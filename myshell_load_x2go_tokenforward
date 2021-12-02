@@ -31,7 +31,7 @@ fi
 if which x2golistsessions >/dev/null && \
    [ -n "$DISPLAY" ] && \
    [ -n "$(x2golistsessions | \
-        awk -F '|' '":"$3 == "'$DISPLAY'" && \
+        awk -F '|' '":"$3 == "'${DISPLAY:1:2}'" && \
                     $5 == "R" && \
                     $8 == "'$(echo $SSH_CLIENT | \
                     awk '{print $1}')'" { print $3 }')" ] && \
