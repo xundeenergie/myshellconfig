@@ -28,10 +28,11 @@ fi
 # check our client DISPLAY and SSH client IP correspond to
 # a running X2Go session and
 # check ~/.x2go/agentsocket is a regular file
+
 if which x2golistsessions >/dev/null && \
    [ -n "$DISPLAY" ] && \
    [ -n "$(x2golistsessions | \
-        awk -F '|' '":"$3 == "'${DISPLAY:1:2}'" && \
+        awk -F '|' '$3 == "'${DISPLAY:1:2}'" && \
                     $5 == "R" && \
                     $8 == "'$(echo $SSH_CLIENT | \
                     awk '{print $1}')'" { print $3 }')" ] && \
@@ -44,7 +45,7 @@ if which x2golistsessions >/dev/null && \
         if [ -S "$MIGHTBEOURAGENT" ]; then
                 # export path to agent socket
                 export SSH_AUTH_SOCK=$MIGHTBEOURAGENT
-                logdebug "export it"
+                logdebug "export SSH_AUTH_SOCK=$MIGHTBEOURAGENT"
         fi
 fi
 
