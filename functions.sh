@@ -390,7 +390,7 @@ sshs() {
         done
     fi
     logdebug "FILELIST1: ${FILELIST[@]}"
-    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=2s -o ControlPath=~/.ssh/master-%C"
+    local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=auto -o ControlPersist=20s -o ControlPath=~/.ssh/master-%C"
     #local SSH_OPTS="-o VisualHostKey=no -o ControlMaster=yes -o ControlPersist=10s -o ControlPath=~/.ssh/ssh-%C"
     # Read /etc/bashrc or /etc/bash.bashrc (depending on distribution) and /etc/profile.d/*.sh first
     ssh -T ${SSH_OPTS} $@ "pwd" >/dev/null 2>/dev/null || { logerror "Server $@ not reachable -> exit"; return 1; }
@@ -861,18 +861,18 @@ token(){
 
     [ -z "${P11M:+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
 
-    tmppubkey="${XDG_RUNTIME_DIR}/token.pub"
+    local tmppubkey="${XDG_RUNTIME_DIR}/token.pub"
+    # If DISPLAY is set, ssh-add calls ssh-askpass, and if its in remote-terminal, it wont work
+    # So remember and unset DISPLAY, and set it at the end again, if it was set before
+    [ $DISPLAY ] && local DISPLAY_ORIG=$DISPLAY
+    [ $DISPLAY ] && unset $DISPLAY
+    
     # Write public keys of all in agent stored keys to a temporary file
     loginfo "$(ssh-add -L > $tmppubkey)"
-
-    # Usage:
-    #   token <identity>                        will load token in agent. does nothing, if token is already loaded
-    #   token -r|-f|--reload-token <identity>   will remove token from agent and add it again (if plugged off and plugged in again
-#    startagent -t $@
-#    loadagent $@
     # Check if public-keys in tmppubkey are working. They are not working, if you removed and add back hardware-token. 
     loginfo "$(ssh-add -T ${tmppubkey} || { ssh-add -e $P11M; ssh-add -s $P11M; } )"
     loginfo "$(ssh-add -l)"
+    [ $DISPLAY_ORIG ] && export DISPLAY=$DISPLAY_ORIG
 
 }
 
