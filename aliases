@@ -191,6 +191,7 @@ alias nextcloud-upgrade='docker-compose down && docker image rm nc_app:latest nc
 
 #--- JIRA ---
 alias gojiralib='cd /opt/atlassian/jira/atlassian-jira/WEB-INF/lib/'
+alias gojiraclasses='cd /opt/atlassian/jira/atlassian-jira/WEB-INF/classes/'
 alias gojirainstall='cd /opt/atlassian/jira/'
 alias gojirahome='cd /var/atlassian/application-data/jira/'
 alias gojiralog='cd /var/atlassian/application-data/jira/log'
@@ -198,6 +199,7 @@ alias tailjra='cd /var/atlassian/application-data/jira/log; tail -F atlassian-ji
 
 #--- CONFLUENCE ---
 alias gocnflib='cd /opt/atlassian/confluence/confluence/WEB-INF/lib/'
+alias gocnfclasses='cd /opt/atlassian/confluence/confluence/WEB-INF/classes/'
 alias gocnfinstall='cd /opt/atlassian/confluence/'
 alias gocnfhome='cd /var/atlassian/application-data/confluence/'
 alias gocnflog='cd /var/atlassian/application-data/confluence/logs'
