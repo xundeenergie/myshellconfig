@@ -368,7 +368,7 @@ ssh-runinagent () {
 
 }
 
-if [ $SSH_TTY ] ; then
+if [[ $SSH_TTY || $X2GO_SESSION ]] ; then
     logdebug "run with forwarded ssh-agent"
     res=1
 else
