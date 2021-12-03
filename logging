@@ -60,6 +60,7 @@ function logerror(){
             ;;
     esac
     local msg="$1"
+    [ -z "${msg:+x}" ] && return 0
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
@@ -81,6 +82,7 @@ function logwarn(){
             ;;
     esac
     local msg="$1"
+    [ -z "${msg:+x}" ] && return 0
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
@@ -102,6 +104,7 @@ function loginfo(){
             ;;
     esac
     local msg="$1"
+    [ -z "${msg:+x}" ] && return 0
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
@@ -124,6 +127,7 @@ function logdebug(){
             ;;
     esac
     local msg="$1"
+    [ -z "${msg:+x}" ] && return 0
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
@@ -145,6 +149,7 @@ function logtrace(){
             ;;
     esac
     local msg="$1"
+    [ -z "${msg:+x}" ] && return 0
     timeAndDate=`date`
     local loglevels
     declare -a loglevels
