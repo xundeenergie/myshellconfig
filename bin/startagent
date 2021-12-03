@@ -75,7 +75,7 @@ EOF
 
 check_token(){
 
-    # it's the same as in functions.sh
+    # it's the same as "token" in functions.sh
     # defined here also, to work also in environments, where functions.sh couldn't be sourced
     [ -z "${P11M:+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
 
@@ -92,7 +92,7 @@ check_token(){
     # Check if public-keys in tmppubkey are working. They are not working, if you removed and add back hardware-token. 
     loginfo "$(ssh-add -T ${tmppubkey}|| { ssh-add -e $P11M; ssh-add -s $P11M; } )"
     logdebug "$(rm "${tmppubkey}")"
-    loginfo "$(ssh-add -l )"
+    logdebug "$(ssh-add -l )"
     [ $DISPLAY_ORIG ] && logtrace "reset DISPLAY=$DISPLAY_ORIG"
     [ $DISPLAY_ORIG ] && export DISPLAY=$DISPLAY_ORIG
 

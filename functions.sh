@@ -861,17 +861,21 @@ token(){
 
     [ -z "${P11M:+x}" ] && { P11M=$PKCS11_MODULE; export P11M; }
 
-    local tmppubkey="${XDG_RUNTIME_DIR}/token.pub"
     # If DISPLAY is set, ssh-add calls ssh-askpass, and if its in remote-terminal, it wont work
     # So remember and unset DISPLAY, and set it at the end again, if it was set before
     [ $DISPLAY ] && local DISPLAY_ORIG=$DISPLAY
-    [ $DISPLAY ] && unset $DISPLAY
+    [ $DISPLAY ] && logtrace "unset DISPLAY: $DISPLAY"
+    [ $DISPLAY ] && unset DISPLAY
     
     # Write public keys of all in agent stored keys to a temporary file
+    local tmppubkey="$(mktemp -p ${XDG_RUNTIME_DIR} pubkey.XXXXXX.pub)"
+    logtrace "tmppubkey: $tmppubkey"
     loginfo "$(ssh-add -L > $tmppubkey)"
     # Check if public-keys in tmppubkey are working. They are not working, if you removed and add back hardware-token. 
-    loginfo "$(ssh-add -T ${tmppubkey} || { ssh-add -e $P11M; ssh-add -s $P11M; } )"
-    loginfo "$(ssh-add -l)"
+    loginfo "$(ssh-add -T ${tmppubkey}|| { ssh-add -e $P11M; ssh-add -s $P11M; } )"
+    logdebug "$(rm "${tmppubkey}")"
+    logdebug "$(ssh-add -l )"
+    [ $DISPLAY_ORIG ] && logtrace "reset DISPLAY=$DISPLAY_ORIG"
     [ $DISPLAY_ORIG ] && export DISPLAY=$DISPLAY_ORIG
 
 }
