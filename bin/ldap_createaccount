@@ -1,0 +1,22 @@
+#!/bin/bash
+
+
+
+USEROUS=( $(ldapsearch -LLL -Z -H ldap://${LDAP_HOST_DEFAULT} -D ${LDAP_ADMIN_BIND_DN} -x -w $(pass ${PASS_ID_LDAP_ADMIN}|head -n 1) -s one -b ou=users,dc=schuerz,dc=at '(objectClass=organizationalUnit)' ou|grep "^ou"|awk '{print $2}') )
+
+for uou in ${USEROUS[@]} ; do
+
+    echo "User OU: $uou"
+    UID_HIGHEST=$(ldapsearch -LLL -Z -H ldap://${LDAP_HOST_DEFAULT} -D ${LDAP_ADMIN_BIND_DN} -x -w $(pass ${PASS_ID_LDAP_ADMIN}|head -n 1) -b ou=$uou,ou=users,dc=schuerz,dc=at '(&(dcAccountStatus=active)(objectClass=posixAccount))' uidNumber|grep "^uidNumber"|awk '{print $2}'|sort|tail -n1)
+    GID_HIGHEST=$(ldapsearch -LLL -Z -H ldap://${LDAP_HOST_DEFAULT} -D ${LDAP_ADMIN_BIND_DN} -x -w $(pass ${PASS_ID_LDAP_ADMIN}|head -n 1) -b ou=$uou,ou=users,dc=schuerz,dc=at '(&(dcAccountStatus=active)(objectClass=posixAccount))' gidNumber|grep "^gidNumber"|awk '{print $2}'|sort|tail -n1)
+
+    echo UID_HIGHEST: $UID_HIGHEST
+    echo GID_HIGHEST: $GID_HIGHEST
+
+    let "UID_HIGHEST=UID_HIGHEST+1"
+    let "GID_HIGHEST=GID_HIGHEST+1"
+
+    echo UID_NEXT: $UID_HIGHEST
+    echo GID_NEXT: $GID_HIGHEST
+
+done
